@@ -22,7 +22,6 @@ import WebServiceDetail from "../../pages/ServiceDetail";
 const SERVICES_DATA: Record<string, any> = {
   "1": {
     name: "Manutenção de Servidor",
-    price: "R$ 500/mês",
     rating: 4.8,
     reviews: 127,
     description:
@@ -40,7 +39,6 @@ const SERVICES_DATA: Record<string, any> = {
   },
   "2": {
     name: "Segurança Cibernética",
-    price: "R$ 800/mês",
     rating: 4.9,
     reviews: 84,
     description:
@@ -58,7 +56,6 @@ const SERVICES_DATA: Record<string, any> = {
   },
   "3": {
     name: "Cloud Computing",
-    price: "R$ 600/mês",
     rating: 4.7,
     reviews: 92,
     description:
@@ -76,7 +73,6 @@ const SERVICES_DATA: Record<string, any> = {
   },
   "4": {
     name: "Backup & Recovery",
-    price: "R$ 400/mês",
     rating: 4.9,
     reviews: 156,
     description:
@@ -94,7 +90,6 @@ const SERVICES_DATA: Record<string, any> = {
   },
   "5": {
     name: "Suporte Técnico",
-    price: "R$ 350/mês",
     rating: 4.6,
     reviews: 210,
     description:
@@ -112,7 +107,6 @@ const SERVICES_DATA: Record<string, any> = {
   },
   "6": {
     name: "Infraestrutura de Rede",
-    price: "R$ 700/mês",
     rating: 4.8,
     reviews: 65,
     description:
@@ -130,7 +124,6 @@ const SERVICES_DATA: Record<string, any> = {
   },
   "7": {
     name: "Gestão de Banco de Dados",
-    price: "R$ 650/mês",
     rating: 4.9,
     reviews: 43,
     description:
@@ -148,7 +141,6 @@ const SERVICES_DATA: Record<string, any> = {
   },
   "8": {
     name: "Email Corporativo",
-    price: "R$ 250/mês",
     rating: 4.5,
     reviews: 312,
     description:

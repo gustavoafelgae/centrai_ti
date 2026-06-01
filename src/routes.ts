@@ -6,7 +6,7 @@ import { Login } from "./pages/Login";
 import { NewTicket } from "./pages/NewTicket";
 import { Profile } from "./pages/Profile";
 import { Register } from "./pages/Register";
-import { ServiceDetail } from "./pages/ServiceDetail";
+import  ServiceDetail  from "./pages/ServiceDetail";
 import { Services } from "./pages/Services";
 import { TicketDetail } from "./pages/TicketDetail";
 import { Tickets } from "./pages/Tickets";

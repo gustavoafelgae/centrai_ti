@@ -1,37 +1,41 @@
-import { useRouter } from "expo-router";
+import { useRouter } from 'expo-router';
 import {
-    Bell,
-    Briefcase,
-    Building2,
-    ChevronRight,
-    HelpCircle,
-    Home,
-    LogOut,
-    Mail,
-    Phone,
-    Shield,
-    Ticket as TicketIcon,
-    User,
-} from "lucide-react-native";
+  Bell,
+  Briefcase,
+  Building2,
+  ChevronRight,
+  HelpCircle,
+  Home,
+  LogOut,
+  Mail,
+  Phone,
+  Shield,
+  Ticket as TicketIcon,
+  User,
+} from 'lucide-react-native';
 import {
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-} from "react-native";
-import { Profile } from "../pages/Profile";
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { Profile } from '../pages/Profile';
+// Importando o nosso contexto de usuário
+import { useUser } from '../hooks/UserContext';
 
 const navItems = [
-  { label: "Início", path: "/dashboard", icon: Home },
-  { label: "Serviços", path: "/services", icon: Briefcase },
-  { label: "Tickets", path: "/tickets", icon: TicketIcon },
-  { label: "Perfil", path: "/profile", icon: User },
+  { label: 'Início', path: '/dashboard', icon: Home },
+  { label: 'Serviços', path: '/services', icon: Briefcase },
+  { label: 'Tickets', path: '/tickets', icon: TicketIcon },
+  { label: 'Perfil', path: '/profile', icon: User },
 ];
 
 function NativeProfileScreen() {
   const router = useRouter();
+  // Trazendo os dados globais do usuário
+  const { user } = useUser();
 
   return (
     <View style={styles.container}>
@@ -46,69 +50,87 @@ function NativeProfileScreen() {
         <View style={styles.profileCard}>
           <View style={styles.userInfoRow}>
             <View style={styles.avatarContainer}>
-              <User size={32} color="#2563eb" strokeWidth={2} />
+              <User size={32} color='#2563eb' strokeWidth={2} />
             </View>
             <View style={styles.userDetails}>
-              <Text style={styles.userName}>João Silva</Text>
+              {/* Nome e Plano dinâmicos */}
+              <Text style={styles.userName}>{user.name}</Text>
               <View style={styles.planBadge}>
-                <Text style={styles.planBadgeText}>Plano Premium</Text>
+                <Text style={styles.planBadgeText}>Plano {user.plan}</Text>
               </View>
             </View>
           </View>
 
           <View style={styles.contactInfo}>
+            {/* Contatos dinâmicos */}
             <View style={styles.infoRow}>
-              <Mail size={18} color="#94a3b8" />
-              <Text style={styles.infoText}>joao.silva@empresa.com.br</Text>
+              <Mail size={18} color='#94a3b8' />
+              <Text style={styles.infoText}>{user.email}</Text>
             </View>
             <View style={styles.infoRow}>
-              <Phone size={18} color="#94a3b8" />
-              <Text style={styles.infoText}>+55 11 98765-4321</Text>
+              <Phone size={18} color='#94a3b8' />
+              <Text style={styles.infoText}>{user.phone}</Text>
             </View>
             <View style={styles.infoRow}>
-              <Building2 size={18} color="#94a3b8" />
-              <Text style={styles.infoText}>Empresa LTDA</Text>
+              <Building2 size={18} color='#94a3b8' />
+              <Text style={styles.infoText}>{user.company}</Text>
             </View>
           </View>
 
-          <TouchableOpacity style={styles.editButton} activeOpacity={0.7}>
+          <TouchableOpacity
+            style={styles.editButton}
+            activeOpacity={0.7}
+            onPress={() => router.push('/profile/edit' as any)}
+          >
             <Text style={styles.editButtonText}>Editar Perfil</Text>
           </TouchableOpacity>
         </View>
 
         {/* Menu de Opções */}
         <View style={styles.menuCard}>
-          <TouchableOpacity style={styles.menuItem} activeOpacity={0.7}>
+          <TouchableOpacity
+            style={styles.menuItem}
+            activeOpacity={0.7}
+            onPress={() => router.push('/profile/notifications' as any)}
+          >
             <View style={styles.menuItemLeft}>
-              <Bell size={22} color="#475569" />
+              <Bell size={22} color='#475569' />
               <Text style={styles.menuItemText}>Notificações</Text>
             </View>
             <View style={styles.menuItemRight}>
               <View style={styles.notificationBadge}>
                 <Text style={styles.notificationBadgeText}>3</Text>
               </View>
-              <ChevronRight size={20} color="#cbd5e1" />
+              <ChevronRight size={20} color='#cbd5e1' />
             </View>
           </TouchableOpacity>
 
           <View style={styles.divider} />
 
-          <TouchableOpacity style={styles.menuItem} activeOpacity={0.7}>
+          <TouchableOpacity
+            style={styles.menuItem}
+            activeOpacity={0.7}
+            onPress={() => router.push('/profile/security' as any)}
+          >
             <View style={styles.menuItemLeft}>
-              <Shield size={22} color="#475569" />
+              <Shield size={22} color='#475569' />
               <Text style={styles.menuItemText}>Privacidade e Segurança</Text>
             </View>
-            <ChevronRight size={20} color="#cbd5e1" />
+            <ChevronRight size={20} color='#cbd5e1' />
           </TouchableOpacity>
 
           <View style={styles.divider} />
 
-          <TouchableOpacity style={styles.menuItem} activeOpacity={0.7}>
+          <TouchableOpacity
+            style={styles.menuItem}
+            activeOpacity={0.7}
+            onPress={() => router.push('/profile/support' as any)}
+          >
             <View style={styles.menuItemLeft}>
-              <HelpCircle size={22} color="#475569" />
+              <HelpCircle size={22} color='#475569' />
               <Text style={styles.menuItemText}>Ajuda e Suporte</Text>
             </View>
-            <ChevronRight size={20} color="#cbd5e1" />
+            <ChevronRight size={20} color='#cbd5e1' />
           </TouchableOpacity>
         </View>
 
@@ -116,19 +138,18 @@ function NativeProfileScreen() {
         <TouchableOpacity
           style={styles.logoutButton}
           activeOpacity={0.7}
-          onPress={() => router.replace("/")}
+          onPress={() => router.replace('/')}
         >
-          <LogOut size={20} color="#dc2626" />
+          <LogOut size={20} color='#dc2626' />
           <Text style={styles.logoutText}>Sair</Text>
         </TouchableOpacity>
       </ScrollView>
 
       {/* Rodapé de Navegação */}
       <View style={styles.navbar}>
-        {navItems.map((item) => {
+        {navItems.map(item => {
           const Icon = item.icon;
-          // Marcando a aba "Perfil" como ativa
-          const isActive = item.label === "Perfil";
+          const isActive = item.label === 'Perfil';
 
           return (
             <TouchableOpacity
@@ -138,7 +159,7 @@ function NativeProfileScreen() {
             >
               <Icon
                 size={24}
-                color={isActive ? "#2563eb" : "#64748b"}
+                color={isActive ? '#2563eb' : '#64748b'}
                 strokeWidth={isActive ? 2.5 : 2}
               />
               <Text
@@ -158,7 +179,7 @@ function NativeProfileScreen() {
 }
 
 export default function ProfilePage() {
-  if (Platform.OS === "web") {
+  if (Platform.OS === 'web') {
     return <Profile />;
   }
 
@@ -166,16 +187,11 @@ export default function ProfilePage() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f8fafc",
-  },
-  scrollContent: {
-    paddingBottom: 100, // Espaço extra no final da rolagem
-  },
+  container: { flex: 1, backgroundColor: '#f8fafc' },
+  scrollContent: { paddingBottom: 100 },
   blueHeader: {
-    backgroundColor: "#2563eb",
-    paddingTop: Platform.OS === "ios" ? 60 : 40,
+    backgroundColor: '#2563eb',
+    paddingTop: Platform.OS === 'ios' ? 60 : 40,
     paddingBottom: 60,
     paddingHorizontal: 24,
     borderBottomLeftRadius: 32,
@@ -183,149 +199,109 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 24,
-    fontWeight: "700",
-    color: "#ffffff",
+    fontWeight: '700',
+    color: '#ffffff',
     marginBottom: 4,
   },
-  headerSubtitle: {
-    fontSize: 15,
-    color: "#bfdbfe",
-  },
+  headerSubtitle: { fontSize: 15, color: '#bfdbfe' },
   profileCard: {
-    backgroundColor: "#ffffff",
+    backgroundColor: '#ffffff',
     borderRadius: 16,
     padding: 20,
     marginHorizontal: 20,
-    marginTop: -40, // Sobrepõe o cabeçalho azul
-    shadowColor: "#000",
+    marginTop: -40,
+    shadowColor: '#000',
     shadowOpacity: 0.05,
     shadowRadius: 15,
     shadowOffset: { width: 0, height: 4 },
     elevation: 4,
   },
-  userInfoRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 20,
-  },
+  userInfoRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 20 },
   avatarContainer: {
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: "#dbeafe",
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: '#dbeafe',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginRight: 16,
   },
-  userDetails: {
-    justifyContent: "center",
-  },
+  userDetails: { justifyContent: 'center' },
   userName: {
     fontSize: 18,
-    fontWeight: "700",
-    color: "#0f172a",
+    fontWeight: '700',
+    color: '#0f172a',
     marginBottom: 6,
   },
   planBadge: {
-    backgroundColor: "#e0e7ff",
+    backgroundColor: '#e0e7ff',
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,
-    alignSelf: "flex-start",
+    alignSelf: 'flex-start',
   },
-  planBadgeText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#4338ca",
-  },
-  contactInfo: {
-    gap: 12,
-    marginBottom: 20,
-  },
-  infoRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  infoText: {
-    fontSize: 14,
-    color: "#475569",
-    marginLeft: 12,
-  },
+  planBadgeText: { fontSize: 12, fontWeight: '600', color: '#4338ca' },
+  contactInfo: { gap: 12, marginBottom: 20 },
+  infoRow: { flexDirection: 'row', alignItems: 'center' },
+  infoText: { fontSize: 14, color: '#475569', marginLeft: 12 },
   editButton: {
     borderWidth: 1,
-    borderColor: "#2563eb",
+    borderColor: '#2563eb',
     borderRadius: 12,
     paddingVertical: 14,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#eff6ff",
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#eff6ff',
+    marginTop: 8,
   },
-  editButtonText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#2563eb",
-  },
+  editButtonText: { fontSize: 14, fontWeight: '600', color: '#2563eb' },
   menuCard: {
-    backgroundColor: "#ffffff",
+    backgroundColor: '#ffffff',
     borderRadius: 16,
     marginHorizontal: 20,
     marginTop: 20,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOpacity: 0.03,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 2 },
     elevation: 2,
   },
   menuItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingVertical: 16,
     paddingHorizontal: 20,
   },
-  menuItemLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
+  menuItemLeft: { flexDirection: 'row', alignItems: 'center' },
   menuItemText: {
     fontSize: 15,
-    fontWeight: "600",
-    color: "#0f172a",
+    fontWeight: '600',
+    color: '#0f172a',
     marginLeft: 16,
   },
-  menuItemRight: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
+  menuItemRight: { flexDirection: 'row', alignItems: 'center' },
   notificationBadge: {
-    backgroundColor: "#ef4444",
+    backgroundColor: '#ef4444',
     width: 20,
     height: 20,
     borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     marginRight: 12,
   },
-  notificationBadgeText: {
-    color: "#ffffff",
-    fontSize: 11,
-    fontWeight: "700",
-  },
-  divider: {
-    height: 1,
-    backgroundColor: "#f1f5f9",
-    marginHorizontal: 20,
-  },
+  notificationBadgeText: { color: '#ffffff', fontSize: 11, fontWeight: '700' },
+  divider: { height: 1, backgroundColor: '#f1f5f9', marginHorizontal: 20 },
   logoutButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#ffffff",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#ffffff',
     borderRadius: 16,
     marginHorizontal: 20,
     marginTop: 20,
     paddingVertical: 16,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOpacity: 0.03,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 2 },
@@ -333,40 +309,34 @@ const styles = StyleSheet.create({
   },
   logoutText: {
     fontSize: 15,
-    fontWeight: "600",
-    color: "#dc2626",
+    fontWeight: '600',
+    color: '#dc2626',
     marginLeft: 8,
   },
   navbar: {
-    flexDirection: "row",
-    backgroundColor: "#ffffff",
+    flexDirection: 'row',
+    backgroundColor: '#ffffff',
     borderTopWidth: 1,
-    borderTopColor: "#f1f5f9",
-    paddingVertical: Platform.OS === "ios" ? 20 : 12,
+    borderTopColor: '#f1f5f9',
+    paddingVertical: Platform.OS === 'ios' ? 20 : 12,
     paddingHorizontal: 8,
-    justifyContent: "space-around",
-    shadowColor: "#000",
+    justifyContent: 'space-around',
+    shadowColor: '#000',
     shadowOpacity: 0.03,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: -4 },
     elevation: 10,
-    position: "absolute",
+    position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
   },
-  navButton: {
-    alignItems: "center",
-    justifyContent: "center",
-    minWidth: 64,
-  },
+  navButton: { alignItems: 'center', justifyContent: 'center', minWidth: 64 },
   navButtonText: {
-    color: "#64748b",
+    color: '#64748b',
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: '600',
     marginTop: 4,
   },
-  navButtonTextActive: {
-    color: "#2563eb",
-  },
+  navButtonTextActive: { color: '#2563eb' },
 });
