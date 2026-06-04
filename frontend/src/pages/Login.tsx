@@ -19,9 +19,32 @@ export function Login() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
 
   const handleLogin = (e?: any) => {
     if (e && typeof e.preventDefault === 'function') e.preventDefault();
+
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+    let hasError = false;
+
+    if (!trimmedEmail) {
+      setEmailError('Informe seu email');
+      hasError = true;
+    }
+
+    if (!trimmedPassword) {
+      setPasswordError('Informe sua senha');
+      hasError = true;
+    }
+
+    if (hasError) {
+      return;
+    }
+
+    setEmailError('');
+    setPasswordError('');
     router.push('/dashboard');
   };
 
@@ -52,7 +75,7 @@ export function Login() {
                   <label className='block text-sm font-medium text-slate-700 mb-3'>
                     Email
                   </label>
-                  <div className='relative rounded-xl border border-slate-200 bg-white px-4 py-3 focus-within:border-blue-500'>
+                  <div className={`relative rounded-xl border px-4 py-3 focus-within:border-blue-500 ${emailError ? 'border-red-400 bg-red-50' : 'border-slate-200 bg-white'}`}>
                     <Mail
                       className='absolute left-4 top-1/2 -translate-y-1/2 text-slate-400'
                       size={18}
@@ -60,18 +83,24 @@ export function Login() {
                     <input
                       type='email'
                       value={email}
-                      onChange={e => setEmail(e.target.value)}
+                      onChange={e => {
+                        setEmail(e.target.value);
+                        if (emailError) setEmailError('');
+                      }}
                       className='w-full bg-transparent pl-11 text-sm text-slate-900 outline-none'
                       placeholder='seu@email.com'
                     />
                   </div>
+                  {emailError ? (
+                    <p className='mt-2 text-sm text-red-500'>{emailError}</p>
+                  ) : null}
                 </div>
 
                 <div>
                   <label className='block text-sm font-medium text-slate-700 mb-3'>
                     Senha
                   </label>
-                  <div className='relative rounded-xl border border-slate-200 bg-white px-4 py-3 focus-within:border-blue-500'>
+                  <div className={`relative rounded-xl border px-4 py-3 focus-within:border-blue-500 ${passwordError ? 'border-red-400 bg-red-50' : 'border-slate-200 bg-white'}`}>
                     <Lock
                       className='absolute left-4 top-1/2 -translate-y-1/2 text-slate-400'
                       size={18}
@@ -79,11 +108,17 @@ export function Login() {
                     <input
                       type='password'
                       value={password}
-                      onChange={e => setPassword(e.target.value)}
+                      onChange={e => {
+                        setPassword(e.target.value);
+                        if (passwordError) setPasswordError('');
+                      }}
                       className='w-full bg-transparent pl-11 text-sm text-slate-900 outline-none'
                       placeholder='••••••••'
                     />
                   </div>
+                  {passwordError ? (
+                    <p className='mt-2 text-sm text-red-500'>{passwordError}</p>
+                  ) : null}
                 </div>
 
                 <div className='flex justify-start'>
@@ -142,11 +177,14 @@ export function Login() {
 
           <View style={styles.field}>
             <Text style={styles.label}>Email</Text>
-            <View style={styles.inputWrapper}>
+            <View style={[styles.inputWrapper, emailError ? styles.inputError : null]}>
               <Mail color='#94a3b8' size={20} style={styles.fieldIcon} />
               <TextInput
                 value={email}
-                onChangeText={setEmail}
+                onChangeText={(text) => {
+                  setEmail(text);
+                  if (emailError) setEmailError('');
+                }}
                 style={styles.input}
                 placeholder='seu@email.com'
                 placeholderTextColor='#94a3b8'
@@ -154,21 +192,26 @@ export function Login() {
                 autoCapitalize='none'
               />
             </View>
+            {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
           </View>
 
           <View style={styles.field}>
             <Text style={styles.label}>Senha</Text>
-            <View style={styles.inputWrapper}>
+            <View style={[styles.inputWrapper, passwordError ? styles.inputError : null]}>
               <Lock color='#94a3b8' size={20} style={styles.fieldIcon} />
               <TextInput
                 value={password}
-                onChangeText={setPassword}
+                onChangeText={(text) => {
+                  setPassword(text);
+                  if (passwordError) setPasswordError('');
+                }}
                 style={styles.input}
                 placeholder='••••••••'
                 placeholderTextColor='#94a3b8'
                 secureTextEntry
               />
             </View>
+            {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
           </View>
 
           <TouchableOpacity
@@ -267,6 +310,15 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     marginTop: 4,
     marginBottom: 12,
+  },
+  inputError: {
+    borderColor: '#ef4444',
+    backgroundColor: '#fef2f2',
+  },
+  errorText: {
+    color: '#ef4444',
+    marginTop: 6,
+    fontSize: 12,
   },
   link: {
     color: '#2563eb',

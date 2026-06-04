@@ -18,8 +18,10 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from "react-native";
+import { Colors, Spacing, BottomTabInset } from "../constants/theme";
 import { Dashboard as WebDashboard } from "../pages/Dashboard";
 
 const services = [
@@ -53,10 +55,16 @@ const navItems = [
 
 function MainMenu() {
   const router = useRouter();
+  const { width } = useWindowDimensions();
+  const horizontalMargin = width > 700 ? Spacing.three : Spacing.two;
 
   return (
     <View style={styles.page}>
-      <ScrollView contentContainerStyle={styles.scrollContent} bounces={false}>
+      <ScrollView
+        contentContainerStyle={[styles.scrollContent, { paddingHorizontal: horizontalMargin }]}
+        bounces={false}
+      >
+        <View style={styles.topSpacer} />
         {/* Cabeçalho Azul */}
         <View style={styles.headerBlue}>
           <View style={styles.headerTopRow}>
@@ -113,6 +121,7 @@ function MainMenu() {
                   style={styles.serviceCard}
                   onPress={() => router.push(`/services/${service.id}` as any)}
                   activeOpacity={0.7}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
                   <View
                     style={[
@@ -160,6 +169,7 @@ function MainMenu() {
             </TouchableOpacity>
           ))}
         </View>
+        <View style={styles.bottomSpacer} />
       </ScrollView>
 
       {/* Rodapé de Navegação */}
@@ -173,6 +183,7 @@ function MainMenu() {
               key={item.path}
               onPress={() => router.push(item.path as any)}
               style={styles.navButton}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
               <Icon
                 size={24}
@@ -206,15 +217,23 @@ const styles = StyleSheet.create({
     backgroundColor: "#f8fafc",
   },
   scrollContent: {
-    paddingBottom: 110,
+    paddingBottom: BottomTabInset + 80,
   },
   headerBlue: {
-    backgroundColor: "#3b82f6",
+    backgroundColor: "#2563eb",
     paddingTop: Platform.OS === "ios" ? 60 : 40,
     paddingBottom: 60,
     paddingHorizontal: 24,
     borderBottomLeftRadius: 32,
     borderBottomRightRadius: 32,
+  },
+  topSpacer: {
+    height: 16,
+    backgroundColor: "#ffffff",
+  },
+  bottomSpacer: {
+    height: 24,
+    backgroundColor: "#ffffff",
   },
   headerTopRow: {
     flexDirection: "row",
@@ -228,11 +247,11 @@ const styles = StyleSheet.create({
   },
   subGreetingText: {
     fontSize: 14,
-    color: "#e0e7ff",
+    color: "#ffffff",
     marginTop: 2,
   },
   notificationBtn: {
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: "rgba(59, 130, 246, 0.18)",
     width: 44,
     height: 44,
     borderRadius: 22,
@@ -240,19 +259,20 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   analystCard: {
-    backgroundColor: "#111827",
-    marginHorizontal: 20,
-    marginTop: -30,
+    backgroundColor: Colors.light.background,
     borderRadius: 16,
-    padding: 16,
+    padding: 20,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    borderWidth: 1,
+    borderColor: "#f1f5f9",
     shadowColor: "#000",
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 5,
+    shadowOpacity: 0.02,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+    marginTop: 16,
   },
   analystLeft: {
     flexDirection: "row",
@@ -268,19 +288,17 @@ const styles = StyleSheet.create({
     marginRight: 14,
   },
   analystTitle: {
-    color: "#ffffff",
+    color: "#0f172a",
     fontSize: 15,
     fontWeight: "700",
   },
   analystSubtitle: {
-    color: "#94a3b8",
+    color: "#475569",
     fontSize: 12,
     marginTop: 2,
   },
   sectionWrapper: {
-    backgroundColor: "#ffffff",
-    marginHorizontal: 20,
-    marginTop: 24,
+    backgroundColor: Colors.light.background,
     borderRadius: 16,
     padding: 20,
     borderWidth: 1,
@@ -290,6 +308,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 },
     elevation: 1,
+    marginTop: 24,
   },
   sectionHeader: {
     flexDirection: "row",
@@ -311,17 +330,20 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
-    gap: 12,
   },
   serviceCard: {
-    width: "48%",
-    backgroundColor: "#ffffff",
+    flexBasis: "48%",
+    maxWidth: "48%",
+    backgroundColor: Colors.light.background,
     borderWidth: 1,
     borderColor: "#f1f5f9",
     borderRadius: 16,
     paddingVertical: 20,
     paddingHorizontal: 12,
     alignItems: "center",
+    justifyContent: "center",
+    minHeight: 140,
+    marginBottom: 12,
   },
   iconCircle: {
     width: 52,
@@ -390,18 +412,22 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
     borderTopWidth: 1,
     borderTopColor: "#f1f5f9",
-    paddingVertical: Platform.OS === "ios" ? 20 : 12,
+    paddingTop: Platform.OS === "ios" ? 20 : 16,
+    paddingBottom: Platform.OS === "ios" ? 30 : 20,
     paddingHorizontal: 8,
     justifyContent: "space-around",
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    height: 85,
+    height: 100,
   },
   navButton: {
+    flex: 1,
     alignItems: "center",
-    minWidth: 64,
+    justifyContent: "center",
+    minWidth: 72,
+    paddingVertical: 8,
   },
   navButtonText: {
     color: "#64748b",

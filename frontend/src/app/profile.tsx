@@ -19,8 +19,10 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from 'react-native';
+import { Colors, Spacing, BottomTabInset } from '../constants/theme';
 import { Profile } from '../pages/Profile';
 // Importando o nosso contexto de usuário
 import { useUser } from '../hooks/UserContext';
@@ -34,12 +36,21 @@ const navItems = [
 
 function NativeProfileScreen() {
   const router = useRouter();
+  const { width } = useWindowDimensions();
+  const horizontalPadding = width > 700 ? Spacing.three : Spacing.two;
+  const cardMargin = width > 700 ? Spacing.three : Spacing.two;
   // Trazendo os dados globais do usuário
   const { user } = useUser();
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent} bounces={false}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingHorizontal: horizontalPadding },
+        ]}
+        bounces={false}
+      >
         {/* Cabeçalho Azul */}
         <View style={styles.blueHeader}>
           <Text style={styles.headerTitle}>Perfil</Text>
@@ -47,7 +58,7 @@ function NativeProfileScreen() {
         </View>
 
         {/* Cartão de Perfil Principal */}
-        <View style={styles.profileCard}>
+        <View style={[styles.profileCard, { marginHorizontal: cardMargin }]}> 
           <View style={styles.userInfoRow}>
             <View style={styles.avatarContainer}>
               <User size={32} color='#2563eb' strokeWidth={2} />
@@ -87,7 +98,7 @@ function NativeProfileScreen() {
         </View>
 
         {/* Menu de Opções */}
-        <View style={styles.menuCard}>
+        <View style={[styles.menuCard, { marginHorizontal: cardMargin }]}> 
           <TouchableOpacity
             style={styles.menuItem}
             activeOpacity={0.7}
@@ -136,7 +147,7 @@ function NativeProfileScreen() {
 
         {/* Botão Sair */}
         <TouchableOpacity
-          style={styles.logoutButton}
+          style={[styles.logoutButton, { marginHorizontal: cardMargin }]}
           activeOpacity={0.7}
           onPress={() => router.replace('/')}
         >
@@ -187,8 +198,8 @@ export default function ProfilePage() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f8fafc' },
-  scrollContent: { paddingBottom: 100 },
+  container: { flex: 1, backgroundColor: Colors.light.background },
+  scrollContent: { paddingBottom: BottomTabInset + 20 },
   blueHeader: {
     backgroundColor: '#2563eb',
     paddingTop: Platform.OS === 'ios' ? 60 : 40,
@@ -205,10 +216,9 @@ const styles = StyleSheet.create({
   },
   headerSubtitle: { fontSize: 15, color: '#bfdbfe' },
   profileCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: Colors.light.background,
     borderRadius: 16,
     padding: 20,
-    marginHorizontal: 20,
     marginTop: -40,
     shadowColor: '#000',
     shadowOpacity: 0.05,
@@ -216,7 +226,11 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     elevation: 4,
   },
-  userInfoRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 20 },
+  userInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
   avatarContainer: {
     width: 64,
     height: 64,

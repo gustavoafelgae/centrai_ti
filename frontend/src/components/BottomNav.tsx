@@ -13,7 +13,7 @@ export function BottomNav() {
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 pb-safe pt-3 px-6 flex items-center justify-between shadow-[0_-4px_20px_rgba(0,0,0,0.03)] h-20">
+    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 pb-safe pt-4 px-4 sm:px-6 flex items-center justify-between gap-2 shadow-[0_-4px_20px_rgba(0,0,0,0.03)] h-24">
       {navItems.map((item) => {
         const Icon = item.icon;
 
@@ -25,7 +25,8 @@ export function BottomNav() {
           <button
             key={item.name}
             onClick={() => router.push(item.path as any)}
-            className="flex flex-col items-center justify-center gap-1.5 min-w-[64px]"
+            className="flex-1 flex flex-col items-center justify-center gap-1.5 min-w-[72px] rounded-3xl py-3 hover:bg-slate-100 transition-colors"
+            aria-label={item.name}
           >
             <Icon
               size={24}

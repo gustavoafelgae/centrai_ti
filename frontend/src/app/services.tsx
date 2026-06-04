@@ -102,9 +102,14 @@ function NativeServicesScreen() {
           style={styles.backButton}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-          <ArrowLeft size={24} color="#0f172a" />
+          <ArrowLeft size={24} color="#ffffff" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Serviços</Text>
+        <View>
+          <Text style={styles.headerTitle}>Serviços</Text>
+          <Text style={styles.headerSubtitle}>
+            Explore nossos serviços mais pedidos
+          </Text>
+        </View>
       </View>
 
       {/* Lista de Serviços */}
@@ -187,20 +192,25 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#ffffff",
-    paddingTop: Platform.OS === "ios" ? 50 : 20, // Ajuste para status bar nativa
-    paddingBottom: 16,
+    backgroundColor: "#2563eb",
+    paddingTop: Platform.OS === "ios" ? 50 : 20,
+    paddingBottom: 18,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderBottomColor: "#f1f5f9",
+    borderBottomColor: "#1e40af",
   },
   backButton: {
     marginRight: 16,
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "700",
-    color: "#0f172a",
+    color: "#ffffff",
+  },
+  headerSubtitle: {
+    fontSize: 14,
+    color: "#e2e8f0",
+    marginTop: 4,
   },
   scrollContent: {
     padding: 20,
