@@ -1,6 +1,6 @@
 import express from 'express';
-import { initDatabase } from './src/database/index.js';
-import routes from './src/routes/index.js';
+import { initDatabase } from './src/database/database.js';
+import routes from './src/routes/routes.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;

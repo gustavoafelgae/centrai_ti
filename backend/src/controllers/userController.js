@@ -1,4 +1,4 @@
-import { getDb } from '../database/index.js';
+import { getDb } from '../database/database.js';
 
 export async function listUsers(req, res) {
   try {
