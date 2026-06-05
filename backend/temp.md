@@ -23,7 +23,9 @@ Cancelado
 
 
 Cargo:
-    -> Auxiliar de Suporte
-    -> Analista de Segurança
-    -> tecnico de infra
-    -> Arquiteto Cloud
+    -> Auxiliar de Suporte   -> Pode também
+    -> Analista de Segurança -> Pode também
+    -> tecnico de infra      -> Pode também
+    -> Arquiteto Cloud       -> Pode também
+
+usuario só abre cliente final
