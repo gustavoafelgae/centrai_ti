@@ -1,4 +1,5 @@
 import { getDb } from '../config/database.js';
+import assert from "node:assert/strict";
 
 export class CargoRepository {
   async insertCargosPadrao() {
@@ -7,6 +8,7 @@ export class CargoRepository {
     const cargoCheck = await repository.find();
     
     if (cargoCheck.length === 0) {
+      console.log('... Populando Cargos iniciais ...');
       const cargos = [
         { id: 1, nome: 'Auxiliar de Suporte' },
         { id: 2, nome: 'Analista de Segurança' },
@@ -22,9 +24,22 @@ export class CargoRepository {
     }
   }
 
+  async assertExists(id) {
+    console.log("Verificando existência do cargo com id:", id);
+    const repository = getDb().getRepository('Cargo');
+    const exists = await repository.existsBy({ id });
+    assert(exists, "O Cargo informado não existe no banco de dados.");
+  }
+
+  async existsBy(id) {
+    const repository = getDb().getRepository('Cargo');
+    const exists = await repository.existsBy({ id });
+    assert(exists, "O Cargo informado não existe no banco de dados.");
+  }
+
   async findById(id) {
     const repository = getDb().getRepository('Cargo');
-    return repository.findOne({ where: { id } });
+    return repository.findOneOrFail({ where: { id } });
   }
 
   async findAll() {
@@ -48,3 +63,5 @@ export class CargoRepository {
     return repository.delete(id);
   }
 }
+
+export const cargoRepository = new CargoRepository();

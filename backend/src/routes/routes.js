@@ -1,13 +1,12 @@
-// import express from 'express';
-// import usersRoutes from './users.js';
+import express from 'express';
+import usuarioRoutes from './usuario.js';
 
-// const router = express.Router();
+const router = express.Router();
 
-// // Rota GET básica
-// router.get('/', (req, res) => {
-//   res.json({ message: 'Servidor está funcionando!' });
-// });
+router.get('/', (req, res) => {
+  res.json({ message: 'Sistema inicializado com Sucesso!' });
+});
 
-// router.use('/users', usersRoutes);
+router.use('/usuarios', usuarioRoutes);
 
-// export default router;
+export default router;

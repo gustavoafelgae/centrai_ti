@@ -1,6 +1,9 @@
 import express from 'express';
 import { initDatabase } from './src/config/database.js';
-// import routes from './src/routes/routes.js';
+import routes from './src/routes/routes.js';
+import { errorHandler } from './src/middlewares/errorHandler.js';
+import { cargoRepository } from './src/repository/CargoRepository.js';
+import { statusNomeRepository } from './src/repository/StatusNomeRepository.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -10,7 +13,11 @@ app.use(express.json());
 async function start() {
   await initDatabase();
 
-  // app.use(routes);
+  await cargoRepository.insertCargosPadrao();
+  await statusNomeRepository.insertStatusNomePadrao();
+
+  app.use(routes);
+  app.use(errorHandler);
 
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

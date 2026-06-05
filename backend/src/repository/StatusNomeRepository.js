@@ -1,17 +1,18 @@
 import { getDb } from '../config/database.js';
 
 export class StatusNomeRepository {
-  async insertStatusPadrao() {
+  async insertStatusNomePadrao() {
     const repository = getDb().getRepository('StatusNome');
     
     const statusCheck = await repository.find();
     
     if (statusCheck.length === 0) {
+      console.log('... Populando StatusNome iniciais ...');
       const statuses = [
-        { nome: 'Aberto' },
-        { nome: 'Em Andamento' },
-        { nome: 'Finalizado' },
-        { nome: 'Cancelado' }
+        { id: 1, nome: 'Aberto' },
+        { id: 2, nome: 'Em Andamento' },
+        { id: 3, nome: 'Finalizado' },
+        { id: 4, nome: 'Cancelado' }
       ];
 
       for (const status of statuses) {
@@ -62,3 +63,5 @@ export class StatusNomeRepository {
     return statusNome ? statusNome.statuses : [];
   }
 }
+
+export const statusNomeRepository = new StatusNomeRepository();

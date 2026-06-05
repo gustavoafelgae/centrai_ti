@@ -16,9 +16,15 @@ export const UsuarioSchema = new EntitySchema({
     },
     email: {
       type: 'varchar',
-      length: 255,
+      length: 80,
       nullable: false,
       unique: true
+    },
+    telefone: {
+      type: 'varchar',
+      length: 11,
+      nullable: false,
+      unique: false
     },
     senha: {
       type: 'varchar',
@@ -26,7 +32,7 @@ export const UsuarioSchema = new EntitySchema({
     },
     idCargo: {
       type: 'integer',
-      nullable: true,
+      nullable: false,
       name: 'id_cargo'
     },
     ativo: {
