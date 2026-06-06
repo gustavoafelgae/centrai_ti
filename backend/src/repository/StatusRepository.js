@@ -1,18 +1,11 @@
 import { getDb } from '../config/database.js';
 
 export class StatusRepository {
-  async findById(id) {
-    const repository = getDb().getRepository('Status');
-    return repository.findOne({
-      where: { id },
-      relations: ['statusNome']
-    });
-  }
 
   async findAll() {
     const repository = getDb().getRepository('Status');
     return repository.find({
-      relations: ['statusNome']
+      relations: { statusNome: true }
     });
   }
 
@@ -20,7 +13,7 @@ export class StatusRepository {
     const repository = getDb().getRepository('Status');
     return repository.find({
       where: { ticketId },
-      relations: ['statusNome'],
+      relations: { statusNome: true },
       order: { data: 'DESC' }
     });
   }
@@ -29,41 +22,40 @@ export class StatusRepository {
     const repository = getDb().getRepository('Status');
     return repository.find({
       where: { statusNomeId },
-      relations: ['statusNome']
+      relations: { statusNome: true }
     });
   }
 
-  async create(status) {
-    const repository = getDb().getRepository('Status');
-    return repository.save(status);
-  }
-
-  async update(id, status) {
-    const repository = getDb().getRepository('Status');
-    await repository.update(id, status);
-    return this.findById(id);
-  }
-
-  async delete(id) {
-    const repository = getDb().getRepository('Status');
-    return repository.delete(id);
+  async insert(status, manager = null) {
+    const repository = manager ? manager.getRepository('Status') : getDb().getRepository('Status');
+    console.log("Inserindo status de ticket:", status);
+    return repository.createQueryBuilder()
+      .insert()
+      .into('Status')
+      .values(status)
+      .updateEntity(false) 
+      .execute();
   }
 
   async obterStatusNomeDoStatus(id) {
     const repository = getDb().getRepository('Status');
-    const status = await repository.findOne({
+    const status = await repository.findOneOrFail({
       where: { id },
-      relations: ['statusNome']
+      relations: { statusNome: true }
     });
     return status ? status.statusNome : null;
   }
 
-  async obterUltimoStatusDoTicket(ticketId) {
+async obterUltimoStatusDoTicket(ticketId) {
     const repository = getDb().getRepository('Status');
-    return repository.findOne({
+    const [ultimoStatus] = await repository.find({
       where: { ticketId },
-      relations: ['statusNome'],
-      order: { data: 'DESC' }
+      relations: { statusNome: true },
+      order: { data: 'DESC' },
+      take: 1 
     });
+    return ultimoStatus || null;
   }
 }
+
+export const statusRepository = new StatusRepository();

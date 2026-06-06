@@ -1,0 +1,403 @@
+type: collection.insomnia.rest/5.0
+schema_version: "5.1"
+name: My first collection
+meta:
+  id: wrk_1955d48b17564deeaa7b4edd2f6ec12d
+  created: 1779461661323
+  modified: 1779461661323
+  description: ""
+collection:
+  - name: USUARIO
+    meta:
+      id: fld_496dddb5b77c4d9c9c4035535d87dfff
+      created: 1780694358728
+      modified: 1780694666716
+      sortKey: -1780694358928
+      description: ""
+    children:
+      - url: "{{ _.base_url }}{{ _.path_usuario }}/login"
+        name: Login Usuario
+        meta:
+          id: req_388395c26d2047a78ed89f4ed4136608
+          created: 1780694372426
+          modified: 1780763673734
+          isPrivate: false
+          description: ""
+          sortKey: -1780694372426
+        method: POST
+        body:
+          mimeType: application/json
+          text: >-
+            {
+            	"email":"alguem_em_algum_lugar@meuemail.com",
+            	"senha":"680ee5b5ff84f003f2d5a1c73d44473eaede9d3d29842ad4c8d33ae60f6338ed"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.6.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}{{ _.path_usuario }}/cadastro"
+        name: Cadastro Usuario
+        meta:
+          id: req_9e1a3ca0019a4ba68d1f72124776e921
+          created: 1780694543220
+          modified: 1780696201316
+          isPrivate: false
+          description: ""
+          sortKey: -1780694367616
+        method: POST
+        body:
+          mimeType: application/json
+          text: >-
+            {
+            	"nome":"Alguem em algum lugar",
+            	"email":"alguem_em_algum_lugar@meuemail.com",
+            	"telefone":"31982827373",
+            	"senha":"680ee5b5ff84f003f2d5a1c73d44473eaede9d3d29842ad4c8d33ae60f6338ed",
+            	"idCargo":1
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.6.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}{{ _.path_usuario }}/atualizar/1"
+        name: Atualizar Usuario
+        meta:
+          id: req_2be638f662b54d3ab29513d3d8d95ddc
+          created: 1780694571418
+          modified: 1780697828476
+          isPrivate: false
+          description: ""
+          sortKey: -1780694367566
+        method: PATCH
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"nome":"Outra alguem em outro lugar",
+            	"email":"outro_alguem_em_outro_lugar@meuemail.com",
+            	"telefone":"34998987676",
+            	"idCargo":2
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.6.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}{{ _.path_usuario }}/senha"
+        name: Alteracao Senha
+        meta:
+          id: req_f95e6d475d88433cbcbaf6d65f8dc82a
+          created: 1780694610050
+          modified: 1780697911820
+          isPrivate: false
+          description: ""
+          sortKey: -1780694367516
+        method: PATCH
+        body:
+          mimeType: application/json
+          text: >-
+            {
+            	"email":"outro_alguem_em_outro_lugar@meuemail.com",
+            	"novaSenha":"42a4243667864855cb582765d3d7c703e053d1f1667d38eb696fa4de43d241f9"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.6.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}{{ _.path_usuario }}/ativacao/1"
+        name: Ativacao/Desativacao Usuario
+        meta:
+          id: req_caa26e90e3c147148421e8930805c3c5
+          created: 1780694640905
+          modified: 1780779876987
+          isPrivate: false
+          description: ""
+          sortKey: -1780694367466
+        method: PATCH
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"ativo":false
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.6.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: TICKET
+    meta:
+      id: fld_245d6e95d5844413b3cb44b52b70389a
+      created: 1780694657114
+      modified: 1780710673107
+      sortKey: -1780694358828
+      description: ""
+    children:
+      - url: "{{ _.base_url }}{{ _.path_ticket }}/TK-000005"
+        name: Consultar Ticket
+        meta:
+          id: req_d3f3f92c6aef4ea78bb4dba230b46d4b
+          created: 1780694670757
+          modified: 1780781677067
+          isPrivate: false
+          description: ""
+          sortKey: -1780746356936.5
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/12.6.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}{{ _.path_ticket }}/criar"
+        name: Criar novo Ticket
+        meta:
+          id: req_a2e890222d7a44a7ae1d52ddf4da6677
+          created: 1780763585663
+          modified: 1780780910748
+          isPrivate: false
+          description: ""
+          sortKey: -1780763585663
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"idUsuario":1,
+            	"titulo":"Quarto",
+            	"prioridade":"Alta",
+            	"descricao": "Hello todo mundo!",
+            	"idServico":4
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.6.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}{{ _.path_ticket }}/atualizar/TK-000005"
+        name: Atualizar Ticket
+        meta:
+          id: req_a6750cbcff27473bb0a095879e9afb85
+          created: 1780776725284
+          modified: 1780785599075
+          isPrivate: false
+          description: ""
+          sortKey: -1780729128210
+        method: PATCH
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"titulo": "Quarto",
+            	"prioridade": "Alta",
+            	"descricao": "Hello todo mundo!",
+            	"idServico": 4,
+            	"idStatus": 3,
+            	"idUsuarioResolved":1
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.6.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}{{ _.path_ticket }}/servico/4"
+        name: Consultar Ticket por Servico
+        meta:
+          id: req_6ce77957e27d4665ab35a4b67bef4f50
+          created: 1780787391550
+          modified: 1780787534406
+          isPrivate: false
+          description: ""
+          sortKey: -1780737742573.25
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/12.6.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: CONSTANTES
+    meta:
+      id: fld_eb4ed036b1434b41b38f7e0e0b859060
+      created: 1780710668302
+      modified: 1780785726675
+      sortKey: -1780710668302
+      description: ""
+    children:
+      - url: "{{ _.base_url }}{{ _.path_cargo }}/listarCargos"
+        name: Listar Cargos
+        meta:
+          id: req_90786eee3c72478cbafc659d0f736b6c
+          created: 1780710680660
+          modified: 1780776848463
+          isPrivate: false
+          description: ""
+          sortKey: -1780710680660
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/12.6.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}{{ _.path_servico }}/listarServicos"
+        name: Listar Servicos
+        meta:
+          id: req_17c413c1364f47258b3aba8ca64b2f99
+          created: 1780785739328
+          modified: 1780785852397
+          isPrivate: false
+          description: ""
+          sortKey: -1780702526543
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/12.6.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}{{ _.path_status }}/listarStatusNomes"
+        name: Listar Status Nome
+        meta:
+          id: req_246c9ce4477e4a4bb7fc552fee244dec
+          created: 1780785746512
+          modified: 1780786525341
+          isPrivate: false
+          description: ""
+          sortKey: -1780698449484.5
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/12.6.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_e88eaadcc7f918aecc62ba31d60cb146ee90d481
+    created: 1779461661329
+    modified: 1779461661329
+environments:
+  name: Base Environment
+  meta:
+    id: env_e88eaadcc7f918aecc62ba31d60cb146ee90d481
+    created: 1779461661326
+    modified: 1780785838669
+    isPrivate: false
+  data:
+    base_url: http://localhost:3000
+    path_usuario: /usuarios
+    path_cargo: /cargos
+    path_servico: /servicos
+    path_status: /status
+    path_ticket: /tickets

@@ -1,4 +1,5 @@
 import { getDb } from '../config/database.js';
+import assert from "node:assert/strict";
 
 export class ServicoRepository {
   async insertServicosPadrao() {
@@ -31,15 +32,13 @@ export class ServicoRepository {
     const repository = getDb().getRepository('Servico');
     return repository.findOne({ 
       where: { id },
-      relations: ['cargo', 'tickets']
+      relations: { cargo: true, tickets: true }
     });
   }
 
   async findAll() {
     const repository = getDb().getRepository('Servico');
-    return repository.find({
-      relations: ['cargo', 'tickets']
-    });
+    return repository.find();
   }
 
   async create(servico) {
@@ -62,10 +61,18 @@ export class ServicoRepository {
     const repository = getDb().getRepository('Servico');
     const servico = await repository.findOne({
       where: { id },
-      relations: ['tickets']
+      relations: { cargo: true, tickets: true }
     });
     return servico ? servico.tickets : [];
   }
+
+  async assertExists(id) {
+    console.log("Verificando existência do serviço com id:", id);
+    const repository = getDb().getRepository('Servico');
+    const exists = await repository.existsBy({ id });
+    assert(exists, "O Serviço informado não existe no banco de dados.");
+  }
+
 }
 
 export const servicoRepository = new ServicoRepository();

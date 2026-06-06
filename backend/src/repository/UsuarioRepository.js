@@ -1,4 +1,5 @@
 import { getDb } from '../config/database.js';
+import assert from "node:assert/strict";
 
 export class UsuarioRepository {
   async findById(id) {
@@ -36,9 +37,9 @@ export class UsuarioRepository {
   }
 
   async create(usuario) {
-    console.log("Criando novo usuario:", usuario);
     const repository = getDb().getRepository('Usuario');
     const novoUsuario = repository.create(usuario);
+    console.log("Criando novo usuario:", usuario);
     return repository.save(novoUsuario);
   }
 
@@ -63,6 +64,13 @@ export class UsuarioRepository {
       relations: { cargo: true }
     });
     return usuario ? usuario.cargos : [];
+  }
+
+  async assertExists(id) {
+    console.log("Verificando existência do usuário com id:", id);
+    const repository = getDb().getRepository('Usuario');
+    const exists = await repository.existsBy({ id });
+    assert(exists, "O Usuário informado não existe no banco de dados.");
   }
 }
 

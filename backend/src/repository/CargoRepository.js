@@ -43,6 +43,7 @@ export class CargoRepository {
   }
 
   async findAll() {
+    console.log("Buscando todos os cargos...");
     const repository = getDb().getRepository('Cargo');
     return repository.find();
   }

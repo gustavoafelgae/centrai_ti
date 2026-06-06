@@ -5,14 +5,14 @@ export class TicketRepository {
     const repository = getDb().getRepository('Ticket');
     return repository.findOne({
       where: { id },
-      relations: ['servico', 'status', 'demanda']
+      relations: { servico: true, status: true, demanda: true }
     });
   }
 
   async findAll() {
     const repository = getDb().getRepository('Ticket');
     return repository.find({
-      relations: ['servico', 'status', 'demanda']
+      relations: { servico: true, status: true, demanda: true }
     });
   }
 
@@ -20,27 +20,31 @@ export class TicketRepository {
     const repository = getDb().getRepository('Ticket');
     return repository.find({
       where: { idServico: servicoId },
-      relations: ['servico', 'status', 'demanda']
+      relations: { servico: true, demanda: true }
     });
   }
 
-  async findByStatus(statusId) {
+  async findBySerial(serial) {
+    console.log("Buscando ticket por serial:", serial);
     const repository = getDb().getRepository('Ticket');
-    return repository.find({
-      where: { idStatus: statusId },
-      relations: ['servico', 'status', 'demanda']
+    return repository.findOneOrFail({
+      where: { serial },
+      relations: { servico: true, status: true, demanda: true }
     });
   }
 
-  async create(ticket) {
-    const repository = getDb().getRepository('Ticket');
-    return repository.save(ticket);
+  async create(ticket, manager = null) {
+    const repository = manager ? manager.getRepository('Ticket') : getDb().getRepository('Ticket');
+    const novoTicket = repository.create(ticket);
+    console.log("Criando novo ticket:", novoTicket);
+    return repository.save(novoTicket);
   }
 
-  async update(id, ticket) {
-    const repository = getDb().getRepository('Ticket');
+  async update(id, ticket, manager = null) {
+    const repository = manager ? manager.getRepository('Ticket') : getDb().getRepository('Ticket');
+    console.log("Atualizando ticket:", ticket);
     await repository.update(id, ticket);
-    return this.findById(id);
+    return this.findById(id); 
   }
 
   async delete(id) {
@@ -48,21 +52,23 @@ export class TicketRepository {
     return repository.delete(id);
   }
 
-  async obterServicoDoTicket(id) {
-    const repository = getDb().getRepository('Ticket');
-    const ticket = await repository.findOne({
-      where: { id },
-      relations: ['servico']
+  async gerarProximoSerial(manager = null) {
+    const repository = manager ? manager.getRepository('Ticket') : getDb().getRepository('Ticket');
+
+    const [ultimoTicket] = await repository.find({
+      order: { id: 'DESC' },
+      take: 1
     });
-    return ticket ? ticket.servico : null;
+
+    if (!ultimoTicket || !ultimoTicket.serial)
+      return 'TK-000001';
+
+    const parteNumerica = ultimoTicket.serial.split('-')[1];
+    const numeroAtual = parseInt(parteNumerica, 10);
+    const proximoNumero = numeroAtual + 1;
+    return `TK-${String(proximoNumero).padStart(6, '0')}`;
   }
 
-  async obterStatusDoTicket(id) {
-    const repository = getDb().getRepository('Ticket');
-    const ticket = await repository.findOne({
-      where: { id },
-      relations: ['status']
-    });
-    return ticket ? ticket.status : null;
-  }
 }
+
+export const ticketRepository = new TicketRepository();

@@ -1,6 +1,7 @@
 import express from 'express';
 import usuarioRoutes from './usuario.js';
-import cargosRoutes from './cargos.js';
+import constantesRoutes from './constantes.js';
+import ticketRoutes from './ticket.js';
 
 const router = express.Router();
 
@@ -9,6 +10,9 @@ router.get('/', (req, res) => {
 });
 
 router.use('/usuarios', usuarioRoutes);
-router.use('/cargos', cargosRoutes);
+router.use('/cargos', constantesRoutes);
+router.use('/servicos', constantesRoutes);
+router.use('/status', constantesRoutes);
+router.use('/tickets', ticketRoutes);
 
 export default router;

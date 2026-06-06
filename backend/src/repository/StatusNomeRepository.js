@@ -1,4 +1,5 @@
 import { getDb } from '../config/database.js';
+import assert from "node:assert/strict";
 
 export class StatusNomeRepository {
   async insertStatusNomePadrao() {
@@ -27,15 +28,13 @@ export class StatusNomeRepository {
     const repository = getDb().getRepository('StatusNome');
     return repository.findOne({ 
       where: { id },
-      relations: ['statuses']
+      relations: { statuses: true }
     });
   }
 
   async findAll() {
     const repository = getDb().getRepository('StatusNome');
-    return repository.find({
-      relations: ['statuses']
-    });
+    return repository.find();
   }
 
   async create(status) {
@@ -58,9 +57,16 @@ export class StatusNomeRepository {
     const repository = getDb().getRepository('StatusNome');
     const statusNome = await repository.findOne({
       where: { id },
-      relations: ['statuses']
+      relations: { statuses: true }
     });
     return statusNome ? statusNome.statuses : [];
+  }
+
+  async assertExists(id) {
+    console.log("Verificando existência do status com id:", id);
+    const repository = getDb().getRepository('StatusNome');
+    const exists = await repository.existsBy({ id });
+    assert(exists, "O Status informado não existe no banco de dados.");
   }
 }
 

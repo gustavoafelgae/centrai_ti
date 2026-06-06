@@ -72,7 +72,7 @@ export const atualizarSenhaDTO = z.object({
 
 
 // Payload para ativar/desativar usuário
-export const alterarStatusDTO = z.object({
+export const ativacaoUsuarioDTO = z.object({
     ativo: z.boolean({ 
         required_error: "O campo 'ativo' é obrigatório.",
         invalid_type_error: "O campo 'ativo' deve ser true ou false." 

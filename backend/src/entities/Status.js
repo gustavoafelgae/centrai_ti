@@ -18,7 +18,7 @@ export const StatusSchema = new EntitySchema({
     data: {
       primary: true,
       type: 'text',
-      nullable: true,
+      nullable: false,
       default: () => "datetime('now')"
     }
   },
@@ -34,6 +34,7 @@ export const StatusSchema = new EntitySchema({
     ticket: {
       target: 'Ticket',
       type: 'many-to-one',
+      inverseSide: 'status',
       joinColumn: {
         name: 'ticket_id'
       },

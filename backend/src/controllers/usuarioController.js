@@ -69,7 +69,7 @@ export const atualizarSenha = async (req, res) => {
 
 
 // ATIVAÇÃO / DESATIVAÇÃO DE USUÁRIO
-export const alterarStatusUsuario = async (req, res) => {
+export const ativacaoUsuario = async (req, res) => {
   
   const { id } = req.params;
   const { ativo } = req.body;

@@ -9,27 +9,29 @@ export const TicketSchema = new EntitySchema({
       type: 'integer',
       generated: true
     },
+    serial: {
+      type: 'text',
+      length: 9,
+      unique: true,
+      nullable: false
+    },
     titulo: {
       type: 'varchar',
       length: 255,
       nullable: false
     },
     prioridade: {
-      type: 'integer',
-      nullable: true
+      type: 'varchar',
+      enum: ['Baixa', 'Media', 'Alta', 'Critica'],
+      nullable: false
     },
     descricao: {
       type: 'text',
       nullable: true
     },
-    idStatus: {
-      type: 'integer',
-      nullable: true,
-      name: 'id_status'
-    },
     idServico: {
       type: 'integer',
-      nullable: true,
+      nullable: false,
       name: 'id_servico'
     }
   },
@@ -37,9 +39,7 @@ export const TicketSchema = new EntitySchema({
     status: {
       target: 'Status',
       type: 'one-to-many',
-      joinColumn: {
-        name: 'id_status'
-      },
+      inverseSide: 'ticket',
       eager: false
     },
     servico: {
