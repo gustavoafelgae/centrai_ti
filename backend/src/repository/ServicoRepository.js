@@ -7,6 +7,7 @@ export class ServicoRepository {
     const servicoCheck = await repository.find();
     
     if (servicoCheck.length === 0) {
+      console.log('... Populando Servicos iniciais ...');
       const servicos = [
         { servico: 'Suporte Tecnico', cargoId: 1 },
         { servico: 'Email Coporativo', cargoId: 1 },
@@ -66,3 +67,5 @@ export class ServicoRepository {
     return servico ? servico.tickets : [];
   }
 }
+
+export const servicoRepository = new ServicoRepository();

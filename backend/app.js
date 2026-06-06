@@ -4,6 +4,7 @@ import routes from './src/routes/routes.js';
 import { errorHandler } from './src/middlewares/errorHandler.js';
 import { cargoRepository } from './src/repository/CargoRepository.js';
 import { statusNomeRepository } from './src/repository/StatusNomeRepository.js';
+import { servicoRepository } from './src/repository/ServicoRepository.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -15,6 +16,7 @@ async function start() {
 
   await cargoRepository.insertCargosPadrao();
   await statusNomeRepository.insertStatusNomePadrao();
+  await servicoRepository.insertServicosPadrao();
 
   app.use(routes);
   app.use(errorHandler);

@@ -1,5 +1,6 @@
 import express from 'express';
 import usuarioRoutes from './usuario.js';
+import cargosRoutes from './cargos.js';
 
 const router = express.Router();
 
@@ -8,5 +9,6 @@ router.get('/', (req, res) => {
 });
 
 router.use('/usuarios', usuarioRoutes);
+router.use('/cargos', cargosRoutes);
 
 export default router;

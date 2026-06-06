@@ -14,10 +14,10 @@ export const DemandaSchema = new EntitySchema({
       nullable: false,
       name: 'id_usuario_created'
     },
-    idUsuarioMaster: {
+    idUsuarioResolved: {
       type: 'integer',
       nullable: true,
-      name: 'id_usuario_master'
+      name: 'id_usuario_resolved'
     },
     idTicket: {
       type: 'integer',

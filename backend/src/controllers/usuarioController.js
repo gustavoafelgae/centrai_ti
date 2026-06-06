@@ -1,8 +1,6 @@
-import { getDb } from '../config/database.js';
 import { usuarioRepository } from '../repository/UsuarioRepository.js';
 import { cargoRepository } from '../repository/CargoRepository.js';
 import { UsuarioSchema } from '../entities/Usuario.js';
-import assert from "node:assert/strict";
 
 
 const omitirSenha = (usuario) => {
