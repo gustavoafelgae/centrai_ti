@@ -32,130 +32,12 @@ import {
   User,
 } from 'lucide-react-native';
 
+// Importa o contexto global de tickets
+import { useTickets } from '../hooks/TicketContext';
+
 type Priority = 'Crítica' | 'Alta' | 'Média' | 'Baixa';
 type Status = 'Aberto' | 'Em Andamento' | 'Aguardando' | 'Resolvido';
 type Tab = 'dashboard' | 'incidents';
-
-interface Incident {
-  id: string;
-  title: string;
-  requester: string;
-  assignee: string | null;
-  priority: Priority;
-  status: Status;
-  category: string;
-  createdAt: string;
-  updatedAt: string;
-  sla: string;
-  slaBreached: boolean;
-}
-
-const INCIDENTS: Incident[] = [
-  {
-    id: 'INC-0041',
-    title: 'Servidor de produção fora do ar',
-    requester: 'Carlos Menezes',
-    assignee: 'Ana Souza',
-    priority: 'Crítica',
-    status: 'Em Andamento',
-    category: 'Infraestrutura',
-    createdAt: '21/05/2026 08:14',
-    updatedAt: '21/05/2026 09:02',
-    sla: '2h restantes',
-    slaBreached: false,
-  },
-  {
-    id: 'INC-0040',
-    title: 'VPN sem acesso para equipe remota',
-    requester: 'Beatriz Lima',
-    assignee: null,
-    priority: 'Alta',
-    status: 'Aberto',
-    category: 'Rede',
-    createdAt: '21/05/2026 07:50',
-    updatedAt: '21/05/2026 07:50',
-    sla: '30min restantes',
-    slaBreached: false,
-  },
-  {
-    id: 'INC-0039',
-    title: 'Falha no backup noturno',
-    requester: 'TI Automático',
-    assignee: 'Pedro Alves',
-    priority: 'Alta',
-    status: 'Em Andamento',
-    category: 'Backup',
-    createdAt: '21/05/2026 06:00',
-    updatedAt: '21/05/2026 08:45',
-    sla: 'SLA violado',
-    slaBreached: true,
-  },
-  {
-    id: 'INC-0038',
-    title: 'Impressora do RH não imprime',
-    requester: 'Márcia Ferreira',
-    assignee: 'João Costa',
-    priority: 'Média',
-    status: 'Aguardando',
-    category: 'Hardware',
-    createdAt: '20/05/2026 15:30',
-    updatedAt: '21/05/2026 08:00',
-    sla: '4h restantes',
-    slaBreached: false,
-  },
-  {
-    id: 'INC-0037',
-    title: 'E-mail institucional bloqueado',
-    requester: 'Rafael Nunes',
-    assignee: 'Ana Souza',
-    priority: 'Média',
-    status: 'Em Andamento',
-    category: 'E-mail',
-    createdAt: '20/05/2026 14:10',
-    updatedAt: '20/05/2026 17:00',
-    sla: '1h restante',
-    slaBreached: false,
-  },
-  {
-    id: 'INC-0036',
-    title: 'Software de contabilidade travando',
-    requester: 'Luciana Dias',
-    assignee: null,
-    priority: 'Baixa',
-    status: 'Aberto',
-    category: 'Software',
-    createdAt: '20/05/2026 11:20',
-    updatedAt: '20/05/2026 11:20',
-    sla: '8h restantes',
-    slaBreached: false,
-  },
-  {
-    id: 'INC-0035',
-    title: 'Reset de senha — diretoria',
-    requester: 'Fernanda Castro',
-    assignee: 'Pedro Alves',
-    priority: 'Alta',
-    status: 'Resolvido',
-    category: 'Acesso',
-    createdAt: '20/05/2026 09:00',
-    updatedAt: '20/05/2026 09:45',
-    sla: 'Resolvido',
-    slaBreached: false,
-  },
-  {
-    id: 'INC-0034',
-    title: 'Monitor com tela piscando',
-    requester: 'Thiago Barbosa',
-    assignee: 'João Costa',
-    priority: 'Baixa',
-    status: 'Resolvido',
-    category: 'Hardware',
-    createdAt: '19/05/2026 16:00',
-    updatedAt: '20/05/2026 10:30',
-    sla: 'Resolvido',
-    slaBreached: false,
-  },
-];
 
 const PRIORITY_META: Record<
   Priority,
@@ -215,6 +97,10 @@ const getNativeStatusStyle = (status: Status) => {
 
 export function AnalystConsole() {
   const router = useRouter();
+  
+  // Traz a lista dinâmica de tickets do Contexto Global
+  const { tickets } = useTickets();
+
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [search, setSearch] = useState('');
   const [activeStatus, setActiveStatus] = useState<Status | 'Todos'>('Todos');
@@ -223,7 +109,8 @@ export function AnalystConsole() {
   );
   const [showFilters, setShowFilters] = useState(false);
 
-  const filtered = INCIDENTS.filter(inc => {
+  // Usa a variável "tickets" no lugar da antiga "INCIDENTS"
+  const filtered = tickets.filter(inc => {
     const matchesSearch =
       inc.title.toLowerCase().includes(search.toLowerCase()) ||
       inc.id.toLowerCase().includes(search.toLowerCase()) ||
@@ -235,13 +122,13 @@ export function AnalystConsole() {
     return matchesSearch && matchesStatus && matchesPriority;
   });
 
-  const openCount = INCIDENTS.filter(i => i.status === 'Aberto').length;
-  const inProgressCount = INCIDENTS.filter(
+  const openCount = tickets.filter(i => i.status === 'Aberto').length;
+  const inProgressCount = tickets.filter(
     i => i.status === 'Em Andamento',
   ).length;
-  const breachedCount = INCIDENTS.filter(i => i.slaBreached).length;
-  const criticalCount = INCIDENTS.filter(i => i.priority === 'Crítica').length;
-  const resolvedCount = INCIDENTS.filter(i => i.status === 'Resolvido').length;
+  const breachedCount = tickets.filter(i => i.slaBreached).length;
+  const criticalCount = tickets.filter(i => i.priority === 'Crítica').length;
+  const resolvedCount = tickets.filter(i => i.status === 'Resolvido').length;
 
   const stats = [
     {
@@ -292,7 +179,7 @@ export function AnalystConsole() {
     },
   ];
 
-  const recentTickets = INCIDENTS.slice(0, 3).map(inc => ({
+  const recentTickets = tickets.slice(0, 3).map(inc => ({
     id: inc.id,
     title: inc.title,
     status: inc.status,
@@ -654,10 +541,10 @@ export function AnalystConsole() {
                 </div>
                 <div>
                   <div className='text-white text-sm'>
-                    {filtered.length} de {INCIDENTS.length} incidentes
+                    {filtered.length} de {tickets.length} incidentes
                   </div>
                   <div className='text-gray-500 text-xs'>
-                    {INCIDENTS.filter(i => i.status === 'Resolvido').length}{' '}
+                    {tickets.filter(i => i.status === 'Resolvido').length}{' '}
                     resolvidos hoje
                   </div>
                 </div>
@@ -911,13 +798,13 @@ export function AnalystConsole() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0f172a',
+    backgroundColor: '#e2e8f0',
   },
   header: {
-    backgroundColor: '#111827',
+    backgroundColor: '#2563eb',
     paddingTop: Platform.OS === 'ios' ? 50 : 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#1e293b',
+    borderBottomColor: '#ffffff',
   },
   headerTop: {
     flexDirection: 'row',
@@ -929,7 +816,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: '#1e293b',
+    backgroundColor: '#ffffff',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -956,7 +843,7 @@ const styles = StyleSheet.create({
   },
   metricCard: {
     flex: 1,
-    backgroundColor: '#1e293b',
+    backgroundColor: '#ffffff',
     borderRadius: 12,
     paddingVertical: 12,
     alignItems: 'center',
@@ -974,14 +861,14 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1e293b',
+    backgroundColor: '#ffffff',
     marginHorizontal: 16,
     borderRadius: 12,
     paddingHorizontal: 12,
     height: 44,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: '#ffffff',
   },
   searchIcon: {
     marginRight: 8,
@@ -993,7 +880,7 @@ const styles = StyleSheet.create({
   },
   filtersWrapper: {
     borderBottomWidth: 1,
-    borderBottomColor: '#1e293b',
+    borderBottomColor: '#ffffff',
     paddingBottom: 12,
   },
   priorityFiltersWrapper: {
@@ -1011,7 +898,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   filterChip: {
-    backgroundColor: '#1e293b',
+    backgroundColor: '#ffffff',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
@@ -1033,11 +920,11 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   incidentCard: {
-    backgroundColor: '#111827',
+    backgroundColor: '#ffffff',
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#1e293b',
+    borderColor: '#ffffff',
   },
   cardHeader: {
     flexDirection: 'row',
@@ -1057,7 +944,7 @@ const styles = StyleSheet.create({
   incidentTitle: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#f8fafc',
+    color: '#000000',
     flex: 1,
   },
   metaRow: {
@@ -1111,7 +998,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     borderTopWidth: 1,
-    borderTopColor: '#1e293b',
+    borderTopColor: '#ffffff',
     paddingTop: 12,
   },
   footerItem: {

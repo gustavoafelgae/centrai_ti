@@ -1,7 +1,8 @@
-import { useRouter } from 'expo-router';
-import { ArrowLeft, ChevronDown, Paperclip } from 'lucide-react-native';
-import { useState } from 'react';
+import { useRouter } from "expo-router";
+import { ArrowLeft, ChevronDown } from "lucide-react-native";
+import { useState } from "react";
 import {
+  KeyboardAvoidingView,
   Platform,
   ScrollView,
   StyleSheet,
@@ -9,308 +10,337 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-} from 'react-native';
-// Mantém a importação da sua página Web original
-import { NewTicket as WebNewTicket } from '../../pages/NewTicket';
+} from "react-native";
+
+// Importa os nossos contextos globais
+import { useTickets } from "../../hooks/TicketContext";
+import { useUser } from "../../hooks/UserContext";
+
+// Importa a versão Web (ajustado de acordo com a sua estrutura de pastas)
+import { NewTicket as WebNewTicket } from "../../pages/NewTicket";
 
 function NativeNewTicketScreen() {
   const router = useRouter();
+  
+  // Traz a função de adicionar ticket e os dados do usuário logado
+  const { addTicket } = useTickets();
+  const { user } = useUser();
 
-  // Estados para capturar os dados do formulário criados pelo botão de enviar
-  const [title, setTitle] = useState('');
-  const [category, setCategory] = useState('');
-  const [priority, setPriority] = useState('Média');
-  const [description, setDescription] = useState('');
+  // Estados para capturar os dados do formulário
+  const [title, setTitle] = useState("");
+  const [category, setCategory] = useState("");
+  const [priority, setPriority] = useState("Média");
+  const [description, setDescription] = useState("");
+  
+  // Estados e opções da Categoria
+  const [showCategories, setShowCategories] = useState(false);
+  const CATEGORIES = ["Hardware", "Software", "Rede", "Infraestrutura", "Backup", "E-mail", "Acesso"];
+  
+  // Opções de Prioridade
+  const PRIORITIES = ["Baixa", "Média", "Alta", "Crítica"];
 
-  // Função disparada ao clicar no botão "Criar Ticket"
   const handleSubmit = () => {
-    console.log('Enviando Incidente:', {
+    // Verificação de segurança
+    if (!title || !category || !description) return;
+
+    // Salva o ticket globalmente na memória do app
+    addTicket({
       title,
       category,
-      priority,
+      priority: priority as any,
       description,
+      requester: user.name, // Puxa dinamicamente o nome do usuário logado ("João Silva")
     });
-
-    // Após salvar, redireciona o usuário de volta para a listagem
-    router.push('/tickets' as any);
+    
+    // Volta para a tela anterior após abrir o ticket
+    router.back();
   };
 
   return (
     <View style={styles.container}>
       {/* Cabeçalho */}
       <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.backButton}
-        >
-          <ArrowLeft size={24} color='#0f172a' />
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <ArrowLeft size={24} color="#ffffff" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Novo Ticket</Text>
+        <Text style={styles.title}>Novo Ticket</Text>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent} bounces={false}>
-        <View style={styles.card}>
-          {/* Campo: Título */}
-          <View style={styles.field}>
-            <Text style={styles.label}>Título</Text>
-            <TextInput
-              style={styles.input}
-              placeholder='Descreva o problema brevemente'
-              placeholderTextColor='#94a3b8'
-              value={title}
-              onChangeText={setTitle}
-            />
-          </View>
-
-          {/* Campo: Categoria */}
-          <View style={styles.field}>
-            <Text style={styles.label}>Categoria</Text>
-            <TouchableOpacity style={styles.dropdown} activeOpacity={0.7}>
-              <Text
-                style={[styles.dropdownText, !category && { color: '#94a3b8' }]}
-              >
-                {category || 'Selecione uma categoria'}
-              </Text>
-              <ChevronDown size={20} color='#0f172a' />
-            </TouchableOpacity>
-          </View>
-
-          {/* Campo: Prioridade */}
-          <View style={styles.field}>
-            <Text style={styles.label}>Prioridade</Text>
-            <View style={styles.priorityContainer}>
-              {['Baixa', 'Média', 'Alta'].map(p => {
-                const isActive = priority === p;
-                return (
-                  <TouchableOpacity
-                    key={p}
-                    style={[
-                      styles.priorityButton,
-                      isActive && p === 'Alta' && styles.priorityButtonAlta,
-                      isActive && p === 'Média' && styles.priorityButtonMedia,
-                      isActive && p === 'Baixa' && styles.priorityButtonBaixa,
-                    ]}
-                    onPress={() => setPriority(p)}
-                    activeOpacity={0.7}
-                  >
-                    <Text
-                      style={[
-                        styles.priorityText,
-                        isActive && p === 'Alta' && styles.priorityTextAlta,
-                        isActive && p === 'Média' && styles.priorityTextMedia,
-                        isActive && p === 'Baixa' && styles.priorityTextBaixa,
-                      ]}
-                    >
-                      {p}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
+      <KeyboardAvoidingView 
+        style={{ flex: 1 }} 
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        <ScrollView contentContainerStyle={styles.content} bounces={false}>
+          
+          <View style={styles.formContainer}>
+            
+            {/* Campo: Título */}
+            <View style={styles.field}>
+              <Text style={styles.label}>Título do Problema</Text>
+              <TextInput
+                style={styles.input}
+                value={title}
+                onChangeText={setTitle}
+                placeholder="Ex: Impressora sem tinta"
+                placeholderTextColor="#94a3b8"
+              />
             </View>
-          </View>
 
-          {/* Campo: Descrição */}
-          <View style={styles.field}>
-            <Text style={styles.label}>Descrição</Text>
-            <TextInput
-              style={styles.textArea}
-              placeholder='Descreva o problema em detalhes...'
-              placeholderTextColor='#94a3b8'
-              multiline
-              numberOfLines={5}
-              textAlignVertical='top'
-              value={description}
-              onChangeText={setDescription}
-            />
-          </View>
+            {/* Campo: Categoria (Com Dropdown Flutuante) */}
+            <View style={styles.field}>
+              <Text style={styles.label}>Categoria</Text>
+              <TouchableOpacity 
+                style={[styles.dropdown, showCategories && { borderColor: "#2563eb" }]} 
+                activeOpacity={0.7}
+                onPress={() => setShowCategories(!showCategories)}
+              >
+                <Text style={[styles.dropdownText, !category && { color: "#94a3b8" }]}>
+                  {category || "Selecione uma categoria"}
+                </Text>
+                <ChevronDown size={20} color={showCategories ? "#2563eb" : "#94a3b8"} />
+              </TouchableOpacity>
 
-          {/* Campo: Anexos */}
-          <View style={styles.field}>
-            <Text style={styles.label}>Anexos (opcional)</Text>
-            <TouchableOpacity style={styles.uploadArea} activeOpacity={0.7}>
-              <Paperclip size={24} color='#64748b' style={styles.uploadIcon} />
-              <Text style={styles.uploadTitle}>
-                Clique para anexar arquivos
-              </Text>
-              <Text style={styles.uploadSubtitle}>Máximo 10MB</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+              {/* Lista suspensa (Dropdown) que aparece ao clicar */}
+              {showCategories && (
+                <View style={styles.optionsContainer}>
+                  {CATEGORIES.map((cat, index) => {
+                    const isSelected = category === cat;
+                    return (
+                      <TouchableOpacity
+                        key={cat}
+                        style={[
+                          styles.optionItem,
+                          index === CATEGORIES.length - 1 && { borderBottomWidth: 0 }
+                        ]}
+                        activeOpacity={0.7}
+                        onPress={() => {
+                          setCategory(cat);
+                          setShowCategories(false); // Fecha o menu ao selecionar
+                        }}
+                      >
+                        <Text style={[styles.optionText, isSelected && styles.optionTextSelected]}>
+                          {cat}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              )}
+            </View>
 
-        {/* O Botão para enviar a abertura do incidente */}
-        <TouchableOpacity
-          style={styles.submitButton}
+            {/* Campo: Prioridade */}
+            <View style={styles.field}>
+              <Text style={styles.label}>Prioridade</Text>
+              <View style={styles.priorityRow}>
+                {PRIORITIES.map((p) => {
+                  const isSelected = priority === p;
+                  return (
+                    <TouchableOpacity
+                      key={p}
+                      style={[styles.priorityPill, isSelected && styles.priorityPillSelected]}
+                      onPress={() => setPriority(p)}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={[styles.priorityText, isSelected && styles.priorityTextSelected]}>
+                        {p}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </View>
+
+            {/* Campo: Descrição */}
+            <View style={styles.field}>
+              <Text style={styles.label}>Descrição Detalhada</Text>
+              <TextInput
+                style={[styles.input, styles.textArea]}
+                value={description}
+                onChangeText={setDescription}
+                placeholder="Descreva o problema com o máximo de detalhes possível..."
+                placeholderTextColor="#94a3b8"
+                multiline={true}
+                numberOfLines={5}
+                textAlignVertical="top"
+              />
+            </View>
+
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+
+      {/* Rodapé Fixo: Botão de Envio */}
+      <View style={styles.footer}>
+        <TouchableOpacity 
+          style={[
+            styles.submitButton, 
+            (!title || !category || !description) && styles.submitButtonDisabled
+          ]} 
           activeOpacity={0.8}
           onPress={handleSubmit}
+          disabled={!title || !category || !description} // Desativa se faltar preencher
         >
-          <Text style={styles.submitButtonText}>Criar Ticket</Text>
+          <Text style={styles.submitButtonText}>Abrir Ticket</Text>
         </TouchableOpacity>
-      </ScrollView>
+      </View>
     </View>
   );
 }
 
 export default function NewTicketPage() {
-  if (Platform.OS === 'web') {
+  if (Platform.OS === "web") {
+    // Renderiza a versão Web (React.js + Tailwind)
     return <WebNewTicket />;
   }
 
+  // Renderiza a versão Nativa (Celular)
   return <NativeNewTicketScreen />;
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8fafc',
+  container: { 
+    flex: 1, 
+    backgroundColor: "#ffffff" 
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
-    paddingTop: Platform.OS === 'ios' ? 50 : 20,
-    paddingBottom: 16,
+  header: { 
+    flexDirection: "row", 
+    alignItems: "center", 
     paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
+    paddingTop: Platform.OS === "ios" ? 50 : 20,
+    paddingBottom: 16,
+    backgroundColor: "#2563eb", 
+    borderBottomWidth: 1, 
+    borderBottomColor: "#f1f5f9" 
   },
-  backButton: {
+  backButton: { 
     marginRight: 16,
+    padding: 4,
   },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#0f172a',
+  title: { 
+    fontSize: 18, 
+    fontWeight: "700", 
+    color: "#ffffff" 
   },
-  scrollContent: {
-    padding: 20,
+  content: { 
+    padding: 24,
     paddingBottom: 40,
   },
-  card: {
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: '#f1f5f9',
+  formContainer: {
+    gap: 20,
   },
   field: {
-    marginBottom: 24,
+    marginBottom: 4,
+    zIndex: 10, // Importante para o dropdown sobrepor os campos abaixo
   },
   label: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#0f172a',
+    fontWeight: "600",
+    color: "#334155",
     marginBottom: 8,
+    marginLeft: 4,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: "#e2e8f0",
+    backgroundColor: "#f8fafc",
     borderRadius: 12,
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    height: 52,
+    color: "#0f172a",
     fontSize: 15,
-    color: '#0f172a',
-    backgroundColor: '#ffffff',
+  },
+  textArea: {
+    height: 120,
+    paddingTop: 16,
+    paddingBottom: 16,
   },
   dropdown: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: "#e2e8f0",
+    backgroundColor: "#f8fafc",
     borderRadius: 12,
     paddingHorizontal: 16,
-    paddingVertical: 14,
-    backgroundColor: '#ffffff',
+    height: 52,
   },
   dropdownText: {
     fontSize: 15,
-    color: '#0f172a',
+    color: "#0f172a",
   },
-  priorityContainer: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  priorityButton: {
-    flex: 1,
+  optionsContainer: {
+    backgroundColor: "#ffffff",
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: "#e2e8f0",
     borderRadius: 12,
-    paddingVertical: 12,
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
+    marginTop: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
   },
-  priorityButtonAlta: {
-    borderColor: '#ef4444',
-    backgroundColor: '#fef2f2',
+  optionItem: {
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f1f5f9",
   },
-  priorityTextAlta: {
-    color: '#b91c1c',
-    fontWeight: '600',
+  optionText: {
+    fontSize: 15,
+    color: "#475569",
   },
-  priorityButtonMedia: {
-    borderColor: '#eab308',
-    backgroundColor: '#fef9c3',
+  optionTextSelected: {
+    color: "#2563eb",
+    fontWeight: "700",
   },
-  priorityTextMedia: {
-    color: '#b45309',
-    fontWeight: '600',
+  priorityRow: {
+    flexDirection: "row",
+    gap: 8,
   },
-  priorityButtonBaixa: {
-    borderColor: '#64748b',
-    backgroundColor: '#f8fafc',
+  priorityPill: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: "#f1f5f9",
+    borderWidth: 1,
+    borderColor: "transparent",
   },
-  priorityTextBaixa: {
-    color: '#334155',
-    fontWeight: '600',
+  priorityPillSelected: {
+    backgroundColor: "#eff6ff",
+    borderColor: "#2563eb",
   },
   priorityText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#475569',
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#64748b",
   },
-  textArea: {
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 15,
-    backgroundColor: '#ffffff',
-    height: 120,
+  priorityTextSelected: {
+    color: "#2563eb",
   },
-  uploadArea: {
-    borderWidth: 1,
-    borderColor: '#cbd5e1',
-    borderStyle: 'dashed',
-    borderRadius: 12,
-    paddingVertical: 24,
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
-  },
-  uploadIcon: {
-    marginBottom: 8,
-  },
-  uploadTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#334155',
-    marginBottom: 4,
-  },
-  uploadSubtitle: {
-    fontSize: 12,
-    color: '#94a3b8',
+  footer: {
+    padding: 20,
+    paddingBottom: Platform.OS === "ios" ? 32 : 20,
+    backgroundColor: "#ffffff",
+    borderTopWidth: 1,
+    borderTopColor: "#f1f5f9",
   },
   submitButton: {
-    backgroundColor: '#2563eb',
+    backgroundColor: "#2563eb",
     borderRadius: 16,
-    paddingVertical: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 20,
+    paddingVertical: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  submitButtonDisabled: {
+    backgroundColor: "#93c5fd", // Um azul mais claro para indicar que está inativo
   },
   submitButtonText: {
-    color: '#ffffff',
+    color: "#ffffff",
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: "700",
   },
 });

@@ -45,7 +45,7 @@ export function Login() {
 
     setEmailError('');
     setPasswordError('');
-    router.push('/dashboard');
+    router.push('/home');
   };
 
   if (Platform.OS === 'web') {
@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   coverOverlay: {
-    ...StyleSheet.absoluteFill,
+    ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(30, 58, 138, 0.4)',
   },
   formContainer: {

@@ -65,7 +65,7 @@ const ticketsList = [
 ];
 
 const navItems = [
-  { label: "Início", path: "/dashboard", icon: Home },
+  { label: "Início", path: "/home", icon: Home },
   { label: "Serviços", path: "/services", icon: Briefcase },
   { label: "Tickets", path: "/tickets", icon: TicketIcon },
   { label: "Perfil", path: "/profile", icon: User },
@@ -110,13 +110,13 @@ function NativeTicketsScreen() {
       {/* Topo com fundo branco (Header, Busca e Filtros) */}
       <View style={styles.topSection}>
         <View style={styles.header}>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             onPress={() => router.back()}
             style={styles.backButton}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
             <ArrowLeft size={24} color="#0f172a" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <Text style={styles.headerTitle}>Tickets</Text>
         </View>
 

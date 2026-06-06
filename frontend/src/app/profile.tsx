@@ -28,7 +28,7 @@ import { Profile } from '../pages/Profile';
 import { useUser } from '../hooks/UserContext';
 
 const navItems = [
-  { label: 'Início', path: '/dashboard', icon: Home },
+  { label: 'Início', path: '/home', icon: Home },
   { label: 'Serviços', path: '/services', icon: Briefcase },
   { label: 'Tickets', path: '/tickets', icon: TicketIcon },
   { label: 'Perfil', path: '/profile', icon: User },

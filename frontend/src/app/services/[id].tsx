@@ -1,262 +1,157 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import {
-  ArrowLeft,
-  CheckCircle,
-  Clock,
-  Star,
-  Users,
+import { 
+  ArrowLeft, 
+  Clock, 
+  Cloud, 
+  HardDrive, 
+  Server, 
+  Shield, 
+  ShieldCheck 
 } from "lucide-react-native";
-import {
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
+import { 
+  Platform, 
+  ScrollView, 
+  StyleSheet, 
+  Text, 
+  TouchableOpacity, 
+  View 
 } from "react-native";
-import { ImageWithFallback } from "../../components/figma/ImageWithFallback";
-import WebServiceDetail from "../../pages/ServiceDetail";
 
-// --- Banco de Dados Local (Mock) ---
-// Usamos o ID do serviço como chave para buscar os detalhes corretos
-const SERVICES_DATA: Record<string, any> = {
+// Importa a versão Web correspondente do seu projeto
+import WebServiceDetail from "../../pages/ServiceDetail";
+// Banco de dados local com as opções de serviço do seu sistema
+const SERVICES_DATA: Record<
+  string, 
+  { name: string; description: string; icon: any; color: string; sla: string; department: string }
+> = {
   "1": {
     name: "Manutenção de Servidor",
-    rating: 4.8,
-    reviews: 127,
-    description:
-      "Oferecemos serviços completos de manutenção e monitoramento de servidores para garantir que sua infraestrutura de TI funcione sem interrupções.",
-    features: [
-      "Monitoramento 24/7",
-      "Atualizações automáticas de segurança",
-      "Backup diário automatizado",
-      "Relatórios mensais de performance",
-      "Suporte técnico prioritário",
-      "Tempo de resposta: 30 minutos",
-    ],
-    image:
-      "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=1080&auto=format&fit=crop",
+    description: "Suporte especializado para toda a infraestrutura de servidores locais e virtuais. Inclui atualizações de sistema, patches de segurança, monitoramento de recursos, correção de falhas críticas de hardware e otimização de performance.",
+    icon: Server,
+    color: "#a855f7", // Roxo
+    sla: "Até 2h (Incidentes Críticos)",
+    department: "Infraestrutura de TI",
   },
   "2": {
     name: "Segurança Cibernética",
-    rating: 4.9,
-    reviews: 84,
-    description:
-      "Proteção avançada contra ameaças digitais, garantindo a integridade e confidencialidade dos dados da sua empresa contra ataques cibernéticos.",
-    features: [
-      "Firewall avançado e IDS/IPS",
-      "Antivírus corporativo gerenciado",
-      "Auditoria de vulnerabilidades",
-      "Proteção contra ransomware",
-      "Treinamento de equipe em segurança",
-      "Resposta a incidentes 24/7",
-    ],
-    image:
-      "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1080&auto=format&fit=crop",
+    description: "Análise proativa de vulnerabilidades, gerenciamento de firewalls, bloqueio de acessos suspeitos e auditoria de credenciais. Atendimento imediato em caso de suspeita de invasão ou vazamento de dados corporativos.",
+    icon: Shield,
+    color: "#3b82f6", // Azul
+    sla: "Imediato (Alta Prioridade)",
+    department: "Segurança da Informação",
   },
   "3": {
     name: "Cloud Computing",
-    rating: 4.7,
-    reviews: 92,
-    description:
-      "Soluções em nuvem escaláveis e seguras para modernizar a infraestrutura da sua empresa, reduzindo custos com hardware físico.",
-    features: [
-      "Migração segura para nuvem",
-      "Arquitetura escalável (AWS/Azure/GCP)",
-      "Otimização de custos mensais",
-      "Alta disponibilidade (99.9% uptime)",
-      "Balanceamento de carga",
-      "Suporte a contêineres e Kubernetes",
-    ],
-    image:
-      "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1080&auto=format&fit=crop",
+    description: "Configuração, gerenciamento e provisionamento de ambientes em nuvem (AWS, Azure e Google Cloud). Suporte para escalabilidade de instâncias, criação de VPCs e manutenção preventiva de serviços integrados.",
+    icon: Cloud,
+    color: "#06b6d4", // Ciano
+    sla: "Até 4h úteis",
+    department: "Arquitetura Cloud",
   },
   "4": {
     name: "Backup & Recovery",
-    rating: 4.9,
-    reviews: 156,
-    description:
-      "Sistemas de backup automático e recuperação de desastres para garantir que você nunca perca dados críticos do seu negócio.",
-    features: [
-      "Backup automático em nuvem e local",
-      "Criptografia de dados de ponta a ponta",
-      "Testes periódicos de restauração",
-      "Versionamento de arquivos",
-      "Plano de Recuperação de Desastres (DRP)",
-      "Retenção customizável de dados",
-    ],
-    image:
-      "https://images.unsplash.com/photo-1601597111158-2fceff292cdc?q=80&w=1080&auto=format&fit=crop",
-  },
-  "5": {
-    name: "Suporte Técnico",
-    rating: 4.6,
-    reviews: 210,
-    description:
-      "Suporte de TI abrangente para sua equipe. Resolvemos problemas de hardware e software rapidamente para manter a produtividade alta.",
-    features: [
-      "Helpdesk disponível 24/7",
-      "Acesso remoto para soluções rápidas",
-      "Suporte a Windows, Mac e Linux",
-      "Manutenção preventiva de estações",
-      "Gestão de inventário de TI",
-      "Atendimento local sob demanda",
-    ],
-    image:
-      "https://images.unsplash.com/photo-1588508065123-287b28e013da?q=80&w=1080&auto=format&fit=crop",
-  },
-  "6": {
-    name: "Infraestrutura de Rede",
-    rating: 4.8,
-    reviews: 65,
-    description:
-      "Projeto, configuração e otimização de redes corporativas (cabeamento estruturado e Wi-Fi) para máxima velocidade e estabilidade.",
-    features: [
-      "Projeto e instalação de redes",
-      "Configuração de roteadores e switches",
-      "Gestão de Wi-Fi corporativo",
-      "Cabeamento estruturado certificado",
-      "Redundância de links de internet",
-      "Monitoramento de tráfego em tempo real",
-    ],
-    image:
-      "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?q=80&w=1080&auto=format&fit=crop",
-  },
-  "7": {
-    name: "Gestão de Banco de Dados",
-    rating: 4.9,
-    reviews: 43,
-    description:
-      "Administração, otimização e monitoramento de bancos de dados relacionais e NoSQL para garantir consultas rápidas e dados seguros.",
-    features: [
-      "Otimização de queries pesadas",
-      "Monitoramento de gargalos (Bottlenecks)",
-      "Gestão de permissões de acesso",
-      "Migração e replicação de dados",
-      "Atualizações de versão sem downtime",
-      "Suporte a PostgreSQL, MySQL, SQL Server",
-    ],
-    image:
-      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1080&auto=format&fit=crop",
-  },
-  "8": {
-    name: "Email Corporativo",
-    rating: 4.5,
-    reviews: 312,
-    description:
-      "Criação e gestão de contas de email profissionais com o domínio da sua empresa, incluindo filtros de spam avançados.",
-    features: [
-      "Emails com domínio personalizado",
-      "Filtro anti-spam e anti-phishing",
-      "Sincronização em múltiplos dispositivos",
-      "Assinaturas de email padronizadas",
-      "Migração de provedores antigos",
-      "Painel de administração simplificado",
-    ],
-    image:
-      "https://images.unsplash.com/photo-1557200134-90327ee9fafa?q=80&w=1080&auto=format&fit=crop",
+    description: "Monitoramento e auditoria das rotinas automáticas de backups noturnos. Suporte completo para recuperação emergencial de arquivos perdidos, restauração de bancos de dados corrompidos e testes de integridade.",
+    icon: HardDrive,
+    color: "#22c55e", // Verde
+    sla: "Até 1h (Solicitações de Restauração)",
+    department: "Data Management",
   },
 };
 
 function NativeServiceDetailScreen() {
   const router = useRouter();
-
-  // 1. Lemos os parâmetros da rota
   const params = useLocalSearchParams();
 
-  // 2. Extraímos o ID de forma segura (garantindo que é uma string e não um array)
+  // Garante que o ID capturado seja uma string simples
   const rawId = Array.isArray(params.id) ? params.id[0] : params.id;
   const currentId = rawId ? String(rawId) : "1";
 
-  // 3. Buscamos os dados corretos no banco de dados local com base no ID
+  // Busca o serviço correspondente ou usa o 1 como fallback de segurança
   const service = SERVICES_DATA[currentId] || SERVICES_DATA["1"];
+  const IconComponent = service.icon;
+
+  const handleRequestService = () => {
+    // Redireciona para a nova tela de ticket enviando o nome do serviço por parâmetro
+    router.push({
+      pathname: "/tickets/new-service",
+      params: { serviceName: service.name }
+    } as any);
+  };
 
   return (
     <View style={styles.container}>
-      <ScrollView bounces={false} contentContainerStyle={styles.scrollContent}>
-        {/* Imagem de Capa e Botão Voltar */}
-        <View style={styles.imageContainer}>
-          <ImageWithFallback
-            src={service.image}
-            alt={service.name}
-            style={styles.coverImage}
-          />
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-            activeOpacity={0.8}
-          >
-            <ArrowLeft size={24} color="#0f172a" />
-          </TouchableOpacity>
+      {/* Cabeçalho */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <ArrowLeft size={24} color="#0f172a" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Detalhes do Serviço</Text>
+      </View>
+
+      <ScrollView contentContainerStyle={styles.scrollContent} bounces={false}>
+        {/* Bloco de Apresentação */}
+        <View style={styles.presentationCard}>
+          <View style={[styles.iconBox, { backgroundColor: `${service.color}15` }]}>
+            <IconComponent size={36} color={service.color} />
+          </View>
+          <Text style={styles.serviceName}>{service.name}</Text>
+          <Text style={styles.departmentText}>{service.department}</Text>
+          
+          <View style={styles.statusBadge}>
+            <View style={styles.statusDot} />
+            <Text style={styles.statusText}>Disponível / Ativo</Text>
+          </View>
         </View>
 
-        {/* Conteúdo do Serviço */}
-        <View style={styles.contentContainer}>
-          {/* Cabeçalho: Título e Preço */}
-          <View style={styles.headerRow}>
-            <Text style={styles.title}>{service.name}</Text>
-            <Text style={styles.price}>{service.price}</Text>
-          </View>
-
-          {/* Avaliação */}
-          <View style={styles.ratingRow}>
-            <Star size={16} color="#eab308" fill="#eab308" />
-            <Text style={styles.ratingText}>
-              <Text style={styles.ratingNumber}>{service.rating}</Text> •{" "}
-              {service.reviews} avaliações
-            </Text>
-          </View>
-
-          {/* Cards de Estatísticas */}
-          <View style={styles.statsGrid}>
-            <View style={styles.statCard}>
-              <Clock size={20} color="#2563eb" style={styles.statIcon} />
-              <Text style={styles.statText}>Resposta em{"\n"}30min</Text>
-            </View>
-            <View style={styles.statCard}>
-              <Users size={20} color="#2563eb" style={styles.statIcon} />
-              <Text style={styles.statText}>500+ clientes</Text>
-            </View>
-            <View style={styles.statCard}>
-              <CheckCircle size={20} color="#2563eb" style={styles.statIcon} />
-              <Text style={styles.statText}>99.9% uptime</Text>
-            </View>
-          </View>
-
-          {/* Descrição */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Descrição</Text>
+        {/* Informações Detalhadas */}
+        <View style={styles.infoSection}>
+          <Text style={styles.sectionTitle}>Descrição do Serviço</Text>
+          <View style={styles.detailsCard}>
             <Text style={styles.descriptionText}>{service.description}</Text>
           </View>
+        </View>
 
-          {/* O que está incluso */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>O que está incluso</Text>
-            <View style={styles.featuresList}>
-              {service.features.map((feature: string, index: number) => (
-                <View key={index} style={styles.featureItem}>
-                  <CheckCircle size={20} color="#22c55e" />
-                  <Text style={styles.featureText}>{feature}</Text>
-                </View>
-              ))}
+        {/* SLA e Prazos */}
+        <View style={styles.infoSection}>
+          <Text style={styles.sectionTitle}>Acordo de Nível de Serviço (SLA)</Text>
+          <View style={styles.slaCard}>
+            <View style={styles.slaRow}>
+              <Clock size={20} color="#64748b" />
+              <View style={styles.slaTextGroup}>
+                <Text style={styles.slaLabel}>Tempo Estimado de Resolução</Text>
+                <Text style={styles.slaValue}>{service.sla}</Text>
+              </View>
+            </View>
+            
+            <View style={styles.divider} />
+            
+            <View style={styles.slaRow}>
+              <ShieldCheck size={20} color="#22c55e" />
+              <View style={styles.slaTextGroup}>
+                <Text style={styles.slaLabel}>Disponibilidade do Suporte</Text>
+                <Text style={styles.slaValue}>24h por dia, 7 dias por semana</Text>
+              </View>
             </View>
           </View>
-
-          {/* Botão de Ação */}
-          <TouchableOpacity
-            style={styles.ctaButton}
-            onPress={() => router.push("/tickets/new" as any)}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.ctaButtonText}>Solicitar Serviço</Text>
-          </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* Rodapé Fixo com o Botão de Solicitação */}
+      <View style={styles.footer}>
+        <TouchableOpacity 
+          style={styles.requestButton} 
+          activeOpacity={0.8}
+          onPress={handleRequestService}
+        >
+          <Text style={styles.requestButtonText}>Solicitar este Serviço</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
 
 export default function ServiceDetailPage() {
+  // Mantém a separação da arquitetura Web/Mobile do seu projeto
   if (Platform.OS === "web") {
     return <WebServiceDetail />;
   }
@@ -267,140 +162,165 @@ export default function ServiceDetailPage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#f8fafc",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === "ios" ? 50 : 20,
+    paddingBottom: 16,
     backgroundColor: "#ffffff",
-  },
-  scrollContent: {
-    paddingBottom: 40,
-  },
-  imageContainer: {
-    position: "relative",
-    width: "100%",
-    height: 300,
-  },
-  coverImage: {
-    width: "100%",
-    height: "100%",
+    borderBottomWidth: 1,
+    borderBottomColor: "#f1f5f9",
   },
   backButton: {
-    position: "absolute",
-    top: Platform.OS === "ios" ? 50 : 30,
-    left: 20,
-    backgroundColor: "#ffffff",
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
+    marginRight: 16,
+    padding: 4,
   },
-  contentContainer: {
-    backgroundColor: "#ffffff",
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
-    marginTop: -32,
-    paddingHorizontal: 24,
-    paddingTop: 32,
-    paddingBottom: 20,
-  },
-  headerRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: 12,
-  },
-  title: {
-    flex: 1,
-    fontSize: 22,
+  headerTitle: {
+    fontSize: 18,
     fontWeight: "700",
     color: "#0f172a",
-    marginRight: 16,
-    lineHeight: 28,
   },
-  price: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: "#2563eb",
-    marginTop: 2,
+  scrollContent: {
+    padding: 20,
+    paddingBottom: 100,
   },
-  ratingRow: {
-    flexDirection: "row",
+  presentationCard: {
+    backgroundColor: "#ffffff",
+    borderRadius: 20,
+    padding: 24,
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#f1f5f9",
+    shadowColor: "#000",
+    shadowOpacity: 0.02,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
     marginBottom: 24,
   },
-  ratingText: {
-    fontSize: 14,
-    color: "#475569",
-    marginLeft: 6,
-  },
-  ratingNumber: {
-    fontWeight: "600",
-    color: "#334155",
-  },
-  statsGrid: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 32,
-    gap: 12,
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: "#f8fafc",
-    borderRadius: 16,
-    paddingVertical: 16,
-    paddingHorizontal: 8,
+  iconBox: {
+    width: 72,
+    height: 72,
+    borderRadius: 20,
     alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
   },
-  statIcon: {
-    marginBottom: 8,
-  },
-  statText: {
-    fontSize: 12,
-    color: "#475569",
+  serviceName: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#0f172a",
     textAlign: "center",
-    lineHeight: 16,
+    marginBottom: 4,
   },
-  section: {
-    marginBottom: 32,
+  departmentText: {
+    fontSize: 14,
+    color: "#64748b",
+    fontWeight: "500",
+    marginBottom: 16,
+  },
+  statusBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f0fdf4",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#bbf7d0",
+  },
+  statusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "#22c55e",
+    marginRight: 8,
+  },
+  statusText: {
+    fontSize: 12,
+    color: "#16a34a",
+    fontWeight: "600",
+  },
+  infoSection: {
+    marginBottom: 24,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#0f172a",
-    marginBottom: 12,
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#64748b",
+    textTransform: "uppercase",
+    marginBottom: 10,
+    marginLeft: 4,
+    letterSpacing: 0.5,
+  },
+  detailsCard: {
+    backgroundColor: "#ffffff",
+    borderRadius: 16,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: "#f1f5f9",
   },
   descriptionText: {
     fontSize: 15,
-    color: "#475569",
+    color: "#334155",
     lineHeight: 24,
   },
-  featuresList: {
-    gap: 12,
+  slaCard: {
+    backgroundColor: "#ffffff",
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "#f1f5f9",
+    gap: 14,
   },
-  featureItem: {
+  slaRow: {
     flexDirection: "row",
     alignItems: "center",
   },
-  featureText: {
-    fontSize: 15,
-    color: "#334155",
-    marginLeft: 12,
+  slaTextGroup: {
+    marginLeft: 14,
     flex: 1,
   },
-  ctaButton: {
+  slaLabel: {
+    fontSize: 12,
+    color: "#64748b",
+    fontWeight: "500",
+    marginBottom: 2,
+  },
+  slaValue: {
+    fontSize: 14,
+    color: "#0f172a",
+    fontWeight: "600",
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "#f1f5f9",
+    marginLeft: 34,
+  },
+  footer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 20,
+    paddingBottom: Platform.OS === "ios" ? 32 : 20,
+    backgroundColor: "#ffffff",
+    borderTopWidth: 1,
+    borderTopColor: "#f1f5f9",
+  },
+  requestButton: {
     backgroundColor: "#2563eb",
     borderRadius: 16,
-    paddingVertical: 18,
+    paddingVertical: 16,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 10,
   },
-  ctaButtonText: {
+  requestButtonText: {
     color: "#ffffff",
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "700",
   },
 });

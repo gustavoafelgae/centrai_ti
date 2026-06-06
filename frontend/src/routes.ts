@@ -1,6 +1,6 @@
 import { createBrowserRouter } from "react-router";
 import { AnalystConsole } from "./pages/AnalystConsole";
-import { Dashboard } from "./pages/Dashboard";
+import { Home } from "./pages/Home";
 import { ForgotPassword } from "./pages/ForgotPassword";
 import { Login } from "./pages/Login";
 import { NewTicket } from "./pages/NewTicket";
@@ -13,7 +13,7 @@ import { Tickets } from "./pages/Tickets";
 
 export const router = createBrowserRouter([
   { path: "/", Component: Login },
-  { path: "/dashboard", Component: Dashboard },
+  { path: "/home", Component: Home },
   { path: "/services", Component: Services },
   { path: "/services/:id", Component: ServiceDetail },
   { path: "/tickets", Component: Tickets },

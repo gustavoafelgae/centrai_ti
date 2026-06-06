@@ -96,25 +96,27 @@ export default function NotificationsScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Cabeçalho */}
+      {/* Cabeçalho Ajustado para Azul */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <TouchableOpacity
             onPress={() => router.back()}
             style={styles.backButton}
           >
-            <ArrowLeft size={24} color='#0f172a' />
+            {/* Seta alterada para branco */}
+            <ArrowLeft size={24} color='#ffffff' />
           </TouchableOpacity>
           <Text style={styles.title}>Notificações</Text>
         </View>
 
-        {/* Botão de marcar como lido (só aparece se houver não lidas) */}
+        {/* Botão de marcar como lido */}
         {unreadCount > 0 && (
           <TouchableOpacity
             style={styles.readAllButton}
             onPress={markAllAsRead}
           >
-            <CheckCheck size={18} color='#2563eb' />
+            {/* Ícone alterado para branco para combinar com o fundo azul */}
+            <CheckCheck size={18} color='#ffffff' />
           </TouchableOpacity>
         )}
       </View>
@@ -193,9 +195,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: Platform.OS === 'ios' ? 50 : 20,
     paddingBottom: 16,
-    backgroundColor: '#ffffff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
+    backgroundColor: '#2563eb', // Fundo azul corrigido
+    borderBottomWidth: 0, // Removida a borda clara
   },
   headerLeft: {
     flexDirection: 'row',
@@ -208,11 +209,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#0f172a',
+    color: '#ffffff', // Título branco corrigido
   },
   readAllButton: {
     padding: 8,
-    backgroundColor: '#eff6ff',
+    backgroundColor: 'rgba(255,255,255,0.2)', // Fundo semi-transparente para combinar com o azul
     borderRadius: 8,
   },
   content: {

@@ -11,7 +11,7 @@ export default function AnalystPage() {
         title="Painel do Analista"
         description="Acompanhe incidentes e portfólio do TI."
         actions={[
-          { label: "Dashboard", path: "/dashboard" },
+          { label: "Home", path: "/home" },
           { label: "Serviços", path: "/services" },
           { label: "Tickets", path: "/tickets" },
         ]}

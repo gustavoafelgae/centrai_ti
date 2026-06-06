@@ -88,7 +88,7 @@ export function Services() {
       <div className="bg-white px-6 py-4 border-b sticky top-0 z-10">
         <div className="flex items-center gap-4">
           <button
-            onClick={() => router.push("/dashboard")}
+            onClick={() => router.push("/home")}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
             <ArrowLeft size={24} />

@@ -1,7 +1,6 @@
 import { useRouter } from "expo-router";
 import {
   ArrowLeft,
-  Building2,
   CheckCircle2,
   ChevronDown,
   Eye,
@@ -21,43 +20,30 @@ import {
   View,
 } from "react-native";
 
-type Step = 1 | 2 | 3;
+type Step = 1 | 2;
 
 interface FormData {
   name: string;
   email: string;
   phone: string;
-  department: string;
   role: string;
   password: string;
   confirmPassword: string;
   terms: boolean;
 }
 
-const DEPARTMENTS = [
-  "TI",
-  "Recursos Humanos",
-  "Financeiro",
-  "Comercial",
-  "Operações",
-  "Jurídico",
-  "Marketing",
-  "Diretoria",
-];
-
 const ROLES = [
-  "Colaborador",
-  "Supervisor",
-  "Gerente",
-  "Diretor",
-  "Analista de TI",
-  "Outro",
+  "Usuário",
+  "Auxiliar de suporte",
+  "Analista de segurança",
+  "Tecnico de infra",
+  "Arquiteto cloud",
 ];
 
 function ProgressBar({ step }: { step: Step }) {
   return (
     <div className="flex items-center gap-2 mb-8">
-      {([1, 2, 3] as Step[]).map((s) => (
+      {([1, 2] as Step[]).map((s) => (
         <div key={s} className="flex items-center gap-2 flex-1">
           <div
             className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0 transition-colors ${
@@ -70,7 +56,7 @@ function ProgressBar({ step }: { step: Step }) {
           >
             {step > s ? <CheckCircle2 size={14} /> : s}
           </div>
-          {s < 3 && (
+          {s < 2 && (
             <div
               className={`flex-1 h-0.5 rounded-full transition-colors ${
                 step > s ? "bg-blue-600" : "bg-gray-200"
@@ -175,14 +161,12 @@ export function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [departmentOpen, setDepartmentOpen] = useState(false);
   const [roleOpen, setRoleOpen] = useState(false);
 
   const [form, setForm] = useState<FormData>({
     name: "",
     email: "",
     phone: "",
-    department: "",
     role: "",
     password: "",
     confirmPassword: "",
@@ -207,19 +191,12 @@ export function Register() {
     if (!form.phone.trim()) e.phone = "Telefone obrigatório";
     else if (form.phone.replace(/\D/g, "").length < 10)
       e.phone = "Telefone inválido";
-    setErrors(e);
-    return Object.keys(e).length === 0;
-  };
-
-  const validateStep2 = () => {
-    const e: typeof errors = {};
-    if (!form.department) e.department = "Selecione um departamento";
     if (!form.role) e.role = "Selecione um cargo";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
-  const validateStep3 = () => {
+  const validateStep2 = () => {
     const e: typeof errors = {};
     if (!form.password) e.password = "Senha obrigatória";
     else if (form.password.length < 8) e.password = "Mínimo de 8 caracteres";
@@ -237,8 +214,7 @@ export function Register() {
 
   const next = () => {
     if (step === 1 && validateStep1()) setStep(2);
-    if (step === 2 && validateStep2()) setStep(3);
-    if (step === 3 && validateStep3()) setSubmitted(true);
+    if (step === 2 && validateStep2()) setSubmitted(true);
   };
 
   const back = () => {
@@ -296,8 +272,7 @@ export function Register() {
   if (Platform.OS !== "web") {
     const nativeStepTitles: Record<Step, { title: string; sub: string }> = {
       1: { title: "Dados pessoais", sub: "Preencha suas informações básicas" },
-      2: { title: "Departamento", sub: "Onde você trabalha?" },
-      3: { title: "Acesso", sub: "Defina sua senha de acesso" },
+      2: { title: "Acesso", sub: "Defina sua senha de acesso" },
     };
 
     const strength = passwordStrength();
@@ -448,7 +423,7 @@ export function Register() {
 
         <View style={nativeStyles.nativeCard}>
           <View style={nativeStyles.progressRow}>
-            {[1, 2, 3].map((s) => (
+            {[1, 2].map((s) => (
               <View key={s} style={nativeStyles.progressStep}>
                 <View
                   style={[
@@ -469,7 +444,7 @@ export function Register() {
                     {step > s ? "✔" : s}
                   </Text>
                 </View>
-                {s < 3 ? (
+                {s < 2 ? (
                   <View
                     style={[
                       nativeStyles.progressLine,
@@ -491,7 +466,7 @@ export function Register() {
             <View>
               {renderNativeTextInput({
                 label: "Nome completo",
-                placeholder: "João da Silva",
+                placeholder: "Seu nome completo",
                 value: form.name,
                 onChangeText: (value) => {
                   set("name")(value);
@@ -503,7 +478,7 @@ export function Register() {
               })}
               {renderNativeTextInput({
                 label: "E-mail corporativo",
-                placeholder: "joao@empresa.com",
+                placeholder: "seu@email.com",
                 value: form.email,
                 onChangeText: (value) => {
                   set("email")(value);
@@ -521,21 +496,6 @@ export function Register() {
                 error: errors.phone,
                 keyboardType: "phone-pad",
               })}
-            </View>
-          ) : null}
-
-          {step === 2 ? (
-            <View>
-              {renderNativeSelect({
-                label: "Departamento",
-                value: form.department,
-                placeholder: "Selecione o departamento",
-                open: departmentOpen,
-                setOpen: setDepartmentOpen,
-                options: DEPARTMENTS,
-                onSelect: set("department"),
-                error: errors.department,
-              })}
               {renderNativeSelect({
                 label: "Cargo / Função",
                 value: form.role,
@@ -543,26 +503,16 @@ export function Register() {
                 open: roleOpen,
                 setOpen: setRoleOpen,
                 options: ROLES,
-                onSelect: set("role"),
+                onSelect: (value) => {
+                  set("role")(value);
+                  setErrors((prev) => ({ ...prev, role: undefined }));
+                },
                 error: errors.role,
               })}
-              {form.department && form.role ? (
-                <View style={nativeStyles.profileSummary}>
-                  <Text style={nativeStyles.summaryTitle}>
-                    Resumo do perfil
-                  </Text>
-                  <Text style={nativeStyles.summaryName}>
-                    {form.name || "Usuário"}
-                  </Text>
-                  <Text style={nativeStyles.summaryRole}>
-                    {form.role} · {form.department}
-                  </Text>
-                </View>
-              ) : null}
             </View>
           ) : null}
 
-          {step === 3 ? (
+          {step === 2 ? (
             <View>
               {renderNativeTextInput({
                 label: "Senha",
@@ -662,7 +612,7 @@ export function Register() {
 
           <TouchableOpacity style={nativeStyles.primaryButton} onPress={next}>
             <Text style={nativeStyles.primaryButtonText}>
-              {step === 3 ? "Criar conta" : "Continuar"}
+              {step === 2 ? "Criar conta" : "Continuar"}
             </Text>
           </TouchableOpacity>
           {step === 1 ? (
@@ -683,8 +633,7 @@ export function Register() {
 
   const stepTitles: Record<Step, { title: string; sub: string }> = {
     1: { title: "Dados pessoais", sub: "Preencha suas informações básicas" },
-    2: { title: "Departamento", sub: "Onde você trabalha?" },
-    3: { title: "Acesso", sub: "Defina sua senha de acesso" },
+    2: { title: "Acesso", sub: "Defina sua senha de acesso" },
   };
 
   const strength = passwordStrength();
@@ -741,50 +690,23 @@ export function Register() {
               onChange={(e) => set("phone")(phoneFormat(e.target.value))}
               error={errors.phone}
             />
-          </div>
-        )}
-
-        {/* Step 2 */}
-        {step === 2 && (
-          <div className="space-y-4">
-            <SelectField
-              label="Departamento"
-              icon={Building2}
-              options={DEPARTMENTS}
-              value={form.department}
-              onChange={set("department")}
-              placeholder="Selecione o departamento"
-              error={errors.department}
-            />
             <SelectField
               label="Cargo / Função"
               icon={User}
               options={ROLES}
               value={form.role}
-              onChange={set("role")}
+              onChange={(v) => {
+                set("role")(v);
+                setErrors((prev) => ({ ...prev, role: undefined }));
+              }}
               placeholder="Selecione o cargo"
               error={errors.role}
             />
-
-            {/* Preview card */}
-            {form.department && form.role && (
-              <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mt-2">
-                <p className="text-xs text-blue-600 font-medium mb-1">
-                  Resumo do perfil
-                </p>
-                <p className="text-sm text-gray-800">
-                  {form.name || "Usuário"}
-                </p>
-                <p className="text-xs text-gray-500">
-                  {form.role} · {form.department}
-                </p>
-              </div>
-            )}
           </div>
         )}
 
-        {/* Step 3 */}
-        {step === 3 && (
+        {/* Step 2 */}
+        {step === 2 && (
           <div className="space-y-4">
             <div>
               <label className="block text-sm text-gray-700 mb-1.5">
@@ -915,7 +837,7 @@ export function Register() {
           onClick={next}
           className="w-full bg-blue-600 text-white py-4 rounded-xl text-sm font-medium hover:bg-blue-700 active:bg-blue-800 transition-colors mt-8"
         >
-          {step === 3 ? "Criar conta" : "Continuar"}
+          {step === 2 ? "Criar conta" : "Continuar"}
         </button>
 
         {step === 1 && (

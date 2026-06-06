@@ -6,7 +6,7 @@ export function BottomNav() {
   const pathname = usePathname();
 
   const navItems = [
-    { name: "Início", path: "/dashboard", icon: Home },
+    { name: "Início", path: "/home", icon: Home },
     { name: "Serviços", path: "/services", icon: Briefcase },
     { name: "Tickets", path: "/tickets", icon: Ticket },
     { name: "Perfil", path: "/profile", icon: User },
