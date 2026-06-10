@@ -1,0 +1,48 @@
+import { useState } from 'react';
+import { Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { usuarioService } from '../services/loginService';
+import { LoginData } from '../types/loginInterfaces'
+import SHA256 from "crypto-js/sha256";
+
+export const useAuth = () => {
+    const [loading, setLoading] = useState(false);
+
+    const login = async (email: string, senha: string): Promise<boolean> => {
+        setLoading(true);
+
+        try {
+            const dados: LoginData = {
+                email: email.trim(),
+                senha: SHA256(senha.trim()).toString()
+            };
+
+            const response = await usuarioService.logar(dados);
+            await AsyncStorage.setItem('@App:user', JSON.stringify(response.usuario));
+
+            return true;
+
+        } catch (error: any) {
+            console.log(error)
+            const mensagem = error.message || 'Erro ao fazer login';
+            Alert.alert('Erro de Autenticação', mensagem);
+            return false;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const logout = async (): Promise<void> => {
+        try {
+            await AsyncStorage.multiRemove(['@App:token', '@App:user']);
+        } catch (error) {
+            console.error('Erro ao fazer logout:', error);
+        }
+    };
+
+    return {
+        loading,
+        login,
+        logout
+    };
+};

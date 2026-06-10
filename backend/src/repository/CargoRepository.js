@@ -13,7 +13,8 @@ export class CargoRepository {
         { id: 1, nome: 'Auxiliar de Suporte' },
         { id: 2, nome: 'Analista de Segurança' },
         { id: 3, nome: 'tecnico de infra' },
-        { id: 4, nome: 'Arquiteto Cloud' }
+        { id: 4, nome: 'Arquiteto Cloud' },
+        { id: 5, nome: 'Solicitante' }
       ];
 
       for (const cargo of cargos) {

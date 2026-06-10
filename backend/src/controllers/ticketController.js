@@ -130,14 +130,14 @@ export const atualizarTicket = async (req, res) => {
     const ticketAtualizado = await ticketRepository.findBySerial(serial);
     const historicoStatusFinal = await statusRepository.obterUltimoStatusDoTicket(ticketAtualizado.id);
 
-    const { status, ...ticketLimpo } = ticketAtualizado;
+    const { status, idServico, ...ticketLimpo } = ticketAtualizado;
 
     return res.status(200).json({
         mensagem: "Ticket atualizado com sucesso.",
         ticket: {
             ...ticketLimpo,
             status: historicoStatusFinal.statusNome
-        }
+        }   
     });
 }
 

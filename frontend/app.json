@@ -2,7 +2,6 @@
   "expo": {
     "name": "central_ti",
     "slug": "central_ti",
-    "sdkVersion": "54.0.0",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -36,7 +35,8 @@
             "imageWidth": 76
           }
         }
-      ]
+      ],
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true,

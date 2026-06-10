@@ -11,41 +11,68 @@ import {
   View,
 } from 'react-native';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+import { useAuth } from '../hooks/useAuth';
 
 const IMAGE_URL =
   'https://images.unsplash.com/photo-1768633647910-7e6fb53e5b0f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxJVCUyMHN1cHBvcnQlMjB0ZWNobmljaWFuJTIwaGVscGluZ3xlbnwxfHx8fDE3NzM5MjIyNTl8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral';
 
 export function Login() {
-  const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [emailError, setEmailError] = useState('');
-  const [passwordError, setPasswordError] = useState('');
 
-  const handleLogin = (e?: any) => {
-    if (e && typeof e.preventDefault === 'function') e.preventDefault();
+  const router = useRouter();
+  const { loading, login } = useAuth();
+
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [emailError, setEmailError] = useState<string>('');
+  const [passwordError, setPasswordError] = useState<string>('');
+
+  const validarCampos = (): boolean => {
 
     const trimmedEmail = email.trim();
     const trimmedPassword = password.trim();
     let hasError = false;
 
+    setEmailError('');
+    setPasswordError('');
+
     if (!trimmedEmail) {
       setEmailError('Informe seu email');
+      hasError = true;
+    } else if (!isValidEmail(trimmedEmail)) {
+      setEmailError('Email inválido');
       hasError = true;
     }
 
     if (!trimmedPassword) {
       setPasswordError('Informe sua senha');
       hasError = true;
+    } else if (trimmedPassword.length < 6) {
+      setPasswordError('Senha deve ter no mínimo 6 caracteres');
+      hasError = true;
     }
 
-    if (hasError) {
+    return !hasError;
+  };
+
+  const isValidEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const handleLogin = async (e?: any): Promise<void> => {
+    if (e && typeof e.preventDefault === 'function') {
+      e.preventDefault();
+    }
+
+    if (!validarCampos()) {
       return;
     }
 
-    setEmailError('');
-    setPasswordError('');
-    router.push('/home');
+    const sucesso = await login(email, password);
+
+    if (sucesso) {
+      router.push('/home');
+    }
   };
 
   if (Platform.OS === 'web') {

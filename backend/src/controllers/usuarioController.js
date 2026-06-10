@@ -22,6 +22,8 @@ export const buscarUsuarioPorId = async (req, res) => {
 // LOGIN DE USUÁRIO
 export const loginUsuario = async (req, res) => {
 
+  console.log(req.headers)
+
     const { email, senha } = req.body;
     const usuario = await usuarioRepository.findByEmailAndSenha(email, senha);
 

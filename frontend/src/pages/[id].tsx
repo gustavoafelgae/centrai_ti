@@ -18,7 +18,7 @@ import {
 } from "react-native";
 
 // Importa a versão Web correspondente do seu projeto
-import WebServiceDetail from "../../pages/ServiceDetail";
+import WebServiceDetail from "./ServiceDetail";
 // Banco de dados local com as opções de serviço do seu sistema
 const SERVICES_DATA: Record<
   string, 

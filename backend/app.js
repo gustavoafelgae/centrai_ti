@@ -8,6 +8,7 @@ import { servicoRepository } from './src/repository/ServicoRepository.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const IP_LINK = process.env.IP_LINK || '192.168.1.247'
 
 app.use(express.json());
 
@@ -22,7 +23,7 @@ async function start() {
   app.use(errorHandler);
 
   app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`Server running on port http://${IP_LINK}:${PORT}`);
   });
 }
 
