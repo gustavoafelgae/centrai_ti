@@ -409,6 +409,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
+    marginTop: 20,
     marginBottom: 20,
     gap: 14,
   },
@@ -622,6 +623,7 @@ const styles = StyleSheet.create({
   // Link login
   loginLink: {
     marginTop: 16,
+    marginBottom: 16,
     alignItems: "center",
   },
   loginLinkText: {

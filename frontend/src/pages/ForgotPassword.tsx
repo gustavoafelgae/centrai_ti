@@ -29,7 +29,7 @@ const stageLabels: Record<
   },
 };
 
-export function ForgotPassword() {
+export default function ForgotPassword() {
   const router = useRouter();
   const [stage, setStage] = useState<Stage>("email");
 

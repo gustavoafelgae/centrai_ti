@@ -1,5 +1,5 @@
 // app/home.tsx
-import { useRouter } from "expo-router";
+import { useRouter, usePathname } from "expo-router";
 import {
   ActivityIndicator,
   Platform,
@@ -40,9 +40,10 @@ const navItems = [
   { label: "Perfil", path: "/profile", icon: "person" as keyof typeof Ionicons.glyphMap },
 ];
 
-export function Home() {
+export default function Home() {
   const router = useRouter();
   const { user, logout } = useUser();
+  const pathname = usePathname();
   const { tickets } = useTickets();
   const { servicos, loading: loadingServicos, error, recarregar } = useServicos();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -126,11 +127,6 @@ export function Home() {
 
         {/* ... dropdown com ícones corrigidos ... */}
         <View style={styles.dropdownActions}>
-          <TouchableOpacity style={styles.dropdownAction}>
-            <Ionicons name="settings-outline" size={20} color="#ffffff" />
-            <Text style={styles.dropdownActionText}>Configurações</Text>
-          </TouchableOpacity>
-
           <TouchableOpacity
             style={[styles.dropdownAction, styles.logoutAction]}
             onPress={handleLogout}
@@ -160,28 +156,43 @@ export function Home() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Serviços</Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push('/services' as any)}>
               <Text style={styles.seeAllText}>Ver todos</Text>
             </TouchableOpacity>
           </View>
 
           {servicos.length === 0 ? (
             <View style={styles.emptyState}>
-              <Ionicons name="briefcase" size={32} color="#94a3b8" />
+              <Ionicons name="apps-outline" size={32} color="#94a3b8" />
               <Text style={styles.emptyStateText}>Nenhum serviço disponível</Text>
             </View>
           ) : (
             <View style={styles.servicesGrid}>
               {servicos.slice(0, 4).map((service) => {
-                const Icon = service.icon;
                 const colorHex = getColorHex(service.color);
-
+                const iconName = (service.icon as string) || "apps-outline";
                 return (
-                  <TouchableOpacity key={service.id} style={styles.serviceCard}>
-                    <View style={[styles.serviceIcon, { backgroundColor: `${colorHex}15` }]}>
-                      <Ionicons size={24} color={colorHex} />
+                  <TouchableOpacity
+                    key={service.id}
+                    style={styles.serviceCard}
+                    activeOpacity={0.7}
+                    onPress={() => router.push(`/services/${service.id}` as any)}
+                  >
+                    <View style={[styles.serviceIcon, { backgroundColor: `${colorHex}18` }]}>
+                      <Ionicons
+                        name={iconName as any}
+                        size={24}
+                        color={colorHex}
+                      />
                     </View>
-                    <Text style={styles.serviceName}>{service.name}</Text>
+                    <Text style={styles.serviceName} numberOfLines={2}>
+                      {service.name || service.name || 'Serviço'}
+                    </Text>
+                    {service.description && (
+                      <Text style={styles.serviceDescription} numberOfLines={2}>
+                        {service.description}
+                      </Text>
+                    )}
                   </TouchableOpacity>
                 );
               })}
@@ -220,9 +231,16 @@ export function Home() {
       {/* Bottom Nav */}
       <View style={styles.bottomNav}>
         {navItems.map((item) => {
-          const isActive = item.label === "Início";
+          const isActive = pathname === item.path ||
+            (item.path === '/home' && pathname === '/home') ||
+            pathname.startsWith(item.path + '/');
           return (
-            <TouchableOpacity key={item.path} style={styles.navButton}>
+            <TouchableOpacity
+              key={item.path}
+              style={styles.navButton}
+              onPress={() => router.push(item.path as any)}
+              activeOpacity={0.7}
+            >
               <Ionicons
                 name={item.icon}
                 size={24}
@@ -288,8 +306,7 @@ const styles = StyleSheet.create({
   // Header
   header: {
     backgroundColor: "#2563eb",
-    paddingTop: Platform.OS === "ios" ? 60 : 30,
-    paddingBottom: 20,
+    paddingTop: Platform.OS === "ios" ? 60 : 60,
     paddingHorizontal: 20,
   },
   headerTop: {
@@ -455,7 +472,7 @@ const styles = StyleSheet.create({
   },
   dropdownActionText: {
     fontSize: 15,
-    color: '#374151',
+    color: '#c6c4c4',
     fontWeight: '500',
   },
   logoutAction: {
@@ -649,10 +666,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
     borderTopWidth: 1,
     borderTopColor: "#f1f5f9",
-    paddingVertical: Platform.OS === "ios" ? 20 : 12,
-    paddingHorizontal: 8,
+    paddingVertical: Platform.OS === "ios" ? 20 : 10,
+    paddingHorizontal: 10,
+    paddingBottom: 50,
     justifyContent: "space-around",
-    elevation: 10,
+    elevation: 50,
     shadowColor: "#000",
     shadowOpacity: 0.05,
     shadowRadius: 10,

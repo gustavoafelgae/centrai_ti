@@ -50,7 +50,7 @@ const getNativeStatusStyle = (status: Status) => {
   }
 };
 
-export function AnalystConsole() {
+export default function AnalystConsole() {
   const router = useRouter();
   const { tickets } = useTickets();
 

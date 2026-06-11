@@ -12,7 +12,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 
-export function Services() {
+export default function Services() {
   const router = useRouter();
   const { servicos, loading, error, recarregar } = useServicos();
 

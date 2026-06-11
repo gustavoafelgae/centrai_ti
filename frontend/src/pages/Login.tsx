@@ -5,6 +5,7 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  ImageBackground,
   ScrollView,
   StyleSheet,
   Text,
@@ -13,6 +14,7 @@ import {
   View,
 } from 'react-native';
 import { useAuth } from '@/hooks/useAuth';
+
 
 export default function Login() {
   const router = useRouter();
@@ -78,15 +80,12 @@ export default function Login() {
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
       >
-        {/* Capa com gradiente */}
-        <View style={styles.cover}>
-          <View style={styles.coverGradient}>
-            <View style={styles.coverContent}>
-              <Text style={styles.coverTitle}>IT Support</Text>
-              <Text style={styles.coverSubtitle}>Soluções em Tecnologia</Text>
-            </View>
-          </View>
-        </View>
+        {/* Capa com imagem de fundo */}
+        <ImageBackground
+          source={require('../../assets/images/image_tela_login.png')}
+          style={styles.cover}
+          resizeMode="cover"
+        ></ImageBackground>
 
         {/* Formulário */}
         <View style={styles.formContainer}>
@@ -215,12 +214,10 @@ const styles = StyleSheet.create({
   // Capa
   cover: {
     height: 260,
-    width: '100%',
-    backgroundColor: '#1e3a8a',
+    width: '100%'
   },
   coverGradient: {
     flex: 1,
-    backgroundColor: '#2563eb',
     justifyContent: 'flex-end',
     padding: 24,
   },
@@ -341,7 +338,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 32,
+    marginTop: 20,
+    marginBottom: 40
   },
   bottomText: {
     color: '#475569',

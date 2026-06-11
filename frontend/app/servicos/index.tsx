@@ -1,5 +1,5 @@
 // app/services/index.tsx
-import { Services } from '../../src/pages/Services';
+import Services from '../../src/pages/Services';
 export default function ServicesScreen() {
   return <Services />;
 }
