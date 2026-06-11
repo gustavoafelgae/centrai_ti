@@ -30,9 +30,8 @@ export class ServicoRepository {
 
   async findById(id) {
     const repository = getDb().getRepository('Servico');
-    return repository.findOne({ 
-      where: { id },
-      relations: { cargo: true, tickets: true }
+    return repository.findOneOrFail({ 
+      where: { id }
     });
   }
 

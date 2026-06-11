@@ -10,8 +10,8 @@ import {
   View,
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { useTickets } from "../hooks/TicketContext";
-import { useUser } from "../hooks/UserContext";
+import { useTickets } from "../hooks/context/TicketContext";
+import { useUser } from "../hooks/context/UserContext";
 import { useServicos } from "../hooks/useLists";
 import { useState, useEffect } from "react";
 import { BottomNav } from '../components/BottomNav';
@@ -176,7 +176,10 @@ export default function Home() {
                     key={service.id}
                     style={styles.serviceCard}
                     activeOpacity={0.7}
-                    onPress={() => router.push(`/services/${service.id}` as any)}
+                    onPress={() => router.push({
+                      pathname: '/tickets/new',
+                      params: { servicoId: service.id }
+                    } as any)}
                   >
                     <View style={[styles.serviceIcon, { backgroundColor: `${colorHex}18` }]}>
                       <Ionicons

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { usuarioService } from '../services/usuarioService';
-import { useUser } from './UserContext';
+import { useUser } from './context/UserContext';
 
 
 export const useProfile = () => {

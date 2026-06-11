@@ -14,7 +14,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { useAuthenticatedUser } from '@/hooks/UserContext';
+import { useAuthenticatedUser } from '@/hooks/context/UserContext';
 import { useCargos } from '@/hooks/useLists';
 import { useProfile } from '@/hooks/useProfile';
 
@@ -111,7 +111,7 @@ export default function EditProfile() {
             };
 
             const response = await atualizarUsuario(dados, user.id);
-            
+
             Alert.alert('Sucesso', 'Perfil atualizado com sucesso!', [
                 { text: 'OK', onPress: () => router.back() }
             ]);

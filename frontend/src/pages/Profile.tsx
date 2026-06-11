@@ -1,6 +1,6 @@
 // app/profile.tsx
 import { useRouter } from 'expo-router';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import {
   Platform,
   ScrollView,
@@ -10,8 +10,7 @@ import {
   View,
 } from 'react-native';
 import { BottomNav } from '../components/BottomNav';
-import { useUser } from '../hooks/UserContext';
-import { useAuth } from '../hooks/useAuth';
+import { useUser } from '../hooks/context/UserContext';
 
 export default function Profile() {
   const router = useRouter();
@@ -38,13 +37,15 @@ export default function Profile() {
         <View style={styles.profileCard}>
           <View style={styles.profileTop}>
             <View style={styles.avatar}>
-              <Ionicons name="person" size={40} color="#2563eb" />
+              <Text style={styles.avatarText}>
+                {user?.nome?.charAt(0)?.toUpperCase() || 'U'}
+              </Text>
             </View>
             <View style={styles.profileInfo}>
               <Text style={styles.userName}>{user?.nome || 'Usuário'}</Text>
               <View style={styles.planBadge}>
                 <Text style={styles.planText}>
-                  Plano {user?.nomeCargo || 'Premium'}
+                  {user?.nomeCargo || 'Premium'}
                 </Text>
               </View>
             </View>
@@ -95,10 +96,15 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 100,
   },
+  avatarText: {
+    fontSize: 40,
+    fontWeight: '700',
+    color: '#ffffff',
+  },
   // Header
   header: {
     backgroundColor: '#2563eb',
-    paddingTop: Platform.OS === "ios" ? 60 : 80,
+    paddingTop: 60,
     paddingHorizontal: 20,
   },
   headerTitle: {
@@ -118,7 +124,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     padding: 24,
     marginHorizontal: 20,
-    marginTop: 80,
+    marginTop: 30,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
@@ -135,7 +141,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#eff6ff',
+    backgroundColor: '#2563eb',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -214,6 +220,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     marginHorizontal: 20,
     marginTop: 24,
+    marginBottom: 40,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,

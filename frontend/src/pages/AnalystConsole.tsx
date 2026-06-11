@@ -10,7 +10,7 @@ import {
   View,
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { useTickets } from '../hooks/TicketContext';
+import { useTickets } from '../hooks/context/TicketContext';
 
 type Priority = 'Crítica' | 'Alta' | 'Média' | 'Baixa';
 type Status = 'Aberto' | 'Em Andamento' | 'Aguardando' | 'Resolvido';

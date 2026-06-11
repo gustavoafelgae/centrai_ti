@@ -1,8 +1,8 @@
 // app/_layout.tsx
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { UserProvider } from '../src/hooks/UserContext';
-import { TicketProvider } from '../src/hooks/TicketContext';
+import { UserProvider } from '../src/hooks/context/UserContext';
+import { TicketProvider } from '../src/hooks/context/TicketContext';
 
 export default function RootLayout() {
   return (
@@ -20,7 +20,7 @@ export default function RootLayout() {
           <Stack.Screen name="register" />
           <Stack.Screen name="forgot-password" />
           <Stack.Screen name="profile/index" />
-          <Stack.Screen name="profile/edit"/>
+          <Stack.Screen name="profile/edit" />
           <Stack.Screen name="analyst" />
           <Stack.Screen name="servicos/index" />
           <Stack.Screen name="servicos/[id]" />

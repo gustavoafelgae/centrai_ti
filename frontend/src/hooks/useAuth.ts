@@ -5,7 +5,7 @@ import { usuarioService } from '../services/usuarioService';
 import { LoginData } from '../types/loginInterfaces'
 import SHA256 from "crypto-js/sha256";
 import { CadastroData } from '@/types/usuarioInterfaces';
-import { useUser } from './UserContext';
+import { useUser } from './context/UserContext';
 
 export const useAuth = () => {
     const [loading, setLoading] = useState(false);

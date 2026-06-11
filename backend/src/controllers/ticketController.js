@@ -12,7 +12,8 @@ export const criarTicket = async (req, res) => {
     
     const dadosDeEntrada = req.body;
 
-    await servicoRepository.assertExists(dadosDeEntrada.idServico);
+    const servico = await servicoRepository.findById(dadosDeEntrada.idServico);
+    const status = await statusNomeRepository.findAll();
 
     const db = getDb();
     const novoTicket = await db.transaction(async (transactionalEntityManager) => {
@@ -20,7 +21,7 @@ export const criarTicket = async (req, res) => {
         const novoSerial  = await ticketRepository.gerarProximoSerial(transactionalEntityManager);
         const ticketSalvo = await ticketRepository.create({ ...dadosDeEntrada, serial: novoSerial }, transactionalEntityManager);
 
-        await demandaRepository.create({
+        const demanda = await demandaRepository.create({
             idUsuarioCreated: dadosDeEntrada.idUsuario,
             idTicket: ticketSalvo.id
         }, transactionalEntityManager);
@@ -30,12 +31,19 @@ export const criarTicket = async (req, res) => {
             statusNomeId: 1
         }, transactionalEntityManager);
 
-        return ticketSalvo;
+        return {
+            ...ticketSalvo,
+            demanda: demanda,
+        };
     });
 
     return res.status(201).json({
         mensagem: "Ticket aberto com sucesso.",
-        ticket: novoTicket
+        ticket: {
+            ...novoTicket,
+            servico: servico,
+            status: status[0]
+        },
     });
 };
 
