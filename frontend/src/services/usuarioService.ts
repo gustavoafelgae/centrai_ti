@@ -1,7 +1,7 @@
 import api from './api';
 import { AxiosResponse } from 'axios';
 import { LoginData, LoginResponse } from '../types/loginInterfaces';
-import { CadastroData, CadastroResponse, UpdateUserData, UpdateUserResponse } from '@/types/usuarioInterfaces';
+import { CadastroData, CadastroResponse, UpdateUserData, UpdateUserResponse, ResetPasswordData} from '@/types/usuarioInterfaces';
 
 const BASE_PATH = '/usuarios';
 
@@ -39,5 +39,15 @@ export const usuarioService = {
             throw error.response?.data || error;
         }
     },
+
+    solicitarRecuperacaoSenha: async (email: string) => {
+        const response = await api.post(`${BASE_PATH}/esqueci-senha`, { email });
+        return response.data;
+    },
+
+    atualizarSenha: async (dados: ResetPasswordData) => {
+        const response = await api.patch(`${BASE_PATH}/senha`, dados);
+        return response.data;
+    }
 
 };

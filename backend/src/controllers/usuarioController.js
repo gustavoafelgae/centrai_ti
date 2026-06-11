@@ -64,50 +64,59 @@ export const atualizarUsuario = async (req, res) => {
 }
 
 
-// SEND EMAIL SENHA
+
+// NÃO APAGA ESSA CONST, ELA SALVA TEMPORARIAMENTE O VALOR //
+const codigosTemporarios = {}; 
+// NÃO APAGA ESSA CONST, ELA SALVA TEMPORARIAMENTE O VALOR //
+
 export const sendEmailSenha = async (req, res) => {
-
   const { email } = req.body;
-  const usuario = await usuarioRepository.findByEmail(email);
-  const codigo = Math.floor(100000 + Math.random() * 900000).toString();
-
-  await enviarCodigoVerificacao(email, codigo);
-  return res.status(200).json({
-    message: "Código enviado para seu e-mail.",
-    sender: {
-      email: email,
+  
+  try {
+    const usuario = await usuarioRepository.findByEmail(email);
+    const codigo = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    codigosTemporarios[email] = {
       codigo: codigo,
       expiraEm: Date.now() + 900000
+    };
 
-    }
-  });
+    await enviarCodigoVerificacao(email, codigo);
+    return res.status(200).json({ message: "Código enviado para seu e-mail." });
+
+  } catch (error) {
+    return res.status(404).json({ message: "Usuário não existe" });
+  }
 };
 
 
-// ATUALIZAÇÃO DE SENHA
 export const atualizarSenha = async (req, res) => {
+  const { email, codigo, novaSenha } = req.body;
+  const registro = codigosTemporarios[email];
 
-  const { email, codigo, novaSenha, timeExp } = req.body;
-  const registro = solicitarRecuperacao(req, res);
-
-  if (!registro || registro.codigo !== codigo || Date.now() > timeExp)
-    return res.status(400).json({
-      message: "Código inválido, expirado ou não solicitado."
-    });
+  if (!registro || registro.codigo !== codigo) {
+    return res.status(400).json({ message: "Código inválido." });
+  }
 
   try {
-
     const usuario = await usuarioRepository.findByEmail(email);
+
     await usuarioRepository.update(usuario.id, { senha: novaSenha });
     delete codigosTemporarios[email];
 
     return res.status(200).json({ message: "Senha atualizada com sucesso." });
-
+    
   } catch (error) {
-    console.error("Erro ao atualizar senha:", error);
-    return res.status(500).json({ message: "Erro interno no servidor ao atualizar a senha." });
+    return res.status(500).json({ message: "Erro ao atualizar a senha no banco de dados." });
   }
 };
+
+
+
+
+
+
+
 
 
 // ATIVAÇÃO / DESATIVAÇÃO DE USUÁRIO

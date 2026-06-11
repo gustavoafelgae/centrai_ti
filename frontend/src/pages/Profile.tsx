@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#2563eb',
     paddingTop: 60,
     paddingHorizontal: 20,
-  },
+  }, 
   headerTitle: {
     fontSize: 28,
     fontWeight: '700',

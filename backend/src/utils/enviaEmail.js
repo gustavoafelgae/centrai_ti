@@ -32,7 +32,7 @@ export async function enviarCodigoVerificacao(destinatarioEmail, codigo) {
 
     try {
         const info = await transporter.sendMail(mailOptions);
-        console.log(`✅ E-mail enviado com sucesso! ID: ${info.messageId}`);
+        console.log(`✅ E-mail enviado com sucesso! ID: ${info.messageId} || Email: ${destinatarioEmail}`);
         return true;
     } catch (error) {
         console.error(`❌ Erro ao enviar o e-mail: ${error.message}`);

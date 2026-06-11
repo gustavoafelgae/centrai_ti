@@ -1,7 +1,7 @@
 import express from 'express';
-import {cadastroUsuario,loginUsuario,atualizarUsuario,atualizarSenha,ativacaoUsuario} from '../controllers/usuarioController.js';
+import {cadastroUsuario,loginUsuario,atualizarUsuario,atualizarSenha,ativacaoUsuario,sendEmailSenha} from '../controllers/usuarioController.js';
 import { validateData } from "../middlewares/validateData.js";
-import { criarUsuarioDTO,loginUsuarioDTO,atualizarUsuarioDTO,atualizarSenhaDTO,ativacaoUsuarioDTO } from "../validations/usuarioSchema.js";
+import { criarUsuarioDTO,loginUsuarioDTO,atualizarUsuarioDTO,atualizarSenhaDTO,ativacaoUsuarioDTO,sendEmailSenhaDTO } from "../validations/usuarioSchema.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
 const router = express.Router();
@@ -24,6 +24,11 @@ router.patch('/atualizar/:id',
 router.patch('/senha', 
     validateData(atualizarSenhaDTO),
     asyncHandler(atualizarSenha)
+);
+
+router.post('/esqueci-senha', 
+    validateData(sendEmailSenhaDTO),
+    asyncHandler(sendEmailSenha)
 );
 
 router.patch('/ativacao/:id', 

@@ -35,3 +35,9 @@ export interface UpdateUserResponse {
   };
   ativo: boolean;
 }
+
+export interface ResetPasswordData {
+  email: string;
+  codigo: string;
+  novaSenha: string;
+}

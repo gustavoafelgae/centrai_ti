@@ -10,7 +10,10 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  KeyboardAvoidingView
 } from "react-native";
+import { useAuth } from '@/hooks/useAuth';
+import SHA256 from "crypto-js/sha256";
 
 type Stage = "email" | "code" | "reset" | "done";
 
@@ -48,6 +51,8 @@ export default function ForgotPassword() {
   const [pwError, setPwError] = useState("");
   const [cfError, setCfError] = useState("");
 
+  const { solicitarRecuperacao, confirmarResetSenha, loading } = useAuth();
+
   useEffect(() => {
     if (stage === "code") {
       setTimeout(() => otpRefs.current[0]?.focus(), 100);
@@ -76,11 +81,19 @@ export default function ForgotPassword() {
     return true;
   };
 
-  const submitEmail = () => {
+  const submitEmail = async () => {
     if (!validateEmail()) return;
-    setResendTimer(60);
-    setStage("code");
+
+    try {
+      const sucesso = await solicitarRecuperacao(email);
+      setResendTimer(60);
+      setStage("code");
+    } catch (error: any) {
+      const msg = error.response?.data?.message || "Erro ao solicitar recuperação";
+      setEmailError(msg);
+    }
   };
+
 
   const focusNextOtp = (idx: number) => {
     otpRefs.current[idx + 1]?.focus();
@@ -100,51 +113,53 @@ export default function ForgotPassword() {
     if (digits && idx < 5) focusNextOtp(idx);
   };
 
-  const submitCode = () => {
+  const submitCode = async () => {
     if (code.some((digit) => !digit)) {
       setCodeError("Preencha todos os 6 dígitos");
-      return;
-    }
-    if (code.join("") !== "123456") {
-      setCodeError("Código incorreto. Tente novamente.");
       return;
     }
     setCodeError("");
     setStage("reset");
   };
 
-  const submitReset = () => {
-    let valid = true;
-    if (!password) {
-      setPwError("Informe a nova senha");
-      valid = false;
-    } else if (password.length < 8) {
-      setPwError("Mínimo 8 caracteres");
-      valid = false;
-    } else if (!/[A-Z]/.test(password)) {
-      setPwError("Use ao menos uma letra maiúscula");
-      valid = false;
-    } else if (!/[0-9]/.test(password)) {
-      setPwError("Use ao menos um número");
-      valid = false;
-    } else {
-      setPwError("");
-    }
 
-    if (!confirm) {
-      setCfError("Confirme a senha");
-      valid = false;
-    } else if (password !== confirm) {
-      setCfError("Senhas não conferem");
-      valid = false;
-    } else {
-      setCfError("");
-    }
+  const getResetError = (password: string, confirm: string) => {
+    if (!password) return "Informe a nova senha";
+    if (password.length < 8) return "Mínimo 8 caracteres";
+    if (!/[A-Z]/.test(password)) return "Use uma letra maiúscula";
+    if (!/[0-9]/.test(password)) return "Use um número";
+    if (password !== confirm) return "As senhas não conferem";
+    return null; // Nenhuma mensagem de erro, tudo ok
+  };
 
-    if (valid) {
+
+  const submitReset = async () => {
+    const errorMessage = getResetError(password, confirm);
+
+    if (errorMessage) {
+      errorMessage.includes("senhas") ? setCfError(errorMessage) : setPwError(errorMessage);
+      return;
+    }
+    setPwError("");
+    setCfError("");
+
+    try {
+      const hashedPass = SHA256(password).toString();
+      await confirmarResetSenha(email, code.join(""), hashedPass);
       setStage("done");
+    } catch (err: any) {
+      // AQUI VOCÊ TRATA O ERRO QUE VEM DO BACKEND
+      const mensagem = err.message || "Erro desconhecido";
+
+      if (mensagem.includes("inválido") || mensagem.includes("expirado")) {
+        setCodeError("Código inválido ou expirado. Tente novamente.");
+        setStage("code"); // Volta o usuário para a etapa de digitar o código
+      } else {
+        setPwError("Erro ao atualizar senha. Tente novamente.");
+      }
     }
   };
+
 
   const current =
     stage === "done"
@@ -381,6 +396,76 @@ export default function ForgotPassword() {
           </>
         )}
 
+        {/* {stage === "reset" && (
+            <>
+              <View style={styles.iconBox}>
+                <Ionicons name="lock-closed" size={28} color="#2563eb" />
+              </View>
+
+              <View style={styles.field}>
+                <Text style={styles.label}>Nova senha</Text>
+                <View style={styles.inputRow}>
+                  <Ionicons name="lock-closed-outline" size={18} color="#94a3b8" style={styles.inputIcon} />
+                  <TextInput
+                    value={password}
+                    onChangeText={(value) => { setPassword(value); setPwError(""); }}
+                    placeholder="Mínimo 8 caracteres"
+                    placeholderTextColor="#94a3b8"
+                    secureTextEntry={!showPw}
+                    style={styles.input}
+                  />
+                  <TouchableOpacity onPress={() => setShowPw((prev) => !prev)}>
+                    <Ionicons name={showPw ? "eye-off-outline" : "eye-outline"} size={20} color="#64748b" />
+                  </TouchableOpacity>
+                </View>
+                {pwError ? <Text style={styles.errorText}>{pwError}</Text> : null}
+              </View>
+
+              <View style={styles.field}>
+                <Text style={styles.label}>Confirmar nova senha</Text>
+                <View style={styles.inputRow}>
+                  <Ionicons name="lock-closed-outline" size={18} color="#94a3b8" style={styles.inputIcon} />
+                  <TextInput
+                    value={confirm}
+                    onChangeText={(value) => { setConfirm(value); setCfError(""); }}
+                    placeholder="Repita a senha"
+                    placeholderTextColor="#94a3b8"
+                    secureTextEntry={!showCf}
+                    style={styles.input}
+                  />
+                  <TouchableOpacity onPress={() => setShowCf((prev) => !prev)}>
+                    <Ionicons name={showCf ? "eye-off-outline" : "eye-outline"} size={20} color="#64748b" />
+                  </TouchableOpacity>
+                </View>
+                {cfError ? <Text style={styles.errorText}>{cfError}</Text> : null}
+              </View>
+
+              <View style={styles.requirementsBox}>
+                {[
+                  { label: "Mínimo 8 caracteres", ok: password.length >= 8 },
+                  { label: "Uma letra maiúscula", ok: /[A-Z]/.test(password) },
+                  { label: "Um número", ok: /[0-9]/.test(password) },
+                  { label: "Senhas coincidem", ok: !!confirm && password === confirm },
+                ].map((item) => (
+                  <View key={item.label} style={styles.requirementRow}>
+                    <Ionicons name={item.ok ? "checkmark-circle" : "ellipse-outline"} size={16} color={item.ok ? "#22c55e" : "#cbd5e1"} style={{ marginRight: 10 }} />
+                    <Text style={[styles.requirementText, item.ok ? styles.requirementTextActive : styles.requirementTextInactive]}>
+                      {item.label}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+
+              <View style={{ marginTop: 10, marginBottom: 40 }}>
+                <TouchableOpacity style={styles.primaryButton} onPress={submitReset}>
+                  <Text style={styles.primaryButtonText}>Redefinir senha</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={{ height: 60 }} />
+            </>
+          )} */}
+
         {/* Stage: Done */}
         {stage === "done" && (
           <View style={styles.successBox}>
@@ -461,12 +546,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
     borderRadius: 32,
     padding: 24,
-    minHeight: 520,
+    paddingBottom: 1,
+    marginTop: 25,
+    minHeight: 400,
   },
   cardSubtitle: {
     color: "#475569",
     fontSize: 14,
-    marginBottom: 22,
+    marginBottom: 10,
   },
   iconBox: {
     width: 72,
@@ -475,10 +562,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#eff6ff",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 24,
+    // marginBottom: 24,
   },
   field: {
-    marginBottom: 18,
+    marginBottom: 10,
   },
   label: {
     fontSize: 13,
@@ -507,7 +594,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: "#ef4444",
-    marginTop: 8,
+    // marginTop: 8,
     fontSize: 13,
   },
   primaryButton: {
@@ -516,7 +603,8 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 4,
+    // marginTop: 4,
+    marginBottom: 15
   },
   primaryButtonText: {
     color: "#ffffff",
@@ -526,7 +614,7 @@ const styles = StyleSheet.create({
   linkRow: {
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: 16,
+    // marginTop: 16,
   },
   linkText: {
     color: "#64748b",
@@ -570,13 +658,13 @@ const styles = StyleSheet.create({
     color: "#475569",
     fontSize: 14,
     textAlign: "center",
-    marginTop: 14,
+    // marginTop: 14,
   },
   requirementsBox: {
     backgroundColor: "#f8fafc",
     borderRadius: 22,
     padding: 16,
-    marginBottom: 20,
+    marginBottom: 10,
   },
   requirementRow: {
     flexDirection: "row",
