@@ -1,126 +1,323 @@
+// app/profile.tsx
 import { useRouter } from 'expo-router';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import {
-  Bell,
-  Building,
-  ChevronRight,
-  HelpCircle,
-  LogOut,
-  Mail,
-  Phone,
-  Shield,
-  User,
-} from 'lucide-react';
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { BottomNav } from '../components/BottomNav';
+import { useUser } from '../hooks/UserContext';
+import { useAuth } from '../hooks/useAuth';
 
-export function Profile() {
+export default function Profile() {
   const router = useRouter();
+  const { user, logout } = useUser();
 
-  const user = {
-    name: 'João Silva',
-    email: 'joao.silva@empresa.com.br',
-    phone: '+55 11 98765-4321',
-    company: 'Empresa LTDA',
-    plan: 'Premium',
-  };
-
-  // Adicionado o parâmetro 'path' para cada opção de menu
   const menuItems = [
     {
-      icon: Bell,
+      icon: 'notifications-outline' as const,
+      iconLib: 'Ionicons' as const,
       label: 'Notificações',
       badge: '3',
       path: '/profile/notifications',
     },
     {
-      icon: Shield,
+      icon: 'shield-checkmark-outline' as const,
+      iconLib: 'Ionicons' as const,
       label: 'Privacidade e Segurança',
       path: '/profile/security',
     },
-    { icon: HelpCircle, label: 'Ajuda e Suporte', path: '/profile/support' },
+    {
+      icon: 'help-circle-outline' as const,
+      iconLib: 'Ionicons' as const,
+      label: 'Ajuda e Suporte',
+      path: '/profile/support',
+    },
   ];
 
+  const handleLogout = async () => {
+    await logout();
+    router.replace('/');
+  };
+
   return (
-    <div className='min-h-screen bg-gray-50 pb-20'>
-      {/* Header */}
-      <div className='bg-blue-600 text-white px-6 pt-12 pb-24 rounded-b-3xl'>
-        <h1 className='text-2xl mb-1'>Perfil</h1>
-        <p className='text-blue-100'>Gerencie suas informações</p>
-      </div>
+    <View style={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Perfil</Text>
+          <Text style={styles.headerSubtitle}>Gerencie suas informações</Text>
+        </View>
 
-      {/* Profile Card */}
-      <div className='px-6 -mt-16'>
-        <div className='bg-white rounded-2xl p-6 shadow-lg'>
-          <div className='flex items-center gap-4 mb-4'>
-            <div className='w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center'>
-              <User size={40} className='text-blue-600' />
-            </div>
-            <div className='flex-1'>
-              <h2 className='text-xl mb-1'>{user.name}</h2>
-              <span className='inline-block px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded-full'>
-                Plano {user.plan}
-              </span>
-            </div>
-          </div>
+        {/* Profile Card */}
+        <View style={styles.profileCard}>
+          <View style={styles.profileTop}>
+            <View style={styles.avatar}>
+              <Ionicons name="person" size={40} color="#2563eb" />
+            </View>
+            <View style={styles.profileInfo}>
+              <Text style={styles.userName}>{user?.nome || 'Usuário'}</Text>
+              <View style={styles.planBadge}>
+                <Text style={styles.planText}>
+                  Plano {user?.nomeCargo || 'Premium'}
+                </Text>
+              </View>
+            </View>
+          </View>
 
-          <div className='space-y-3'>
-            <div className='flex items-center gap-3 text-gray-700'>
-              <Mail size={20} className='text-gray-400' />
-              <span className='text-sm'>{user.email}</span>
-            </div>
-            <div className='flex items-center gap-3 text-gray-700'>
-              <Phone size={20} className='text-gray-400' />
-              <span className='text-sm'>{user.phone}</span>
-            </div>
-            <div className='flex items-center gap-3 text-gray-700'>
-              <Building size={20} className='text-gray-400' />
-              <span className='text-sm'>{user.company}</span>
-            </div>
-          </div>
+          <View style={styles.infoList}>
+            <View style={styles.infoRow}>
+              <Ionicons name="mail-outline" size={20} color="#94a3b8" />
+              <Text style={styles.infoText}>{user?.email || 'email@exemplo.com'}</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Ionicons name="call-outline" size={20} color="#94a3b8" />
+              <Text style={styles.infoText}>{user?.telefone || '+55 11 90000-0000'}</Text>
+            </View>
+          </View>
 
-          {/* Botão de Editar Perfil Funcional */}
-          <button
-            onClick={() => router.push('/profile/edit')}
-            className='w-full mt-4 py-3 border border-blue-600 text-blue-600 rounded-xl hover:bg-blue-50 transition-colors'
+          <TouchableOpacity
+            style={styles.editButton}
+            onPress={() => router.push('/profile/edit' as any)}
+            activeOpacity={0.7}
           >
-            Editar Perfil
-          </button>
-        </div>
-      </div>
+            <Ionicons name="create-outline" size={18} color="#2563eb" style={{ marginRight: 8 }} />
+            <Text style={styles.editButtonText}>Editar Perfil</Text>
+          </TouchableOpacity>
+        </View>
 
-      {/* Menu Items Funcionais */}
-      <div className='px-6 mt-6'>
-        <div className='bg-white rounded-2xl shadow-sm overflow-hidden'>
+        {/* Menu Items */}
+        <View style={styles.menuCard}>
           {menuItems.map((item, index) => (
-            <button
+            <TouchableOpacity
               key={index}
-              onClick={() => item.path && router.push(item.path as any)}
-              className='w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-50 transition-colors border-b last:border-b-0'
+              style={[
+                styles.menuItem,
+                index < menuItems.length - 1 && styles.menuItemBorder,
+              ]}
+              onPress={() => item.path && router.push(item.path as any)}
+              activeOpacity={0.7}
             >
-              <item.icon size={24} className='text-gray-600' />
-              <span className='flex-1 text-left'>{item.label}</span>
-              {item.badge && (
-                <span className='bg-red-500 text-white text-xs px-2 py-1 rounded-full'>
-                  {item.badge}
-                </span>
-              )}
-              <ChevronRight size={20} className='text-gray-400' />
-            </button>
+              <View style={styles.menuItemLeft}>
+                {item.iconLib === 'Ionicons' ? (
+                  <Ionicons name={item.icon as any} size={24} color="#4b5563" />
+                ) : (
+                  <MaterialCommunityIcons name={item.icon as any} size={24} color="#4b5563" />
+                )}
+                <Text style={styles.menuItemLabel}>{item.label}</Text>
+              </View>
+              <View style={styles.menuItemRight}>
+                {item.badge && (
+                  <View style={styles.badge}>
+                    <Text style={styles.badgeText}>{item.badge}</Text>
+                  </View>
+                )}
+                <Ionicons name="chevron-forward" size={20} color="#94a3b8" />
+              </View>
+            </TouchableOpacity>
           ))}
-        </div>
-      </div>
+        </View>
 
-      {/* Logout */}
-      <div className='px-6 mt-6'>
-        <button
-          onClick={() => router.push('/')}
-          className='w-full flex items-center justify-center gap-2 bg-white text-red-600 py-4 rounded-2xl shadow-sm hover:bg-red-50 transition-colors'
+        {/* Logout */}
+        <TouchableOpacity
+          style={styles.logoutButton}
+          onPress={handleLogout}
+          activeOpacity={0.7}
         >
-          <LogOut size={20} />
-          <span>Sair</span>
-        </button>
-      </div>
+          <Ionicons name="log-out-outline" size={20} color="#ef4444" style={{ marginRight: 8 }} />
+          <Text style={styles.logoutText}>Sair</Text>
+        </TouchableOpacity>
+      </ScrollView>
 
       <BottomNav />
-    </div>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f8fafc',
+  },
+  scrollContent: {
+    paddingBottom: 100,
+  },
+  // Header
+  header: {
+    backgroundColor: '#2563eb',
+    paddingTop: Platform.OS === 'ios' ? 60 : 30,
+    paddingBottom: 80,
+    paddingHorizontal: 24,
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#ffffff',
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    fontSize: 15,
+    color: '#dbeafe',
+  },
+  // Profile Card
+  profileCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 24,
+    padding: 24,
+    marginHorizontal: 20,
+    marginTop: -60,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  profileTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+    gap: 16,
+  },
+  avatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#eff6ff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  profileInfo: {
+    flex: 1,
+  },
+  userName: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#0f172a',
+    marginBottom: 8,
+  },
+  planBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#eff6ff',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  planText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#2563eb',
+  },
+  // Info List
+  infoList: {
+    gap: 12,
+    marginBottom: 20,
+    paddingVertical: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#f1f5f9',
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  infoText: {
+    fontSize: 14,
+    color: '#374151',
+    flex: 1,
+  },
+  // Edit Button
+  editButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: '#2563eb',
+    borderRadius: 14,
+    paddingVertical: 12,
+  },
+  editButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#2563eb',
+  },
+  // Menu
+  menuCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 24,
+    marginHorizontal: 20,
+    marginTop: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+    overflow: 'hidden',
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  menuItemBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  menuItemLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  menuItemLabel: {
+    fontSize: 16,
+    color: '#374151',
+    fontWeight: '500',
+  },
+  menuItemRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  badge: {
+    backgroundColor: '#ef4444',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+  },
+  badgeText: {
+    color: '#ffffff',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  // Logout
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    paddingVertical: 16,
+    marginHorizontal: 20,
+    marginTop: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  logoutText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#ef4444',
+  },
+});

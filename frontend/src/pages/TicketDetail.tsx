@@ -1,11 +1,23 @@
+// app/tickets/[id].tsx
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ArrowLeft, Paperclip, Send } from "lucide-react";
-import { useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
+import { useState, useRef } from "react";
+import {
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  KeyboardAvoidingView,
+} from "react-native";
 
 export function TicketDetail() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [message, setMessage] = useState("");
+  const scrollViewRef = useRef<ScrollView>(null);
 
   const ticket = {
     id: Number(id),
@@ -50,118 +62,360 @@ export function TicketDetail() {
     },
   ];
 
-  const handleSend = () => {
-    if (message.trim()) {
-      // Add message logic here
-      setMessage("");
+  const getPriorityStyle = (priority: string) => {
+    switch (priority) {
+      case "Crítica":
+        return { bg: "#fee2e2", text: "#ef4444" };
+      case "Alta":
+        return { bg: "#ffedd5", text: "#f97316" };
+      case "Média":
+        return { bg: "#fef9c3", text: "#eab308" };
+      default:
+        return { bg: "#dcfce7", text: "#22c55e" };
     }
   };
 
+  const handleSend = () => {
+    if (message.trim()) {
+      // Aqui você adicionaria a lógica de envio
+      console.log("Enviando mensagem:", message);
+      setMessage("");
+      // Rolar para o final
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }, 100);
+    }
+  };
+
+  const priorityStyle = getPriorityStyle(ticket.priority);
+
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
+    >
       {/* Header */}
-      <div className="bg-white px-6 py-4 border-b">
-        <div className="flex items-center gap-4 mb-3">
-          <button
-            onClick={() => router.push("/tickets")}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+      <View style={styles.header}>
+        <View style={styles.headerTop}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.push("/tickets")}
           >
-            <ArrowLeft size={24} />
-          </button>
-          <div className="flex-1 min-w-0">
-            <h1 className="text-lg truncate">Ticket #{ticket.id}</h1>
-          </div>
-          <span
-            className={`text-xs px-2 py-1 rounded-full ${
-              ticket.priority === "Alta"
-                ? "bg-red-100 text-red-700"
-                : ticket.priority === "Média"
-                  ? "bg-yellow-100 text-yellow-700"
-                  : "bg-gray-100 text-gray-700"
-            }`}
-          >
-            {ticket.priority}
-          </span>
-        </div>
+            <Ionicons name="arrow-back" size={24} color="#0f172a" />
+          </TouchableOpacity>
+          <View style={styles.headerTitleContainer}>
+            <Text style={styles.headerTitle} numberOfLines={1}>
+              Ticket #{ticket.id}
+            </Text>
+          </View>
+          <View style={[styles.priorityBadge, { backgroundColor: priorityStyle.bg }]}>
+            <Text style={[styles.priorityText, { color: priorityStyle.text }]}>
+              {ticket.priority}
+            </Text>
+          </View>
+        </View>
+      </View>
 
-        {/* Ticket Info */}
-        <div className="bg-gray-50 rounded-xl p-4">
-          <h2 className="mb-2">{ticket.title}</h2>
-          <div className="space-y-1 text-sm text-gray-600">
-            <div className="flex justify-between">
-              <span>Status:</span>
-              <span className="text-yellow-600">{ticket.status}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Categoria:</span>
-              <span>{ticket.category}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Atribuído a:</span>
-              <span>{ticket.assignedTo}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Criado em:</span>
-              <span>{ticket.createdAt}</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      <ScrollView
+        ref={scrollViewRef}
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        onContentSizeChange={() => {
+          scrollViewRef.current?.scrollToEnd({ animated: false });
+        }}
+      >
+        {/* Ticket Info Card */}
+        <View style={styles.infoCard}>
+          <Text style={styles.ticketTitle}>{ticket.title}</Text>
+          <View style={styles.infoGrid}>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Status:</Text>
+              <Text style={[styles.infoValue, { color: "#eab308" }]}>
+                {ticket.status}
+              </Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Categoria:</Text>
+              <Text style={styles.infoValue}>{ticket.category}</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Atribuído a:</Text>
+              <Text style={styles.infoValue}>{ticket.assignedTo}</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Criado em:</Text>
+              <Text style={styles.infoValue}>{ticket.createdAt}</Text>
+            </View>
+          </View>
+        </View>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
-        {messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`flex ${msg.isOwn ? "justify-end" : "justify-start"}`}
-          >
-            <div
-              className={`max-w-[80%] ${msg.isOwn ? "bg-blue-600 text-white" : "bg-white"} rounded-2xl px-4 py-3 shadow-sm`}
+        {/* Messages */}
+        <View style={styles.messagesContainer}>
+          {messages.map((msg) => (
+            <View
+              key={msg.id}
+              style={[
+                styles.messageWrapper,
+                msg.isOwn ? styles.messageOwn : styles.messageOther,
+              ]}
             >
-              {!msg.isOwn && (
-                <div className="text-xs mb-1 opacity-70">{msg.sender}</div>
-              )}
-              <div className="text-sm">{msg.text}</div>
-              <div
-                className={`text-xs mt-1 ${msg.isOwn ? "text-blue-100" : "text-gray-500"}`}
+              <View
+                style={[
+                  styles.messageBubble,
+                  msg.isOwn ? styles.messageBubbleOwn : styles.messageBubbleOther,
+                ]}
               >
-                {msg.time}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+                {!msg.isOwn && (
+                  <Text style={styles.messageSender}>{msg.sender}</Text>
+                )}
+                <Text
+                  style={[
+                    styles.messageText,
+                    msg.isOwn ? styles.messageTextOwn : styles.messageTextOther,
+                  ]}
+                >
+                  {msg.text}
+                </Text>
+                <Text
+                  style={[
+                    styles.messageTime,
+                    msg.isOwn ? styles.messageTimeOwn : styles.messageTimeOther,
+                  ]}
+                >
+                  {msg.time}
+                </Text>
+              </View>
+            </View>
+          ))}
+        </View>
+      </ScrollView>
 
-      {/* Input */}
-      <div className="bg-white border-t px-6 py-4">
-        <div className="flex items-end gap-2">
-          <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-            <Paperclip size={24} className="text-gray-600" />
-          </button>
-          <div className="flex-1 relative">
-            <textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-              placeholder="Digite sua mensagem..."
-              rows={1}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSend();
-                }
-              }}
-            />
-          </div>
-          <button
-            onClick={handleSend}
-            className="p-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      {/* Input Area */}
+      <View style={styles.inputContainer}>
+        <View style={styles.inputRow}>
+          <TouchableOpacity style={styles.attachButton}>
+            <Ionicons name="attach" size={24} color="#6b7280" />
+          </TouchableOpacity>
+          <TextInput
+            value={message}
+            onChangeText={setMessage}
+            style={styles.textInput}
+            placeholder="Digite sua mensagem..."
+            placeholderTextColor="#94a3b8"
+            multiline
+            maxLength={500}
+          />
+          <TouchableOpacity
+            style={[
+              styles.sendButton,
+              !message.trim() && styles.sendButtonDisabled,
+            ]}
+            onPress={handleSend}
             disabled={!message.trim()}
+            activeOpacity={0.7}
           >
-            <Send size={20} />
-          </button>
-        </div>
-      </div>
-    </div>
+            <Ionicons
+              name="send"
+              size={20}
+              color={message.trim() ? "#ffffff" : "#94a3b8"}
+            />
+          </TouchableOpacity>
+        </View>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#f8fafc",
+  },
+  // Header
+  header: {
+    backgroundColor: "#ffffff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e5e7eb",
+    paddingTop: Platform.OS === "ios" ? 50 : 20,
+    paddingBottom: 16,
+    paddingHorizontal: 16,
+  },
+  headerTop: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 12,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  headerTitleContainer: {
+    flex: 1,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#0f172a",
+  },
+  priorityBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  priorityText: {
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  // Scroll
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: 16,
+    gap: 16,
+  },
+  // Info Card
+  infoCard: {
+    backgroundColor: "#ffffff",
+    borderRadius: 20,
+    padding: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  ticketTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#0f172a",
+    marginBottom: 16,
+  },
+  infoGrid: {
+    gap: 10,
+  },
+  infoRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 4,
+  },
+  infoLabel: {
+    fontSize: 14,
+    color: "#6b7280",
+  },
+  infoValue: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#374151",
+  },
+  // Messages
+  messagesContainer: {
+    gap: 12,
+    paddingBottom: 8,
+  },
+  messageWrapper: {
+    flexDirection: "row",
+  },
+  messageOwn: {
+    justifyContent: "flex-end",
+  },
+  messageOther: {
+    justifyContent: "flex-start",
+  },
+  messageBubble: {
+    maxWidth: "80%",
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  messageBubbleOwn: {
+    backgroundColor: "#2563eb",
+    borderBottomRightRadius: 4,
+  },
+  messageBubbleOther: {
+    backgroundColor: "#ffffff",
+    borderBottomLeftRadius: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  messageSender: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#6b7280",
+    marginBottom: 4,
+  },
+  messageText: {
+    fontSize: 15,
+    lineHeight: 21,
+  },
+  messageTextOwn: {
+    color: "#ffffff",
+  },
+  messageTextOther: {
+    color: "#0f172a",
+  },
+  messageTime: {
+    fontSize: 11,
+    marginTop: 6,
+    textAlign: "right",
+  },
+  messageTimeOwn: {
+    color: "rgba(255, 255, 255, 0.7)",
+  },
+  messageTimeOther: {
+    color: "#94a3b8",
+  },
+  // Input
+  inputContainer: {
+    backgroundColor: "#ffffff",
+    borderTopWidth: 1,
+    borderTopColor: "#e5e7eb",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    paddingBottom: Platform.OS === "ios" ? 30 : 12,
+  },
+  inputRow: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    gap: 8,
+  },
+  attachButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#f3f4f6",
+  },
+  textInput: {
+    flex: 1,
+    backgroundColor: "#f3f4f6",
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    fontSize: 15,
+    color: "#0f172a",
+    maxHeight: 100,
+  },
+  sendButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#2563eb",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  sendButtonDisabled: {
+    backgroundColor: "#e5e7eb",
+  },
+});

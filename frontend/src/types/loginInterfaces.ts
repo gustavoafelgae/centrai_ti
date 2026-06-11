@@ -13,9 +13,9 @@ export interface LoginResponse {
     telefone: string;
     idCargo: number;
     ativo: boolean;
-    cargo:{
-        id: number;
-        nome: string;
+    cargo: {
+      id: number;
+      nome: string;
     }
   };
   message?: string;

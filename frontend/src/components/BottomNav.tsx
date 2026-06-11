@@ -1,48 +1,150 @@
+// src/components/BottomNav.tsx (com badge)
 import { usePathname, useRouter } from "expo-router";
-import { Briefcase, Home, Ticket, User } from "lucide-react";
+import { Ionicons } from "@expo/vector-icons";
+import {
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export function BottomNav() {
   const router = useRouter();
   const pathname = usePathname();
 
   const navItems = [
-    { name: "Início", path: "/home", icon: Home },
-    { name: "Serviços", path: "/services", icon: Briefcase },
-    { name: "Tickets", path: "/tickets", icon: Ticket },
-    { name: "Perfil", path: "/profile", icon: User },
+    { 
+      name: "Início", 
+      path: "/home", 
+      icon: "home" as const, 
+      iconActive: "home" as const,
+      badge: 0,
+    },
+    { 
+      name: "Serviços", 
+      path: "/services", 
+      icon: "briefcase-outline" as const, 
+      iconActive: "briefcase" as const,
+      badge: 0,
+    },
+    { 
+      name: "Tickets", 
+      path: "/tickets", 
+      icon: "ticket-outline" as const, 
+      iconActive: "ticket" as const,
+      badge: 3, // Exemplo de badge
+    },
+    { 
+      name: "Perfil", 
+      path: "/profile", 
+      icon: "person-outline" as const, 
+      iconActive: "person" as const,
+      badge: 0,
+    },
   ];
 
-  return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 pb-safe pt-4 px-4 sm:px-6 flex items-center justify-between gap-2 shadow-[0_-4px_20px_rgba(0,0,0,0.03)] h-24">
-      {navItems.map((item) => {
-        const Icon = item.icon;
+  const isActive = (path: string) => {
+    if (path === "/home" && (pathname === "/home" || pathname === "/")) return true;
+    if (pathname.startsWith(path)) return true;
+    return false;
+  };
 
-        // Aqui você pode alterar a lógica conforme necessário usando o usePathname()
-        // Estou forçando o "Serviços" como ativo para ficar idêntico ao seu print.
-        const isActive = item.name === "Serviços";
+  return (
+    <View style={styles.container}>
+      {navItems.map((item) => {
+        const active = isActive(item.path);
+        const iconName = active ? item.iconActive : item.icon;
 
         return (
-          <button
+          <TouchableOpacity
             key={item.name}
-            onClick={() => router.push(item.path as any)}
-            className="flex-1 flex flex-col items-center justify-center gap-1.5 min-w-[72px] rounded-3xl py-3 hover:bg-slate-100 transition-colors"
-            aria-label={item.name}
+            style={styles.navButton}
+            onPress={() => router.push(item.path as any)}
+            activeOpacity={0.7}
           >
-            <Icon
-              size={24}
-              className={isActive ? "text-blue-600" : "text-slate-500"}
-              strokeWidth={isActive ? 2.5 : 2}
-            />
-            <span
-              className={`text-[12px] font-semibold ${
-                isActive ? "text-blue-600" : "text-slate-500"
-              }`}
+            <View style={styles.iconContainer}>
+              <Ionicons
+                name={iconName}
+                size={24}
+                color={active ? "#2563eb" : "#94a3b8"}
+              />
+              {item.badge > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>
+                    {item.badge > 99 ? "99+" : item.badge}
+                  </Text>
+                </View>
+              )}
+            </View>
+            <Text
+              style={[
+                styles.navText,
+                active && styles.navTextActive,
+              ]}
             >
               {item.name}
-            </span>
-          </button>
+            </Text>
+          </TouchableOpacity>
         );
       })}
-    </div>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    backgroundColor: "#ffffff",
+    borderTopWidth: 1,
+    borderTopColor: "#f1f5f9",
+    paddingTop: 8,
+    paddingBottom: Platform.OS === "ios" ? 28 : 12,
+    paddingHorizontal: 8,
+    justifyContent: "space-around",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  navButton: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 4,
+  },
+  iconContainer: {
+    position: "relative",
+    marginBottom: 4,
+  },
+  badge: {
+    position: "absolute",
+    top: -4,
+    right: -8,
+    backgroundColor: "#ef4444",
+    borderRadius: 10,
+    minWidth: 18,
+    height: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 4,
+    borderWidth: 1.5,
+    borderColor: "#ffffff",
+  },
+  badgeText: {
+    color: "#ffffff",
+    fontSize: 10,
+    fontWeight: "700",
+  },
+  navText: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#94a3b8",
+  },
+  navTextActive: {
+    color: "#2563eb",
+    fontWeight: "700",
+  },
+});

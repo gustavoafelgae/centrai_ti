@@ -1,15 +1,36 @@
+// app/tickets/new.tsx
 import { useRouter } from "expo-router";
-import { ArrowLeft, ChevronDown } from "lucide-react";
+import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
-
-// Importa os nossos contextos globais!
+import {
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  Modal,
+  FlatList,
+  Alert,
+} from "react-native";
 import { useTickets } from "../hooks/TicketContext";
 import { useUser } from "../hooks/UserContext";
 
+const CATEGORIES = [
+  "Hardware",
+  "Software",
+  "Rede",
+  "Infraestrutura",
+  "Backup",
+  "E-mail",
+  "Acesso",
+];
+
+const PRIORITIES = ["Baixa", "Média", "Alta", "Crítica"];
+
 export function NewTicket() {
   const router = useRouter();
-  
-  // Traz a função de adicionar ticket e os dados do usuário logado
   const { addTicket } = useTickets();
   const { user } = useUser();
 
@@ -17,153 +38,386 @@ export function NewTicket() {
   const [category, setCategory] = useState("");
   const [priority, setPriority] = useState("Média");
   const [description, setDescription] = useState("");
-
   const [showCategories, setShowCategories] = useState(false);
 
-  const CATEGORIES = [
-    "Hardware",
-    "Software",
-    "Rede",
-    "Infraestrutura",
-    "Backup",
-    "E-mail",
-    "Acesso",
-  ];
-  
-  const PRIORITIES = ["Baixa", "Média", "Alta", "Crítica"];
+  const getPriorityColor = (p: string) => {
+    switch (p) {
+      case "Crítica": return { bg: "#fee2e2", text: "#ef4444", border: "#fecaca" };
+      case "Alta": return { bg: "#ffedd5", text: "#f97316", border: "#fed7aa" };
+      case "Média": return { bg: "#fef9c3", text: "#eab308", border: "#fde68a" };
+      default: return { bg: "#dcfce7", text: "#22c55e", border: "#bbf7d0" };
+    }
+  };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault(); // Impede o recarregamento padrão da página na web
+  const handleSubmit = () => {
+    if (!title.trim()) {
+      Alert.alert("Erro", "Informe o título do problema");
+      return;
+    }
+    if (!category) {
+      Alert.alert("Erro", "Selecione uma categoria");
+      return;
+    }
+    if (!description.trim()) {
+      Alert.alert("Erro", "Descreva o problema");
+      return;
+    }
 
-    if (!title || !category || !description) return;
-
-    // Salva o ticket globalmente na memória do app
     addTicket({
-      title,
+      title: title.trim(),
       category,
       priority: priority as any,
-      description,
-      requester: user.name, // Puxa dinamicamente
+      description: description.trim(),
+      requester: user?.nome || "Anônimo",
     });
 
-    router.back();
+    Alert.alert("Sucesso", "Ticket criado com sucesso!", [
+      { text: "OK", onPress: () => router.back() }
+    ]);
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <View style={styles.container}>
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-4 flex items-center gap-4 sticky top-0 z-10">
-        <button
-          onClick={() => router.back()}
-          className="p-2 -ml-2 rounded-xl text-gray-600 hover:bg-gray-100 transition-colors"
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
         >
-          <ArrowLeft size={20} />
-        </button>
-        <h1 className="text-lg font-semibold text-gray-900">Novo Ticket</h1>
-      </div>
+          <Ionicons name="arrow-back" size={22} color="#374151" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Novo Ticket</Text>
+        <View style={styles.headerSpacer} />
+      </View>
 
-      {/* Form */}
-      <form onSubmit={handleSubmit} className="p-4 space-y-6">
-        
+      {/* Formulário */}
+      <ScrollView
+        contentContainerStyle={styles.formContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
         {/* Título */}
-        <div className="space-y-1.5">
-          <label className="text-sm font-semibold text-gray-700 ml-1">
-            Título do Problema
-          </label>
-          <input
-            type="text"
+        <View style={styles.field}>
+          <Text style={styles.label}>Título do Problema</Text>
+          <TextInput
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChangeText={setTitle}
             placeholder="Ex: Impressora sem tinta"
-            className="w-full bg-white border border-gray-200 rounded-2xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+            placeholderTextColor="#94a3b8"
+            style={styles.input}
           />
-        </div>
+        </View>
 
         {/* Categoria */}
-        <div className="space-y-1.5 relative">
-          <label className="text-sm font-semibold text-gray-700 ml-1">
-            Categoria
-          </label>
-          <button
-            type="button"
-            onClick={() => setShowCategories(!showCategories)}
-            className="w-full bg-white border border-gray-200 rounded-2xl px-4 py-3.5 text-sm flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+        <View style={styles.field}>
+          <Text style={styles.label}>Categoria</Text>
+          <TouchableOpacity
+            style={styles.selectButton}
+            onPress={() => setShowCategories(true)}
+            activeOpacity={0.7}
           >
-            <span className={category ? "text-gray-900" : "text-gray-400"}>
+            <Text style={category ? styles.selectText : styles.selectPlaceholder}>
               {category || "Selecione uma categoria"}
-            </span>
-            <ChevronDown size={18} className="text-gray-400" />
-          </button>
-
-          {showCategories && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-100 rounded-2xl shadow-lg shadow-gray-200/50 overflow-hidden z-20">
-              {CATEGORIES.map((cat) => (
-                <button
-                  key={cat}
-                  type="button"
-                  onClick={() => {
-                    setCategory(cat);
-                    setShowCategories(false);
-                  }}
-                  className={`w-full text-left px-4 py-3 text-sm border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors ${
-                    category === cat
-                      ? "text-blue-600 font-semibold bg-blue-50/50"
-                      : "text-gray-700"
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+            </Text>
+            <Ionicons name="chevron-down" size={18} color="#94a3b8" />
+          </TouchableOpacity>
+        </View>
 
         {/* Prioridade */}
-        <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-700 ml-1">
-            Prioridade
-          </label>
-          <div className="flex gap-2">
-            {PRIORITIES.map((p) => (
-              <button
-                key={p}
-                type="button"
-                onClick={() => setPriority(p)}
-                className={`flex-1 py-2.5 rounded-xl text-xs font-semibold border transition-all ${
-                  priority === p
-                    ? "bg-blue-50 border-blue-200 text-blue-700"
-                    : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
-                }`}
-              >
-                {p}
-              </button>
-            ))}
-          </div>
-        </div>
+        <View style={styles.field}>
+          <Text style={styles.label}>Prioridade</Text>
+          <View style={styles.priorityRow}>
+            {PRIORITIES.map((p) => {
+              const isActive = priority === p;
+              const colors = getPriorityColor(p);
+              return (
+                <TouchableOpacity
+                  key={p}
+                  style={[
+                    styles.priorityButton,
+                    isActive && {
+                      backgroundColor: colors.bg,
+                      borderColor: colors.border,
+                    },
+                  ]}
+                  onPress={() => setPriority(p)}
+                  activeOpacity={0.7}
+                >
+                  <Text
+                    style={[
+                      styles.priorityText,
+                      isActive && { color: colors.text },
+                    ]}
+                  >
+                    {p}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
 
         {/* Descrição */}
-        <div className="space-y-1.5">
-          <label className="text-sm font-semibold text-gray-700 ml-1">
-            Descrição Detalhada
-          </label>
-          <textarea
+        <View style={styles.field}>
+          <Text style={styles.label}>Descrição Detalhada</Text>
+          <TextInput
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChangeText={setDescription}
             placeholder="Descreva o problema com o máximo de detalhes possível..."
-            rows={5}
-            className="w-full bg-white border border-gray-200 rounded-2xl px-4 py-3.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+            placeholderTextColor="#94a3b8"
+            style={[styles.input, styles.textArea]}
+            multiline
+            numberOfLines={6}
+            textAlignVertical="top"
           />
-        </div>
+        </View>
 
-        {/* Submit */}
-        <button
-          type="submit"
+        {/* Botão Submit */}
+        <TouchableOpacity
+          style={[
+            styles.submitButton,
+            (!title || !category || !description) && styles.submitButtonDisabled,
+          ]}
+          onPress={handleSubmit}
           disabled={!title || !category || !description}
-          className="w-full bg-blue-600 text-white font-semibold text-sm py-4 rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700 active:bg-blue-800 transition-colors mt-8"
+          activeOpacity={0.8}
         >
-          Abrir Ticket
-        </button>
-      </form>
-    </div>
+          <Ionicons name="send" size={18} color="#ffffff" style={{ marginRight: 8 }} />
+          <Text style={styles.submitButtonText}>Abrir Ticket</Text>
+        </TouchableOpacity>
+      </ScrollView>
+
+      {/* Modal de Categorias */}
+      <Modal
+        visible={showCategories}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowCategories(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowCategories(false)}
+        >
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Selecione uma Categoria</Text>
+              <TouchableOpacity onPress={() => setShowCategories(false)}>
+                <Ionicons name="close" size={24} color="#374151" />
+              </TouchableOpacity>
+            </View>
+
+            <FlatList
+              data={CATEGORIES}
+              keyExtractor={(item) => item}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={[
+                    styles.categoryOption,
+                    category === item && styles.categoryOptionActive,
+                  ]}
+                  onPress={() => {
+                    setCategory(item);
+                    setShowCategories(false);
+                  }}
+                >
+                  <Text
+                    style={[
+                      styles.categoryOptionText,
+                      category === item && styles.categoryOptionTextActive,
+                    ]}
+                  >
+                    {item}
+                  </Text>
+                  {category === item && (
+                    <Ionicons name="checkmark" size={20} color="#2563eb" />
+                  )}
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+        </TouchableOpacity>
+      </Modal>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#f8fafc",
+  },
+  // Header
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e5e7eb",
+    paddingHorizontal: 16,
+    paddingTop: Platform.OS === "ios" ? 50 : 20,
+    paddingBottom: 16,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  headerTitle: {
+    flex: 1,
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#0f172a",
+    textAlign: "center",
+    marginRight: 40,
+  },
+  headerSpacer: {
+    width: 40,
+  },
+  // Formulário
+  formContent: {
+    padding: 20,
+    paddingBottom: 40,
+    gap: 24,
+  },
+  field: {
+    gap: 8,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#374151",
+    marginLeft: 4,
+  },
+  input: {
+    backgroundColor: "#ffffff",
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 15,
+    color: "#0f172a",
+  },
+  textArea: {
+    minHeight: 140,
+    paddingTop: 14,
+  },
+  // Select
+  selectButton: {
+    backgroundColor: "#ffffff",
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  selectText: {
+    fontSize: 15,
+    color: "#0f172a",
+    flex: 1,
+  },
+  selectPlaceholder: {
+    fontSize: 15,
+    color: "#94a3b8",
+    flex: 1,
+  },
+  // Prioridade
+  priorityRow: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  priorityButton: {
+    flex: 1,
+    backgroundColor: "#ffffff",
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: "center",
+  },
+  priorityText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#6b7280",
+  },
+  // Submit
+  submitButton: {
+    backgroundColor: "#2563eb",
+    borderRadius: 16,
+    paddingVertical: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 8,
+    shadowColor: "#2563eb",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  submitButtonDisabled: {
+    backgroundColor: "#94a3b8",
+    shadowOpacity: 0,
+    elevation: 0,
+  },
+  submitButtonText: {
+    color: "#ffffff",
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  // Modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    backgroundColor: "#ffffff",
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: Platform.OS === "ios" ? 40 : 20,
+    maxHeight: "60%",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f1f5f9",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#0f172a",
+  },
+  categoryOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 16,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    marginBottom: 4,
+  },
+  categoryOptionActive: {
+    backgroundColor: "#eff6ff",
+  },
+  categoryOptionText: {
+    fontSize: 16,
+    color: "#374151",
+  },
+  categoryOptionTextActive: {
+    color: "#2563eb",
+    fontWeight: "600",
+  },
+});

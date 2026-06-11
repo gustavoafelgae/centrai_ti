@@ -1,129 +1,149 @@
+// src/pages/Services.tsx
 import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { useServicos } from "@/hooks/useLists";
 import {
-    ArrowLeft,
-    Cloud,
-    Database,
-    HardDrive,
-    Mail,
-    Monitor,
-    Server,
-    Shield,
-    Wifi,
-} from "lucide-react";
-import { BottomNav } from "../components/BottomNav";
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  ActivityIndicator,
+} from "react-native";
 
 export function Services() {
   const router = useRouter();
+  const { servicos, loading, error, recarregar } = useServicos();
 
-  const services = [
-    {
-      id: 1,
-      name: "Manutenção de Servidor",
-      icon: Server,
-      color: "bg-purple-500",
-      description: "Monitoramento e manutenção de servidores",
-      price: "A partir de R$ 500/mês",
-    },
-    {
-      id: 2,
-      name: "Segurança Cibernética",
-      icon: Shield,
-      color: "bg-blue-500",
-      description: "Proteção avançada contra ameaças",
-      price: "A partir de R$ 800/mês",
-    },
-    {
-      id: 3,
-      name: "Cloud Computing",
-      icon: Cloud,
-      color: "bg-cyan-500",
-      description: "Soluções em nuvem escaláveis",
-      price: "A partir de R$ 600/mês",
-    },
-    {
-      id: 4,
-      name: "Backup & Recovery",
-      icon: HardDrive,
-      color: "bg-green-500",
-      description: "Backup automático e recuperação",
-      price: "A partir de R$ 400/mês",
-    },
-    {
-      id: 5,
-      name: "Suporte Técnico",
-      icon: Monitor,
-      color: "bg-orange-500",
-      description: "Suporte 24/7 para sua empresa",
-      price: "A partir de R$ 350/mês",
-    },
-    {
-      id: 6,
-      name: "Infraestrutura de Rede",
-      icon: Wifi,
-      color: "bg-pink-500",
-      description: "Configuração e otimização de rede",
-      price: "A partir de R$ 700/mês",
-    },
-    {
-      id: 7,
-      name: "Gestão de Banco de Dados",
-      icon: Database,
-      color: "bg-indigo-500",
-      description: "Administração e otimização de BD",
-      price: "A partir de R$ 650/mês",
-    },
-    {
-      id: 8,
-      name: "Email Corporativo",
-      icon: Mail,
-      color: "bg-teal-500",
-      description: "Contas de email profissionais",
-      price: "A partir de R$ 250/mês",
-    },
-  ];
+  if (loading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#2563eb" />
+      </View>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      {/* Header */}
-      <div className="bg-white px-6 py-4 border-b sticky top-0 z-10">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => router.push("/home")}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <ArrowLeft size={24} />
-          </button>
-          <h1 className="text-xl">Serviços</h1>
-        </div>
-      </div>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={24} color="#0f172a" />
+        </TouchableOpacity>
+        <Text style={styles.title}>Serviços</Text>
+        <View style={{ width: 24 }} />
+      </View>
 
-      {/* Services List */}
-      <div className="px-6 py-6 space-y-4">
-        {services.map((service) => (
-          <button
+      <View style={styles.grid}>
+        {servicos.map((service) => (
+          <TouchableOpacity
             key={service.id}
-            onClick={() => router.push(`/services/${service.id}`)}
-            className="w-full bg-white rounded-2xl p-4 shadow-sm text-left hover:shadow-md transition-shadow"
+            style={styles.card}
+            onPress={() => router.push(`/services/${service.id}` as any)}
           >
-            <div className="flex gap-4">
-              <div
-                className={`${service.color} w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0`}
-              >
-                <service.icon size={28} className="text-white" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="mb-1">{service.name}</div>
-                <p className="text-sm text-gray-600 mb-2">
-                  {service.description}
-                </p>
-                <div className="text-sm text-blue-600">{service.price}</div>
-              </div>
-            </div>
-          </button>
+            <View style={[styles.iconContainer, { backgroundColor: getColorBg(service.color) }]}>
+              <Ionicons name={service.icon} size={24} color={getColorHex(service.color)} />
+            </View>
+            <Text style={styles.serviceName}>{service.name}</Text>
+            <Text style={styles.serviceDescription}>{service.description}</Text>
+            {service.price && (
+              <Text style={styles.price}>{service.price}</Text>
+            )}
+          </TouchableOpacity>
         ))}
-      </div>
-
-      <BottomNav />
-    </div>
+      </View>
+    </ScrollView>
   );
 }
+
+function getColorHex(colorClass: string): string {
+  const colorMap: Record<string, string> = {
+    'bg-violet-500': '#8b5cf6',
+    'bg-purple-500': '#a855f7',
+    'bg-blue-500': '#3b82f6',
+    'bg-cyan-500': '#06b6d4',
+    'bg-green-500': '#22c55e',
+    'bg-orange-500': '#f97316',
+    'bg-teal-500': '#14b8a6',
+    'bg-pink-500': '#ec4899',
+    'bg-indigo-500': '#6366f1',
+    'bg-red-500': '#ef4444',
+    'bg-yellow-500': '#eab308',
+  };
+  return colorMap[colorClass] || '#6b7280';
+}
+
+function getColorBg(colorClass: string): string {
+  const hex = getColorHex(colorClass);
+  return hex + '15';
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f8fafc',
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  content: {
+    paddingBottom: 40,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: Platform.OS === 'ios' ? 50 : 20,
+    paddingBottom: 16,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#0f172a',
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    padding: 16,
+    gap: 12,
+  },
+  card: {
+    width: '47%',
+    backgroundColor: '#ffffff',
+    borderRadius: 20,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  serviceName: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#0f172a',
+    marginBottom: 4,
+  },
+  serviceDescription: {
+    fontSize: 13,
+    color: '#64748b',
+    lineHeight: 18,
+    marginBottom: 8,
+  },
+  price: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#2563eb',
+  },
+});

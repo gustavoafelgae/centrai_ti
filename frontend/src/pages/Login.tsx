@@ -1,7 +1,9 @@
 import { useRouter } from 'expo-router';
-import { ArrowRight, Lock, Mail } from 'lucide-react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
   Platform,
   ScrollView,
   StyleSheet,
@@ -10,24 +12,24 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '@/hooks/useAuth';
 
-const IMAGE_URL =
-  'https://images.unsplash.com/photo-1768633647910-7e6fb53e5b0f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxJVCUyMHN1cHBvcnQlMjB0ZWNobmljaWFuJTIwaGVscGluZ3xlbnwxfHx8fDE3NzM5MjIyNTl8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral';
-
-export function Login() {
-
+export default function Login() {
   const router = useRouter();
   const { loading, login } = useAuth();
 
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [emailError, setEmailError] = useState<string>('');
-  const [passwordError, setPasswordError] = useState<string>('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+
+  const isValidEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
   const validarCampos = (): boolean => {
-
     const trimmedEmail = email.trim();
     const trimmedPassword = password.trim();
     let hasError = false;
@@ -46,24 +48,15 @@ export function Login() {
     if (!trimmedPassword) {
       setPasswordError('Informe sua senha');
       hasError = true;
-    } else if (trimmedPassword.length < 6) {
-      setPasswordError('Senha deve ter no mínimo 6 caracteres');
+    } else if (trimmedPassword.length < 8) {
+      setPasswordError('Senha deve ter no mínimo 8 caracteres');
       hasError = true;
     }
 
     return !hasError;
   };
 
-  const isValidEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
-  const handleLogin = async (e?: any): Promise<void> => {
-    if (e && typeof e.preventDefault === 'function') {
-      e.preventDefault();
-    }
-
+  const handleLogin = async (): Promise<void> => {
     if (!validarCampos()) {
       return;
     }
@@ -71,141 +64,46 @@ export function Login() {
     const sucesso = await login(email, password);
 
     if (sucesso) {
-      router.push('/home');
+      router.replace('/home');
     }
   };
 
-  if (Platform.OS === 'web') {
-    return (
-      <div className='min-h-screen bg-white flex items-center justify-center'>
-        <div className='w-full max-w-md'>
-          <div className='overflow-hidden bg-white'>
-            <div className='relative h-60 overflow-hidden bg-slate-900'>
-              <ImageWithFallback
-                src={IMAGE_URL}
-                alt='IT support'
-                className='w-full h-full object-cover'
-              />
-              <div className='absolute inset-0 bg-blue-900/40 mix-blend-multiply' />
-            </div>
-
-            <div className='px-6 pb-8 pt-8 bg-white'>
-              <h1 className='text-3xl font-semibold text-slate-950'>
-                Bem-vindo
-              </h1>
-              <p className='mt-2 text-sm text-slate-500'>
-                Entre para acessar seus serviços de TI
-              </p>
-
-              <form onSubmit={handleLogin} className='mt-8 space-y-5'>
-                <div>
-                  <label className='block text-sm font-medium text-slate-700 mb-3'>
-                    Email
-                  </label>
-                  <div className={`relative rounded-xl border px-4 py-3 focus-within:border-blue-500 ${emailError ? 'border-red-400 bg-red-50' : 'border-slate-200 bg-white'}`}>
-                    <Mail
-                      className='absolute left-4 top-1/2 -translate-y-1/2 text-slate-400'
-                      size={18}
-                    />
-                    <input
-                      type='email'
-                      value={email}
-                      onChange={e => {
-                        setEmail(e.target.value);
-                        if (emailError) setEmailError('');
-                      }}
-                      className='w-full bg-transparent pl-11 text-sm text-slate-900 outline-none'
-                      placeholder='seu@email.com'
-                    />
-                  </div>
-                  {emailError ? (
-                    <p className='mt-2 text-sm text-red-500'>{emailError}</p>
-                  ) : null}
-                </div>
-
-                <div>
-                  <label className='block text-sm font-medium text-slate-700 mb-3'>
-                    Senha
-                  </label>
-                  <div className={`relative rounded-xl border px-4 py-3 focus-within:border-blue-500 ${passwordError ? 'border-red-400 bg-red-50' : 'border-slate-200 bg-white'}`}>
-                    <Lock
-                      className='absolute left-4 top-1/2 -translate-y-1/2 text-slate-400'
-                      size={18}
-                    />
-                    <input
-                      type='password'
-                      value={password}
-                      onChange={e => {
-                        setPassword(e.target.value);
-                        if (passwordError) setPasswordError('');
-                      }}
-                      className='w-full bg-transparent pl-11 text-sm text-slate-900 outline-none'
-                      placeholder='••••••••'
-                    />
-                  </div>
-                  {passwordError ? (
-                    <p className='mt-2 text-sm text-red-500'>{passwordError}</p>
-                  ) : null}
-                </div>
-
-                <div className='flex justify-start'>
-                  <button
-                    type='button'
-                    onClick={() => router.push('/forgot-password')}
-                    className='text-sm font-semibold text-blue-600 hover:underline'
-                  >
-                    Esqueceu a senha?
-                  </button>
-                </div>
-
-                <button
-                  type='submit'
-                  className='mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-4 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition hover:bg-blue-700'
-                >
-                  Entrar
-                  <ArrowRight size={18} color='#ffffff' />
-                </button>
-              </form>
-
-              <p className='mt-6 text-center text-sm text-slate-500'>
-                Não tem uma conta?{' '}
-                <button
-                  type='button'
-                  onClick={() => router.push('/register')}
-                  className='text-blue-600 font-semibold hover:underline'
-                >
-                  Cadastre-se
-                </button>
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <ScrollView bounces={false} contentContainerStyle={styles.container}>
-      <View style={styles.card}>
+    <KeyboardAvoidingView
+      style={styles.keyboardView}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView
+        bounces={false}
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Capa com gradiente */}
         <View style={styles.cover}>
-          <ImageWithFallback
-            src={IMAGE_URL}
-            alt='IT support'
-            style={styles.coverImage}
-          />
-          <View style={styles.coverOverlay} />
+          <View style={styles.coverGradient}>
+            <View style={styles.coverContent}>
+              <Text style={styles.coverTitle}>IT Support</Text>
+              <Text style={styles.coverSubtitle}>Soluções em Tecnologia</Text>
+            </View>
+          </View>
         </View>
 
+        {/* Formulário */}
         <View style={styles.formContainer}>
           <Text style={styles.title}>Bem-vindo</Text>
           <Text style={styles.subtitle}>
             Entre para acessar seus serviços de TI
           </Text>
 
+          {/* Campo Email */}
           <View style={styles.field}>
             <Text style={styles.label}>Email</Text>
             <View style={[styles.inputWrapper, emailError ? styles.inputError : null]}>
-              <Mail color='#94a3b8' size={20} style={styles.fieldIcon} />
+              <Ionicons
+                name="mail-outline"
+                size={20}
+                color={emailError ? '#ef4444' : '#94a3b8'}
+              />
               <TextInput
                 value={email}
                 onChangeText={(text) => {
@@ -213,19 +111,26 @@ export function Login() {
                   if (emailError) setEmailError('');
                 }}
                 style={styles.input}
-                placeholder='seu@email.com'
-                placeholderTextColor='#94a3b8'
-                keyboardType='email-address'
-                autoCapitalize='none'
+                placeholder="seu@email.com"
+                placeholderTextColor="#94a3b8"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                editable={!loading}
               />
             </View>
             {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
           </View>
 
+          {/* Campo Senha */}
           <View style={styles.field}>
             <Text style={styles.label}>Senha</Text>
             <View style={[styles.inputWrapper, passwordError ? styles.inputError : null]}>
-              <Lock color='#94a3b8' size={20} style={styles.fieldIcon} />
+              <Ionicons
+                name="lock-closed-outline"
+                size={20}
+                color={passwordError ? '#ef4444' : '#94a3b8'}
+              />
               <TextInput
                 value={password}
                 onChangeText={(text) => {
@@ -233,65 +138,111 @@ export function Login() {
                   if (passwordError) setPasswordError('');
                 }}
                 style={styles.input}
-                placeholder='••••••••'
-                placeholderTextColor='#94a3b8'
-                secureTextEntry
+                placeholder="••••••••"
+                placeholderTextColor="#94a3b8"
+                secureTextEntry={!showPassword}
+                autoCapitalize="none"
+                editable={!loading}
               />
+              <TouchableOpacity
+                onPress={() => setShowPassword(!showPassword)}
+                style={styles.eyeButton}
+              >
+                <Ionicons
+                  name={showPassword ? "eye-off-outline" : "eye-outline"}
+                  size={20}
+                  color="#94a3b8"
+                />
+              </TouchableOpacity>
             </View>
             {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
           </View>
 
+          {/* Esqueceu a senha */}
           <TouchableOpacity
-            style={styles.forgotPasswordContainer}
+            style={styles.forgotPassword}
             onPress={() => router.push('/forgot-password')}
+            disabled={loading}
           >
             <Text style={styles.link}>Esqueceu a senha?</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.primaryButton} onPress={handleLogin}>
-            <Text style={styles.primaryButtonText}>Entrar</Text>
-            <ArrowRight color='#ffffff' size={20} style={styles.buttonIcon} />
+          {/* Botão Entrar */}
+          <TouchableOpacity
+            style={[styles.loginButton, loading && styles.loginButtonDisabled]}
+            onPress={handleLogin}
+            disabled={loading}
+            activeOpacity={0.8}
+          >
+            {loading ? (
+              <View style={styles.buttonContent}>
+                <ActivityIndicator color="#ffffff" size="small" />
+                <Text style={styles.loginButtonText}>Entrando...</Text>
+              </View>
+            ) : (
+              <View style={styles.buttonContent}>
+                <Text style={styles.loginButtonText}>Entrar</Text>
+                <Ionicons name="arrow-forward" size={20} color="#ffffff" />
+              </View>
+            )}
           </TouchableOpacity>
 
+          {/* Link para cadastro */}
           <View style={styles.registerRow}>
             <Text style={styles.bottomText}>Não tem uma conta? </Text>
-            <TouchableOpacity onPress={() => router.push('/register')}>
+            <TouchableOpacity
+              onPress={() => router.push('/register')}
+              disabled={loading}
+            >
               <Text style={styles.link}>Cadastre-se</Text>
             </TouchableOpacity>
           </View>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    backgroundColor: '#ffffff', // Fundo agora é branco
-  },
-  card: {
+  keyboardView: {
     flex: 1,
     backgroundColor: '#ffffff',
-    // Removidas as bordas arredondadas e sombras para preencher a tela toda
   },
+  container: {
+    flexGrow: 1,
+    backgroundColor: '#ffffff',
+  },
+  // Capa
   cover: {
-    height: 260, // Aumentado um pouco para ficar mais proporcional à tela cheia
+    height: 260,
     width: '100%',
+    backgroundColor: '#1e3a8a',
   },
-  coverImage: {
-    width: '100%',
-    height: '100%',
+  coverGradient: {
+    flex: 1,
+    backgroundColor: '#2563eb',
+    justifyContent: 'flex-end',
+    padding: 24,
   },
-  coverOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(30, 58, 138, 0.4)',
+  coverContent: {
+    marginBottom: 20,
   },
+  coverTitle: {
+    fontSize: 36,
+    fontWeight: '800',
+    color: '#ffffff',
+  },
+  coverSubtitle: {
+    fontSize: 16,
+    color: '#dbeafe',
+    marginTop: 4,
+  },
+  // Formulário
   formContainer: {
     flex: 1,
     backgroundColor: '#ffffff',
     paddingHorizontal: 24,
-    paddingTop: 32, // Um respiro maior após a imagem
+    paddingTop: 32,
     paddingBottom: 40,
   },
   title: {
@@ -303,8 +254,9 @@ const styles = StyleSheet.create({
   subtitle: {
     color: '#64748b',
     fontSize: 15,
-    marginBottom: 32, // Margem aumentada levemente
+    marginBottom: 32,
   },
+  // Campos
   field: {
     marginBottom: 16,
   },
@@ -317,15 +269,13 @@ const styles = StyleSheet.create({
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#e2e8f0',
-    backgroundColor: '#ffffff',
+    backgroundColor: '#f8fafc',
     borderRadius: 12,
     paddingHorizontal: 16,
     height: 52,
-  },
-  fieldIcon: {
-    marginRight: 12,
+    gap: 12,
   },
   input: {
     flex: 1,
@@ -333,42 +283,60 @@ const styles = StyleSheet.create({
     fontSize: 15,
     height: 52,
   },
-  forgotPasswordContainer: {
-    alignSelf: 'flex-start',
-    marginTop: 4,
-    marginBottom: 12,
-  },
   inputError: {
     borderColor: '#ef4444',
     backgroundColor: '#fef2f2',
+  },
+  eyeButton: {
+    padding: 4,
   },
   errorText: {
     color: '#ef4444',
     marginTop: 6,
     fontSize: 12,
+    fontWeight: '500',
+  },
+  // Esqueceu senha
+  forgotPassword: {
+    alignSelf: 'flex-start',
+    marginTop: 4,
+    marginBottom: 24,
   },
   link: {
     color: '#2563eb',
     fontWeight: '600',
     fontSize: 14,
   },
-  primaryButton: {
+  // Botão
+  loginButton: {
     backgroundColor: '#2563eb',
     borderRadius: 12,
     paddingVertical: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#2563eb',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  loginButtonDisabled: {
+    backgroundColor: '#94a3b8',
+    shadowOpacity: 0,
+    elevation: 0,
+  },
+  buttonContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 16,
+    gap: 8,
   },
-  primaryButtonText: {
+  loginButtonText: {
     color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
   },
-  buttonIcon: {
-    marginLeft: 8,
-  },
+  // Cadastro
   registerRow: {
     flexDirection: 'row',
     justifyContent: 'center',

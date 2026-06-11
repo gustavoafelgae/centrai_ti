@@ -1,11 +1,6 @@
+// app/services/[id].tsx
 import { useLocalSearchParams, useRouter } from "expo-router";
-import {
-  ArrowLeft,
-  CheckCircle,
-  Clock,
-  Star,
-  Users,
-} from "lucide-react-native";
+import { Ionicons } from "@expo/vector-icons";
 import {
   Image,
   Platform,
@@ -54,20 +49,20 @@ export default function ServiceDetail() {
             onPress={() => router.back()}
             activeOpacity={0.8}
           >
-            <ArrowLeft size={24} color="#0f172a" />
+            <Ionicons name="arrow-back" size={24} color="#0f172a" />
           </TouchableOpacity>
         </View>
 
         {/* Conteúdo do Serviço */}
         <View style={styles.contentContainer}>
-          {/* Cabeçalho: Título e Preço */}
+          {/* Cabeçalho: Título */}
           <View style={styles.headerRow}>
             <Text style={styles.title}>{service.name}</Text>
           </View>
 
           {/* Avaliação */}
           <View style={styles.ratingRow}>
-            <Star size={16} color="#eab308" fill="#eab308" />
+            <Ionicons name="star" size={16} color="#eab308" />
             <Text style={styles.ratingText}>
               <Text style={styles.ratingNumber}>{service.rating}</Text> •{" "}
               {service.reviews} avaliações
@@ -77,15 +72,15 @@ export default function ServiceDetail() {
           {/* Cards de Estatísticas */}
           <View style={styles.statsGrid}>
             <View style={styles.statCard}>
-              <Clock size={20} color="#2563eb" style={styles.statIcon} />
+              <Ionicons name="time-outline" size={20} color="#2563eb" style={styles.statIcon} />
               <Text style={styles.statText}>Resposta em{"\n"}30min</Text>
             </View>
             <View style={styles.statCard}>
-              <Users size={20} color="#2563eb" style={styles.statIcon} />
+              <Ionicons name="people-outline" size={20} color="#2563eb" style={styles.statIcon} />
               <Text style={styles.statText}>500+ clientes</Text>
             </View>
             <View style={styles.statCard}>
-              <CheckCircle size={20} color="#2563eb" style={styles.statIcon} />
+              <Ionicons name="checkmark-circle-outline" size={20} color="#2563eb" style={styles.statIcon} />
               <Text style={styles.statText}>99.9% uptime</Text>
             </View>
           </View>
@@ -102,7 +97,7 @@ export default function ServiceDetail() {
             <View style={styles.featuresList}>
               {service.features.map((feature, index) => (
                 <View key={index} style={styles.featureItem}>
-                  <CheckCircle size={20} color="#22c55e" />
+                  <Ionicons name="checkmark-circle" size={20} color="#22c55e" />
                   <Text style={styles.featureText}>{feature}</Text>
                 </View>
               ))}
@@ -115,6 +110,7 @@ export default function ServiceDetail() {
             onPress={() => router.push("/tickets/new" as any)}
             activeOpacity={0.8}
           >
+            <Ionicons name="add-circle-outline" size={20} color="#ffffff" style={{ marginRight: 8 }} />
             <Text style={styles.ctaButtonText}>Solicitar Serviço</Text>
           </TouchableOpacity>
         </View>
@@ -134,7 +130,7 @@ const styles = StyleSheet.create({
   imageContainer: {
     position: "relative",
     width: "100%",
-    height: 300, // Altura da imagem de capa
+    height: 300,
   },
   coverImage: {
     width: "100%",
@@ -142,7 +138,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: "absolute",
-    top: Platform.OS === "ios" ? 50 : 30, // Ajuste para a Status Bar
+    top: Platform.OS === "ios" ? 50 : 30,
     left: 20,
     backgroundColor: "#ffffff",
     width: 44,
@@ -160,7 +156,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
-    marginTop: -32, // Faz o card sobrepor a imagem
+    marginTop: -32,
     paddingHorizontal: 24,
     paddingTop: 32,
     paddingBottom: 20,
@@ -178,12 +174,6 @@ const styles = StyleSheet.create({
     color: "#0f172a",
     marginRight: 16,
     lineHeight: 28,
-  },
-  price: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: "#2563eb",
-    marginTop: 2,
   },
   ratingRow: {
     flexDirection: "row",
@@ -253,6 +243,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#2563eb",
     borderRadius: 16,
     paddingVertical: 18,
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     marginTop: 10,

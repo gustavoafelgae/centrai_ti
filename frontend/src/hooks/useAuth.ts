@@ -1,24 +1,35 @@
 import { useState } from 'react';
 import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { usuarioService } from '../services/loginService';
+import { usuarioService } from '../services/usuarioService';
 import { LoginData } from '../types/loginInterfaces'
 import SHA256 from "crypto-js/sha256";
+import { CadastroData } from '@/types/usuarioInterfaces';
+import { useUser } from './UserContext';
 
 export const useAuth = () => {
     const [loading, setLoading] = useState(false);
+    const { setUser } = useUser();
 
     const login = async (email: string, senha: string): Promise<boolean> => {
         setLoading(true);
-
         try {
             const dados: LoginData = {
                 email: email.trim(),
                 senha: SHA256(senha.trim()).toString()
             };
-
             const response = await usuarioService.logar(dados);
             await AsyncStorage.setItem('@App:user', JSON.stringify(response.usuario));
+
+            setUser({
+                id: response.usuario.id,
+                nome: response.usuario.nome,
+                email: response.usuario.email,
+                telefone: response.usuario.telefone,
+                idCargo: response.usuario.cargo.id,
+                nomeCargo: response.usuario.cargo.nome,
+                ativo: response.usuario.ativo
+            });
 
             return true;
 
@@ -32,6 +43,7 @@ export const useAuth = () => {
         }
     };
 
+
     const logout = async (): Promise<void> => {
         try {
             await AsyncStorage.multiRemove(['@App:token', '@App:user']);
@@ -40,9 +52,31 @@ export const useAuth = () => {
         }
     };
 
+
+    const cadastro = async (dados: CadastroData): Promise<boolean> => {
+
+        setLoading(true);
+        try {
+            const response = await usuarioService.cadastrar(dados);
+            await AsyncStorage.setItem('@App:user', JSON.stringify(response));
+
+            return true;
+
+        } catch (error: any) {
+            console.log(error)
+            const mensagem = error.message || 'Erro ao fazer cadastro de usuario';
+            Alert.alert('Ocorreu um falha ao tentar cadastrar. Tente novamente!', mensagem);
+            return false;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
     return {
         loading,
         login,
-        logout
+        logout,
+        cadastro
     };
 };

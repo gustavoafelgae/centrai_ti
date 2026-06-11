@@ -1,13 +1,6 @@
+// app/forgot-password.tsx
 import { useRouter } from "expo-router";
-import {
-  ArrowLeft,
-  CheckCircle2,
-  Eye,
-  EyeOff,
-  KeyRound,
-  Lock,
-  Mail,
-} from "lucide-react";
+import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useRef, useState } from "react";
 import {
   Platform,
@@ -56,8 +49,8 @@ export function ForgotPassword() {
   const [cfError, setCfError] = useState("");
 
   useEffect(() => {
-    if (stage === "code" && Platform.OS !== "web") {
-      otpRefs.current[0]?.focus();
+    if (stage === "code") {
+      setTimeout(() => otpRefs.current[0]?.focus(), 100);
     }
   }, [stage]);
 
@@ -90,25 +83,11 @@ export function ForgotPassword() {
   };
 
   const focusNextOtp = (idx: number) => {
-    if (Platform.OS === "web") {
-      const nextInput = document.getElementById(
-        `otp-${idx + 1}`,
-      ) as HTMLInputElement | null;
-      nextInput?.focus();
-    } else {
-      otpRefs.current[idx + 1]?.focus();
-    }
+    otpRefs.current[idx + 1]?.focus();
   };
 
   const focusPreviousOtp = (idx: number) => {
-    if (Platform.OS === "web") {
-      const prevInput = document.getElementById(
-        `otp-${idx - 1}`,
-      ) as HTMLInputElement | null;
-      prevInput?.focus();
-    } else {
-      otpRefs.current[idx - 1]?.focus();
-    }
+    otpRefs.current[idx - 1]?.focus();
   };
 
   const handleCodeChange = (idx: number, value: string) => {
@@ -119,12 +98,6 @@ export function ForgotPassword() {
     setCode(next);
     setCodeError("");
     if (digits && idx < 5) focusNextOtp(idx);
-  };
-
-  const handleCodeKeyDown = (idx: number, e: any) => {
-    if (e.key === "Backspace" && !code[idx] && idx > 0) {
-      focusPreviousOtp(idx);
-    }
   };
 
   const submitCode = () => {
@@ -138,20 +111,6 @@ export function ForgotPassword() {
     }
     setCodeError("");
     setStage("reset");
-  };
-
-  const passwordStrength = () => {
-    if (!password) return null;
-    let score = 0;
-    if (password.length >= 8) score++;
-    if (/[A-Z]/.test(password)) score++;
-    if (/[0-9]/.test(password)) score++;
-    if (/[^A-Za-z0-9]/.test(password)) score++;
-    if (score <= 1) return { label: "Fraca", color: "#fb7185", width: "25%" };
-    if (score === 2)
-      return { label: "Razoável", color: "#f59e0b", width: "50%" };
-    if (score === 3) return { label: "Boa", color: "#facc15", width: "75%" };
-    return { label: "Forte", color: "#22c55e", width: "100%" };
   };
 
   const submitReset = () => {
@@ -187,7 +146,6 @@ export function ForgotPassword() {
     }
   };
 
-  const strength = passwordStrength();
   const current =
     stage === "done"
       ? { title: "Senha redefinida!", sub: "" }
@@ -195,280 +153,9 @@ export function ForgotPassword() {
   const stepIndex =
     stage === "email" ? 0 : stage === "code" ? 1 : stage === "reset" ? 2 : 2;
 
-  if (Platform.OS === "web") {
-    return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4 py-10">
-        <div className="w-full max-w-md">
-          <div className="overflow-hidden rounded-[32px] border border-white/10 bg-white shadow-[0_30px_80px_rgba(15,23,42,0.18)]">
-            <div className="bg-blue-600 px-6 py-8">
-              <div className="flex items-center gap-3 mb-6">
-                <button
-                  onClick={() => {
-                    if (stage === "email") router.push("/");
-                    else if (stage === "code") setStage("email");
-                    else setStage("code");
-                  }}
-                  className="w-11 h-11 rounded-2xl bg-white/15 text-white flex items-center justify-center"
-                >
-                  <ArrowLeft size={20} />
-                </button>
-                <div>
-                  <p className="text-sm text-blue-100">Recuperação de acesso</p>
-                  <h1 className="text-xl font-semibold text-white">
-                    {current.title}
-                  </h1>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                {[0, 1, 2].map((idx) => (
-                  <div
-                    key={idx}
-                    className={`h-2.5 rounded-full transition-all ${
-                      idx === stepIndex ? "w-12 bg-white" : "w-2.5 bg-white/40"
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
-            <div className="bg-white px-6 pb-8 pt-8">
-              <p className="text-sm text-slate-500 mb-6">{current.sub}</p>
-              {stage === "email" && (
-                <>
-                  <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-6">
-                    <Mail size={28} className="text-blue-600" />
-                  </div>
-                  <div className="space-y-4 mb-6">
-                    <label className="block text-sm font-medium text-slate-700">
-                      E-mail
-                    </label>
-                    <div className="relative rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 focus-within:border-blue-500">
-                      <Mail
-                        className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-                        size={18}
-                      />
-                      <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => {
-                          setEmail(e.target.value);
-                          setEmailError("");
-                        }}
-                        onKeyDown={(e) => e.key === "Enter" && submitEmail()}
-                        placeholder="seu@email.com"
-                        className="w-full bg-transparent pl-11 text-sm text-slate-950 outline-none"
-                      />
-                    </div>
-                    {emailError && (
-                      <p className="text-sm text-red-500">{emailError}</p>
-                    )}
-                  </div>
-                  <button
-                    onClick={submitEmail}
-                    className="w-full rounded-3xl bg-blue-600 px-5 py-4 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition"
-                  >
-                    Enviar código de verificação
-                  </button>
-                  <p className="text-center text-sm text-slate-500 mt-5">
-                    Lembrou a senha?{" "}
-                    <button
-                      onClick={() => router.push("/")}
-                      className="text-blue-600 font-semibold"
-                    >
-                      Voltar ao login
-                    </button>
-                  </p>
-                </>
-              )}
-              {stage === "code" && (
-                <>
-                  <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-6">
-                    <KeyRound size={28} className="text-blue-600" />
-                  </div>
-                  <div className="flex justify-center gap-3 mb-3">
-                    {code.map((digit, idx) => (
-                      <input
-                        key={idx}
-                        id={`otp-${idx}`}
-                        type="text"
-                        inputMode="numeric"
-                        maxLength={1}
-                        value={digit}
-                        onChange={(e) => handleCodeChange(idx, e.target.value)}
-                        onKeyDown={(e) => handleCodeKeyDown(idx, e)}
-                        className="w-14 h-14 rounded-2xl border border-slate-200 text-center text-xl font-semibold text-slate-900 focus:border-blue-500 focus:outline-none"
-                      />
-                    ))}
-                  </div>
-                  {codeError && (
-                    <p className="text-sm text-red-500 text-center mb-4">
-                      {codeError}
-                    </p>
-                  )}
-                  <p className="text-center text-sm text-slate-400 mb-6">
-                    Para testar, use o código{" "}
-                    <span className="font-mono text-blue-600">123456</span>
-                  </p>
-                  <button
-                    onClick={submitCode}
-                    className="w-full rounded-3xl bg-blue-600 px-5 py-4 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition mb-4"
-                  >
-                    Verificar código
-                  </button>
-                  {resendTimer > 0 ? (
-                    <p className="text-center text-sm text-slate-500">
-                      Reenviar em{" "}
-                      <span className="font-semibold text-slate-900">
-                        {resendTimer}s
-                      </span>
-                    </p>
-                  ) : (
-                    <button
-                      onClick={() => {
-                        setCode(["", "", "", "", "", ""]);
-                        setResendTimer(60);
-                      }}
-                      className="mx-auto text-sm font-semibold text-blue-600"
-                    >
-                      Reenviar código
-                    </button>
-                  )}
-                </>
-              )}
-              {stage === "reset" && (
-                <>
-                  <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-6">
-                    <Lock size={28} className="text-blue-600" />
-                  </div>
-                  <div className="space-y-4 mb-6">
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Nova senha
-                      </label>
-                      <div className="relative rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 focus-within:border-blue-500">
-                        <Lock
-                          className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-                          size={18}
-                        />
-                        <input
-                          type={showPw ? "text" : "password"}
-                          value={password}
-                          onChange={(e) => {
-                            setPassword(e.target.value);
-                            setPwError("");
-                          }}
-                          placeholder="Mínimo 8 caracteres"
-                          className="w-full bg-transparent pl-11 pr-11 text-sm text-slate-950 outline-none"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPw((prev) => !prev)}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"
-                        >
-                          {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
-                        </button>
-                      </div>
-                      {pwError && (
-                        <p className="text-sm text-red-500 mt-2">{pwError}</p>
-                      )}
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Confirmar nova senha
-                      </label>
-                      <div className="relative rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 focus-within:border-blue-500">
-                        <Lock
-                          className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-                          size={18}
-                        />
-                        <input
-                          type={showCf ? "text" : "password"}
-                          value={confirm}
-                          onChange={(e) => {
-                            setConfirm(e.target.value);
-                            setCfError("");
-                          }}
-                          placeholder="Repita a senha"
-                          className="w-full bg-transparent pl-11 pr-11 text-sm text-slate-950 outline-none"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowCf((prev) => !prev)}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"
-                        >
-                          {showCf ? <EyeOff size={18} /> : <Eye size={18} />}
-                        </button>
-                      </div>
-                      {cfError && (
-                        <p className="text-sm text-red-500 mt-2">{cfError}</p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="rounded-3xl bg-slate-50 p-4 space-y-3 mb-6">
-                    {[
-                      {
-                        label: "Mínimo 8 caracteres",
-                        ok: password.length >= 8,
-                      },
-                      {
-                        label: "Uma letra maiúscula",
-                        ok: /[A-Z]/.test(password),
-                      },
-                      { label: "Um número", ok: /[0-9]/.test(password) },
-                      {
-                        label: "Senhas coincidem",
-                        ok: !!confirm && password === confirm,
-                      },
-                    ].map((item) => (
-                      <div key={item.label} className="flex items-center gap-3">
-                        <span
-                          className={`text-sm ${item.ok ? "text-blue-600" : "text-slate-300"}`}
-                        >
-                          •
-                        </span>
-                        <span
-                          className={`text-sm ${item.ok ? "text-slate-800" : "text-slate-400"}`}
-                        >
-                          {item.label}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                  <button
-                    onClick={submitReset}
-                    className="w-full rounded-3xl bg-blue-600 px-5 py-4 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition"
-                  >
-                    Redefinir senha
-                  </button>
-                </>
-              )}
-              {stage === "done" && (
-                <div className="bg-slate-50 rounded-3xl p-8 text-center">
-                  <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
-                    <CheckCircle2 size={36} />
-                  </div>
-                  <h2 className="text-2xl font-semibold text-slate-950 mb-3">
-                    Senha redefinida!
-                  </h2>
-                  <p className="text-sm text-slate-500 mb-8">
-                    Sua senha foi alterada com sucesso. Use-a no próximo acesso.
-                  </p>
-                  <button
-                    onClick={() => router.push("/")}
-                    className="w-full rounded-3xl bg-blue-600 px-5 py-4 text-sm font-semibold text-white hover:bg-blue-700 transition"
-                  >
-                    Ir para o login
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
@@ -478,7 +165,7 @@ export function ForgotPassword() {
             else setStage("code");
           }}
         >
-          <Text style={styles.backArrow}>←</Text>
+          <Ionicons name="arrow-back" size={22} color="#ffffff" />
         </TouchableOpacity>
         <View style={styles.headerText}>
           <Text style={styles.overline}>Recuperação de acesso</Text>
@@ -498,17 +185,21 @@ export function ForgotPassword() {
           </View>
         </View>
       </View>
+
+      {/* Card */}
       <View style={styles.card}>
         <Text style={styles.cardSubtitle}>{current.sub}</Text>
+
+        {/* Stage: Email */}
         {stage === "email" && (
           <>
             <View style={styles.iconBox}>
-              <Text style={styles.iconText}>✉️</Text>
+              <Ionicons name="mail" size={28} color="#2563eb" />
             </View>
             <View style={styles.field}>
               <Text style={styles.label}>E-mail</Text>
               <View style={styles.inputRow}>
-                <Text style={styles.inputIcon}>✉️</Text>
+                <Ionicons name="mail-outline" size={18} color="#94a3b8" style={styles.inputIcon} />
                 <TextInput
                   value={email}
                   onChangeText={(value) => {
@@ -526,27 +217,23 @@ export function ForgotPassword() {
                 <Text style={styles.errorText}>{emailError}</Text>
               ) : null}
             </View>
-            <TouchableOpacity
-              style={styles.primaryButton}
-              onPress={submitEmail}
-            >
+            <TouchableOpacity style={styles.primaryButton} onPress={submitEmail}>
               <Text style={styles.primaryButtonText}>
                 Enviar código de verificação
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => router.push("/")}
-              style={styles.linkRow}
-            >
+            <TouchableOpacity onPress={() => router.push("/")} style={styles.linkRow}>
               <Text style={styles.linkText}>Lembrou a senha?</Text>
               <Text style={styles.linkAction}> Voltar ao login</Text>
             </TouchableOpacity>
           </>
         )}
+
+        {/* Stage: Code */}
         {stage === "code" && (
           <>
             <View style={styles.iconBox}>
-              <Text style={styles.iconText}>🔑</Text>
+              <Ionicons name="key" size={28} color="#2563eb" />
             </View>
             <View style={styles.otpRow}>
               {code.map((digit, idx) => (
@@ -601,15 +288,17 @@ export function ForgotPassword() {
             )}
           </>
         )}
+
+        {/* Stage: Reset */}
         {stage === "reset" && (
           <>
             <View style={styles.iconBox}>
-              <Text style={styles.iconText}>🔒</Text>
+              <Ionicons name="lock-closed" size={28} color="#2563eb" />
             </View>
             <View style={styles.field}>
               <Text style={styles.label}>Nova senha</Text>
               <View style={styles.inputRow}>
-                <Text style={styles.inputIcon}>🔒</Text>
+                <Ionicons name="lock-closed-outline" size={18} color="#94a3b8" style={styles.inputIcon} />
                 <TextInput
                   value={password}
                   onChangeText={(value) => {
@@ -622,7 +311,11 @@ export function ForgotPassword() {
                   style={styles.input}
                 />
                 <TouchableOpacity onPress={() => setShowPw((prev) => !prev)}>
-                  <Text style={styles.eyeText}>{showPw ? "🙈" : "👁️"}</Text>
+                  <Ionicons
+                    name={showPw ? "eye-off-outline" : "eye-outline"}
+                    size={20}
+                    color="#64748b"
+                  />
                 </TouchableOpacity>
               </View>
               {pwError ? <Text style={styles.errorText}>{pwError}</Text> : null}
@@ -630,7 +323,7 @@ export function ForgotPassword() {
             <View style={styles.field}>
               <Text style={styles.label}>Confirmar nova senha</Text>
               <View style={styles.inputRow}>
-                <Text style={styles.inputIcon}>🔒</Text>
+                <Ionicons name="lock-closed-outline" size={18} color="#94a3b8" style={styles.inputIcon} />
                 <TextInput
                   value={confirm}
                   onChangeText={(value) => {
@@ -643,7 +336,11 @@ export function ForgotPassword() {
                   style={styles.input}
                 />
                 <TouchableOpacity onPress={() => setShowCf((prev) => !prev)}>
-                  <Text style={styles.eyeText}>{showCf ? "🙈" : "👁️"}</Text>
+                  <Ionicons
+                    name={showCf ? "eye-off-outline" : "eye-outline"}
+                    size={20}
+                    color="#64748b"
+                  />
                 </TouchableOpacity>
               </View>
               {cfError ? <Text style={styles.errorText}>{cfError}</Text> : null}
@@ -659,16 +356,12 @@ export function ForgotPassword() {
                 },
               ].map((item) => (
                 <View key={item.label} style={styles.requirementRow}>
-                  <Text
-                    style={[
-                      styles.requirementBullet,
-                      item.ok
-                        ? styles.requirementBulletActive
-                        : styles.requirementBulletInactive,
-                    ]}
-                  >
-                    •
-                  </Text>
+                  <Ionicons
+                    name={item.ok ? "checkmark-circle" : "ellipse-outline"}
+                    size={16}
+                    color={item.ok ? "#22c55e" : "#cbd5e1"}
+                    style={{ marginRight: 10 }}
+                  />
                   <Text
                     style={[
                       styles.requirementText,
@@ -682,18 +375,17 @@ export function ForgotPassword() {
                 </View>
               ))}
             </View>
-            <TouchableOpacity
-              style={styles.primaryButton}
-              onPress={submitReset}
-            >
+            <TouchableOpacity style={styles.primaryButton} onPress={submitReset}>
               <Text style={styles.primaryButtonText}>Redefinir senha</Text>
             </TouchableOpacity>
           </>
         )}
+
+        {/* Stage: Done */}
         {stage === "done" && (
           <View style={styles.successBox}>
             <View style={styles.successIconBox}>
-              <Text style={styles.successIcon}>✔️</Text>
+              <Ionicons name="checkmark-circle" size={40} color="#22c55e" />
             </View>
             <Text style={styles.successTitle}>Senha redefinida!</Text>
             <Text style={styles.successSubtitle}>
@@ -733,10 +425,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 14,
-  },
-  backArrow: {
-    color: "#ffffff",
-    fontSize: 22,
   },
   headerText: {
     marginBottom: 8,
@@ -789,9 +477,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginBottom: 24,
   },
-  iconText: {
-    fontSize: 28,
-  },
   field: {
     marginBottom: 18,
   },
@@ -813,18 +498,12 @@ const styles = StyleSheet.create({
   },
   inputIcon: {
     marginRight: 10,
-    color: "#94a3b8",
-    fontSize: 18,
   },
   input: {
     flex: 1,
     color: "#0f172a",
     fontSize: 15,
     height: 52,
-  },
-  eyeText: {
-    fontSize: 18,
-    color: "#64748b",
   },
   errorText: {
     color: "#ef4444",
@@ -904,16 +583,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 10,
   },
-  requirementBullet: {
-    marginRight: 10,
-    fontSize: 12,
-  },
-  requirementBulletActive: {
-    color: "#22c55e",
-  },
-  requirementBulletInactive: {
-    color: "#cbd5e1",
-  },
   requirementText: {
     fontSize: 13,
     color: "#475569",
@@ -936,9 +605,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 24,
-  },
-  successIcon: {
-    fontSize: 32,
   },
   successTitle: {
     fontSize: 22,
