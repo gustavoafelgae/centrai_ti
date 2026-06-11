@@ -19,7 +19,8 @@ export default function RootLayout() {
           <Stack.Screen name="home" options={{ gestureEnabled: false }} />
           <Stack.Screen name="register" />
           <Stack.Screen name="forgot-password" />
-          <Stack.Screen name="profile" />
+          <Stack.Screen name="profile/index" />
+          <Stack.Screen name="profile/edit"/>
           <Stack.Screen name="analyst" />
           <Stack.Screen name="servicos/index" />
           <Stack.Screen name="servicos/[id]" />

@@ -1,7 +1,7 @@
 import api from './api';
 import { AxiosResponse } from 'axios';
 import { LoginData, LoginResponse } from '../types/loginInterfaces';
-import { CadastroData, CadastroResponse } from '@/types/usuarioInterfaces';
+import { CadastroData, CadastroResponse, UpdateUserData, UpdateUserResponse } from '@/types/usuarioInterfaces';
 
 const BASE_PATH = '/usuarios';
 
@@ -22,7 +22,7 @@ export const usuarioService = {
     cadastrar: async (dados: CadastroData): Promise<CadastroResponse> => {
         try {
             const response: AxiosResponse<CadastroResponse> = await api.post(
-                `${BASE_PATH}/cadastro`, 
+                `${BASE_PATH}/cadastro`,
                 dados
             );
             return response.data;
@@ -31,5 +31,13 @@ export const usuarioService = {
         }
     },
 
+    atualizarPerfil: async (dados: UpdateUserData, id: number): Promise<UpdateUserResponse> => {
+        try {
+            const response = await api.patch(`/usuarios/atualizar/${id}`, dados);
+            return response.data;
+        } catch (error: any) {
+            throw error.response?.data || error;
+        }
+    },
 
 };

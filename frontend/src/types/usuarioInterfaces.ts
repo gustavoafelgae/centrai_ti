@@ -15,3 +15,23 @@ export interface CadastroResponse {
     id: number;
     ativo: boolean;
 }
+
+export interface UpdateUserData {
+  nome: string;
+  email: string;
+  telefone: string;
+  idCargo: number;
+}
+
+export interface UpdateUserResponse {
+  id: number;
+  nome: string;
+  email: string;
+  telefone: string;
+  idCargo: number;
+  cargo: {
+    id: number;
+    nome: string
+  };
+  ativo: boolean;
+}

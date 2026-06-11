@@ -14,6 +14,7 @@ import { useTickets } from "../hooks/TicketContext";
 import { useUser } from "../hooks/UserContext";
 import { useServicos } from "../hooks/useLists";
 import { useState, useEffect } from "react";
+import { BottomNav } from '../components/BottomNav';
 
 // Mapeamento de cores
 function getColorHex(colorClass: string): string {
@@ -35,7 +36,7 @@ function getColorHex(colorClass: string): string {
 
 const navItems = [
   { label: "Início", path: "/home", icon: "home" as keyof typeof Ionicons.glyphMap },
-  { label: "Serviços", path: "/services", icon: "briefcase" as keyof typeof Ionicons.glyphMap },
+  { label: "Serviços", path: "/servicos", icon: "briefcase" as keyof typeof Ionicons.glyphMap },
   { label: "Tickets", path: "/tickets", icon: "ticket" as keyof typeof Ionicons.glyphMap },
   { label: "Perfil", path: "/profile", icon: "person" as keyof typeof Ionicons.glyphMap },
 ];
@@ -138,27 +139,26 @@ export default function Home() {
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
+
         {/* Banner */}
-        <TouchableOpacity style={styles.analystBanner}>
-          <View style={styles.analystBannerLeft}>
-            <View style={styles.analystIcon}>
-              <MaterialCommunityIcons name="view-dashboard" size={20} color="#ffffff" />
+        {user?.idCargo !== 5 && (
+          <TouchableOpacity style={styles.analystBanner}>
+            <View style={styles.analystBannerLeft}>
+              <View style={styles.analystIcon}>
+                <MaterialCommunityIcons name="view-dashboard" size={20} color="#ffffff" />
+              </View>
+              <View>
+                <Text style={styles.analystTitle}>Console do Analista</Text>
+                <Text style={styles.analystSubtitle}>Gerenciar fila de chamados</Text>
+              </View>
             </View>
-            <View>
-              <Text style={styles.analystTitle}>Console do Analista</Text>
-              <Text style={styles.analystSubtitle}>Gerenciar fila de chamados</Text>
-            </View>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color="#94a3b8" />
-        </TouchableOpacity>
+            <Ionicons name="chevron-forward" size={20} color="#94a3b8" />
+          </TouchableOpacity>)}
 
         {/* Serviços */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Serviços</Text>
-            <TouchableOpacity onPress={() => router.push('/services' as any)}>
-              <Text style={styles.seeAllText}>Ver todos</Text>
-            </TouchableOpacity>
           </View>
 
           {servicos.length === 0 ? (
@@ -168,7 +168,7 @@ export default function Home() {
             </View>
           ) : (
             <View style={styles.servicesGrid}>
-              {servicos.slice(0, 4).map((service) => {
+              {servicos.map((service) => {
                 const colorHex = getColorHex(service.color);
                 const iconName = (service.icon as string) || "apps-outline";
                 return (
@@ -197,33 +197,6 @@ export default function Home() {
                 );
               })}
             </View>
-          )}
-        </View>
-
-        {/* Tickets */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Tickets Recentes</Text>
-            <TouchableOpacity>
-              <Text style={styles.seeAllText}>Ver histórico</Text>
-            </TouchableOpacity>
-          </View>
-
-          {recentTickets.length === 0 ? (
-            <View style={styles.emptyState}>
-              <Ionicons name="ticket" size={32} color="#94a3b8" />
-              <Text style={styles.emptyStateText}>Nenhum ticket recente</Text>
-            </View>
-          ) : (
-            recentTickets.map((ticket) => (
-              <TouchableOpacity key={ticket.id} style={styles.ticketCard}>
-                <View style={styles.ticketHeader}>
-                  <Text style={styles.ticketTitle}>{ticket.title}</Text>
-                  <Ionicons name="chevron-forward" size={16} color="#94a3b8" />
-                </View>
-                {/* ... badges ... */}
-              </TouchableOpacity>
-            ))
           )}
         </View>
       </ScrollView>

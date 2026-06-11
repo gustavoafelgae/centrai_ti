@@ -17,28 +17,6 @@ export default function Profile() {
   const router = useRouter();
   const { user, logout } = useUser();
 
-  const menuItems = [
-    {
-      icon: 'notifications-outline' as const,
-      iconLib: 'Ionicons' as const,
-      label: 'Notificações',
-      badge: '3',
-      path: '/profile/notifications',
-    },
-    {
-      icon: 'shield-checkmark-outline' as const,
-      iconLib: 'Ionicons' as const,
-      label: 'Privacidade e Segurança',
-      path: '/profile/security',
-    },
-    {
-      icon: 'help-circle-outline' as const,
-      iconLib: 'Ionicons' as const,
-      label: 'Ajuda e Suporte',
-      path: '/profile/support',
-    },
-  ];
-
   const handleLogout = async () => {
     await logout();
     router.replace('/');
@@ -93,38 +71,6 @@ export default function Profile() {
           </TouchableOpacity>
         </View>
 
-        {/* Menu Items */}
-        <View style={styles.menuCard}>
-          {menuItems.map((item, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[
-                styles.menuItem,
-                index < menuItems.length - 1 && styles.menuItemBorder,
-              ]}
-              onPress={() => item.path && router.push(item.path as any)}
-              activeOpacity={0.7}
-            >
-              <View style={styles.menuItemLeft}>
-                {item.iconLib === 'Ionicons' ? (
-                  <Ionicons name={item.icon as any} size={24} color="#4b5563" />
-                ) : (
-                  <MaterialCommunityIcons name={item.icon as any} size={24} color="#4b5563" />
-                )}
-                <Text style={styles.menuItemLabel}>{item.label}</Text>
-              </View>
-              <View style={styles.menuItemRight}>
-                {item.badge && (
-                  <View style={styles.badge}>
-                    <Text style={styles.badgeText}>{item.badge}</Text>
-                  </View>
-                )}
-                <Ionicons name="chevron-forward" size={20} color="#94a3b8" />
-              </View>
-            </TouchableOpacity>
-          ))}
-        </View>
-
         {/* Logout */}
         <TouchableOpacity
           style={styles.logoutButton}
@@ -152,11 +98,8 @@ const styles = StyleSheet.create({
   // Header
   header: {
     backgroundColor: '#2563eb',
-    paddingTop: Platform.OS === 'ios' ? 60 : 30,
-    paddingBottom: 80,
-    paddingHorizontal: 24,
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
+    paddingTop: Platform.OS === "ios" ? 60 : 80,
+    paddingHorizontal: 20,
   },
   headerTitle: {
     fontSize: 28,
@@ -167,6 +110,7 @@ const styles = StyleSheet.create({
   headerSubtitle: {
     fontSize: 15,
     color: '#dbeafe',
+    marginBottom: 50
   },
   // Profile Card
   profileCard: {
@@ -174,7 +118,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     padding: 24,
     marginHorizontal: 20,
-    marginTop: -60,
+    marginTop: 80,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
@@ -248,45 +192,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
     color: '#2563eb',
-  },
-  // Menu
-  menuCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 24,
-    marginHorizontal: 20,
-    marginTop: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-    overflow: 'hidden',
-  },
-  menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-  },
-  menuItemBorder: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
-  },
-  menuItemLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  menuItemLabel: {
-    fontSize: 16,
-    color: '#374151',
-    fontWeight: '500',
-  },
-  menuItemRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
   },
   badge: {
     backgroundColor: '#ef4444',

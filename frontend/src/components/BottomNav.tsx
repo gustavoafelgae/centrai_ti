@@ -14,31 +14,31 @@ export function BottomNav() {
   const pathname = usePathname();
 
   const navItems = [
-    { 
-      name: "Início", 
-      path: "/home", 
-      icon: "home" as const, 
+    {
+      name: "Início",
+      path: "/home",
+      icon: "home" as const,
       iconActive: "home" as const,
       badge: 0,
     },
-    { 
-      name: "Serviços", 
-      path: "/services", 
-      icon: "briefcase-outline" as const, 
+    {
+      name: "Serviços",
+      path: "/services",
+      icon: "briefcase-outline" as const,
       iconActive: "briefcase" as const,
       badge: 0,
     },
-    { 
-      name: "Tickets", 
-      path: "/tickets", 
-      icon: "ticket-outline" as const, 
+    {
+      name: "Tickets",
+      path: "/tickets",
+      icon: "ticket-outline" as const,
       iconActive: "ticket" as const,
       badge: 3, // Exemplo de badge
     },
-    { 
-      name: "Perfil", 
-      path: "/profile", 
-      icon: "person-outline" as const, 
+    {
+      name: "Perfil",
+      path: "/profile",
+      icon: "person-outline" as const,
       iconActive: "person" as const,
       badge: 0,
     },
@@ -98,16 +98,19 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
     borderTopWidth: 1,
     borderTopColor: "#f1f5f9",
-    paddingTop: 8,
-    paddingBottom: Platform.OS === "ios" ? 28 : 12,
-    paddingHorizontal: 8,
+    paddingVertical: Platform.OS === "ios" ? 20 : 10,
+    paddingHorizontal: 10,
+    paddingBottom: 50,
     justifyContent: "space-around",
-    alignItems: "center",
+    elevation: 50,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.05,
-    shadowRadius: 20,
-    elevation: 10,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: -4 },
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
   navButton: {
     flex: 1,

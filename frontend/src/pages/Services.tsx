@@ -39,7 +39,7 @@ export default function Services() {
           <TouchableOpacity
             key={service.id}
             style={styles.card}
-            onPress={() => router.push(`/services/${service.id}` as any)}
+            onPress={() => router.push(`/servicos/${service.id}` as any)}
           >
             <View style={[styles.iconContainer, { backgroundColor: getColorBg(service.color) }]}>
               <Ionicons name={service.icon} size={24} color={getColorHex(service.color)} />

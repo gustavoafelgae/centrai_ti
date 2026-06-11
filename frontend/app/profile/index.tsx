@@ -1,5 +1,5 @@
 // app/profile.tsx
-import Profile from '../src/pages/Profile';
+import Profile from '../../src/pages/Profile';
 export default function ProfileScreen() {
   return <Profile />;
 }
