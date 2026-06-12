@@ -64,11 +64,9 @@ export const atualizarUsuario = async (req, res) => {
 }
 
 
-
 // NÃO APAGA ESSA CONST, ELA SALVA TEMPORARIAMENTE O VALOR //
 const codigosTemporarios = {}; 
 // NÃO APAGA ESSA CONST, ELA SALVA TEMPORARIAMENTE O VALOR //
-
 export const sendEmailSenha = async (req, res) => {
   const { email } = req.body;
   
@@ -85,7 +83,7 @@ export const sendEmailSenha = async (req, res) => {
     return res.status(200).json({ message: "Código enviado para seu e-mail." });
 
   } catch (error) {
-    return res.status(404).json({ message: "Usuário não existe" });
+    return res.status(404).json({ message: "E-mail de usuário não encontrado." });
   }
 };
 
@@ -110,13 +108,6 @@ export const atualizarSenha = async (req, res) => {
     return res.status(500).json({ message: "Erro ao atualizar a senha no banco de dados." });
   }
 };
-
-
-
-
-
-
-
 
 
 // ATIVAÇÃO / DESATIVAÇÃO DE USUÁRIO

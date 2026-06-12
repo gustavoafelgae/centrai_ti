@@ -6,7 +6,6 @@ import { LoginData } from '../types/loginInterfaces'
 import SHA256 from "crypto-js/sha256";
 import { CadastroData } from '@/types/usuarioInterfaces';
 import { useUser } from './context/UserContext';
-import { ResetPasswordData } from '@/types/usuarioInterfaces';
 
 
 export const useAuth = () => {
@@ -39,7 +38,7 @@ export const useAuth = () => {
             console.log(error)
             const mensagem = error.message || 'Erro ao fazer login';
             Alert.alert('Erro de Autenticação', mensagem);
-            return false;
+            throw error.response?.data || error;
         } finally {
             setLoading(false);
         }
@@ -68,7 +67,7 @@ export const useAuth = () => {
             console.log(error)
             const mensagem = error.message || 'Erro ao fazer cadastro de usuario';
             Alert.alert('Ocorreu um falha ao tentar cadastrar. Tente novamente!', mensagem);
-            return false;
+            throw error.response?.data || error;
         } finally {
             setLoading(false);
         }
@@ -78,11 +77,11 @@ export const useAuth = () => {
     const solicitarRecuperacao = async (email: string): Promise<boolean> => {
         setLoading(true);
         try {
-            await usuarioService.solicitarRecuperacaoSenha(email);
+            const response = await usuarioService.solicitarRecuperacaoSenha(email);
             return true;
         } catch (error: any) {
-            Alert.alert('Erro', error.message || 'Falha ao solicitar recuperação.');
-            return false;
+            Alert.alert('Erro', error.response?.data.message || error);
+            throw error.response?.data || error;
         } finally {
             setLoading(false);
         }
@@ -91,10 +90,10 @@ export const useAuth = () => {
     const confirmarResetSenha = async (email: string, codigo: string, novaSenha: string): Promise<boolean> => {
         setLoading(true);
         try {
-            await usuarioService.atualizarSenha({ email, codigo, novaSenha });
+            const response = await usuarioService.atualizarSenha({ email, codigo, novaSenha });
             return true;
         } catch (error: any) {
-            // LANÇA O ERRO PARA QUEM CHAMOU A FUNÇÃO
+            Alert.alert('Erro', error.response?.data.message || error);
             throw error;
         } finally {
             setLoading(false);

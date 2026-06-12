@@ -36,7 +36,7 @@ export const useTicket = () => {
       console.log(error);
       const mensagem = error?.mensagem || error?.message || 'Erro ao criar ticket';
       Alert.alert('Erro', mensagem);
-      return null;
+      throw error.response?.data || error;;
     } finally {
       setLoading(false);
     }
@@ -69,7 +69,7 @@ export const useTicket = () => {
       console.log(error);
       const mensagem = error?.mensagem || error?.message || 'Erro ao atualizar ticket';
       Alert.alert('Erro', mensagem);
-      return false;
+      throw error.response?.data || error;;
     } finally {
       setLoading(false);
     }

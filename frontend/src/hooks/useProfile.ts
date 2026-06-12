@@ -31,7 +31,7 @@ export const useProfile = () => {
             console.log(error)
             const mensagem = error.message || 'Erro ao atualizar cliente';
             Alert.alert('Erro ao atualizar cliente', mensagem);
-            return false;
+            throw error.response?.data || error;
         } finally {
             setLoading(false);
         }

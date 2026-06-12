@@ -22,9 +22,10 @@ export const useCargos = () => {
         try {
             const dados = await listasService.listarCargos();
             setCargos(dados);
-        } catch (err: any) {
-            const mensagem = err.message || 'Lista de cargos não encontrada';
+        } catch (error: any) {
+            const mensagem = error.message || 'Lista de cargos não encontrada';
             Alert.alert('Erro ao realizar requisição', mensagem);
+            throw error.response?.data || error;
         } finally {
             setLoading(false);
         }
@@ -78,7 +79,7 @@ export const useServicos = () => {
             const mensagem = err.message || 'Erro ao carregar serviços';
             setError(mensagem);
             console.error('Erro ao carregar serviços:', err);
-
+            throw err.response?.data || error;
         } finally {
             setLoading(false);
         }

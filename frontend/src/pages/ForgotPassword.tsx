@@ -10,31 +10,18 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  KeyboardAvoidingView
+  KeyboardAvoidingView,
+  ActivityIndicator,
 } from "react-native";
 import { useAuth } from '@/hooks/useAuth';
 import SHA256 from "crypto-js/sha256";
 
-type Stage = "email" | "code" | "reset" | "done";
-
-const stageLabels: Record<
-  Exclude<Stage, "done">,
-  { title: string; sub: string }
-> = {
-  email: { title: "Esqueci a senha", sub: "Informe o e-mail da sua conta" },
-  code: {
-    title: "Código de verificação",
-    sub: "Enviamos um código de 6 dígitos para o seu e-mail",
-  },
-  reset: {
-    title: "Nova senha",
-    sub: "Escolha uma senha forte para sua conta",
-  },
-};
+type Stage = "email" | "reset" | "done";
 
 export default function ForgotPassword() {
   const router = useRouter();
   const [stage, setStage] = useState<Stage>("email");
+  const [sendingCode, setSendingCode] = useState(false);
 
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
@@ -54,7 +41,7 @@ export default function ForgotPassword() {
   const { solicitarRecuperacao, confirmarResetSenha, loading } = useAuth();
 
   useEffect(() => {
-    if (stage === "code") {
+    if (stage === "reset") {
       setTimeout(() => otpRefs.current[0]?.focus(), 100);
     }
   }, [stage]);
@@ -84,16 +71,29 @@ export default function ForgotPassword() {
   const submitEmail = async () => {
     if (!validateEmail()) return;
 
+    setSendingCode(true);
     try {
-      const sucesso = await solicitarRecuperacao(email);
+      await solicitarRecuperacao(email);
       setResendTimer(60);
-      setStage("code");
+      setStage("reset");
     } catch (error: any) {
       const msg = error.response?.data?.message || "Erro ao solicitar recuperação";
       setEmailError(msg);
+    } finally {
+      setSendingCode(false);
     }
   };
 
+  const resendCode = async () => {
+    setCode(["", "", "", "", "", ""]);
+    setCodeError("");
+    setResendTimer(60);
+    try {
+      await solicitarRecuperacao(email);
+    } catch (error: any) {
+      setCodeError("Erro ao reenviar código");
+    }
+  };
 
   const focusNextOtp = (idx: number) => {
     otpRefs.current[idx + 1]?.focus();
@@ -113,295 +113,190 @@ export default function ForgotPassword() {
     if (digits && idx < 5) focusNextOtp(idx);
   };
 
-  const submitCode = async () => {
-    if (code.some((digit) => !digit)) {
-      setCodeError("Preencha todos os 6 dígitos");
-      return;
-    }
-    setCodeError("");
-    setStage("reset");
-  };
-
-
   const getResetError = (password: string, confirm: string) => {
     if (!password) return "Informe a nova senha";
     if (password.length < 8) return "Mínimo 8 caracteres";
     if (!/[A-Z]/.test(password)) return "Use uma letra maiúscula";
     if (!/[0-9]/.test(password)) return "Use um número";
     if (password !== confirm) return "As senhas não conferem";
-    return null; // Nenhuma mensagem de erro, tudo ok
+    return null;
   };
 
-
   const submitReset = async () => {
-    const errorMessage = getResetError(password, confirm);
+    if (code.some((digit) => !digit)) {
+      setCodeError("Preencha todos os 6 dígitos");
+      return;
+    }
 
+    const errorMessage = getResetError(password, confirm);
     if (errorMessage) {
       errorMessage.includes("senhas") ? setCfError(errorMessage) : setPwError(errorMessage);
       return;
     }
+
     setPwError("");
     setCfError("");
+    setCodeError("");
 
     try {
       const hashedPass = SHA256(password).toString();
       await confirmarResetSenha(email, code.join(""), hashedPass);
       setStage("done");
     } catch (err: any) {
-      // AQUI VOCÊ TRATA O ERRO QUE VEM DO BACKEND
       const mensagem = err.message || "Erro desconhecido";
 
       if (mensagem.includes("inválido") || mensagem.includes("expirado")) {
+        setCode(["", "", "", "", "", ""]);
+        setPassword("");
+        setConfirm("");
         setCodeError("Código inválido ou expirado. Tente novamente.");
-        setStage("code"); // Volta o usuário para a etapa de digitar o código
+        setPwError("");
+        setCfError("");
       } else {
-        setPwError("Erro ao atualizar senha. Tente novamente.");
+        setCode(["", "", "", "", "", ""]);
+        setPassword("");
+        setConfirm("");
+        setCodeError("Erro ao redefinir senha. Tente novamente.");
+        setPwError("");
+        setCfError("");
       }
     }
   };
 
+  const stageInfo = {
+    email: { title: "Esqueci a senha", sub: "Informe o e-mail da sua conta" },
+    reset: { title: "Código de verificação", sub: "Enviamos um código de 6 dígitos para o seu e-mail" },
+  };
 
-  const current =
-    stage === "done"
-      ? { title: "Senha redefinida!", sub: "" }
-      : stageLabels[stage];
-  const stepIndex =
-    stage === "email" ? 0 : stage === "code" ? 1 : stage === "reset" ? 2 : 2;
+  const current = stage === "done" ? { title: "Senha redefinida!", sub: "" } : stageInfo[stage];
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => {
-            if (stage === "email") router.push("/");
-            else if (stage === "code") setStage("email");
-            else setStage("code");
-          }}
-        >
-          <Ionicons name="arrow-back" size={22} color="#ffffff" />
-        </TouchableOpacity>
-        <View style={styles.headerText}>
-          <Text style={styles.overline}>Recuperação de acesso</Text>
-          <Text style={styles.headerTitle}>{current.title}</Text>
-          <View style={styles.stepRow}>
-            {[0, 1, 2].map((idx) => (
-              <View
-                key={idx}
-                style={[
-                  styles.stepDot,
-                  idx === stepIndex
-                    ? styles.stepDotActive
-                    : styles.stepDotInactive,
-                ]}
-              />
-            ))}
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
+    >
+      <ScrollView contentContainerStyle={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => {
+              if (stage === "email" || stage === "done") router.replace("/");
+              else setStage("email");
+            }}
+          >
+            <Ionicons name="arrow-back" size={22} color="#ffffff" />
+          </TouchableOpacity>
+          <View style={styles.headerText}>
+            <Text style={styles.overline}>Recuperação de acesso</Text>
+            <Text style={styles.headerTitle}>{current.title}</Text>
           </View>
         </View>
-      </View>
 
-      {/* Card */}
-      <View style={styles.card}>
-        <Text style={styles.cardSubtitle}>{current.sub}</Text>
-
-        {/* Stage: Email */}
-        {stage === "email" && (
-          <>
-            <View style={styles.iconBox}>
-              <Ionicons name="mail" size={28} color="#2563eb" />
-            </View>
-            <View style={styles.field}>
-              <Text style={styles.label}>E-mail</Text>
-              <View style={styles.inputRow}>
-                <Ionicons name="mail-outline" size={18} color="#94a3b8" style={styles.inputIcon} />
-                <TextInput
-                  value={email}
-                  onChangeText={(value) => {
-                    setEmail(value);
-                    setEmailError("");
-                  }}
-                  placeholder="seu@email.com"
-                  placeholderTextColor="#94a3b8"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  style={styles.input}
-                />
-              </View>
-              {emailError ? (
-                <Text style={styles.errorText}>{emailError}</Text>
-              ) : null}
-            </View>
-            <TouchableOpacity style={styles.primaryButton} onPress={submitEmail}>
-              <Text style={styles.primaryButtonText}>
-                Enviar código de verificação
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => router.push("/")} style={styles.linkRow}>
-              <Text style={styles.linkText}>Lembrou a senha?</Text>
-              <Text style={styles.linkAction}> Voltar ao login</Text>
-            </TouchableOpacity>
-          </>
-        )}
-
-        {/* Stage: Code */}
-        {stage === "code" && (
-          <>
-            <View style={styles.iconBox}>
-              <Ionicons name="key" size={28} color="#2563eb" />
-            </View>
-            <View style={styles.otpRow}>
-              {code.map((digit, idx) => (
-                <TextInput
-                  key={idx}
-                  ref={(ref) => {
-                    otpRefs.current[idx] = ref;
-                  }}
-                  value={digit}
-                  onChangeText={(value) => handleCodeChange(idx, value)}
-                  keyboardType="number-pad"
-                  maxLength={1}
-                  returnKeyType={idx === 5 ? "done" : "next"}
-                  onSubmitEditing={() => {
-                    if (idx < 5) focusNextOtp(idx);
-                    else submitCode();
-                  }}
-                  onKeyPress={({ nativeEvent }) => {
-                    if (nativeEvent.key === "Backspace" && !digit && idx > 0) {
-                      focusPreviousOtp(idx);
-                    }
-                  }}
-                  style={[
-                    styles.otpInput,
-                    codeError
-                      ? styles.otpInputError
-                      : digit
-                        ? styles.otpInputFilled
-                        : null,
-                  ]}
-                />
-              ))}
-            </View>
-            {codeError ? (
-              <Text style={styles.errorText}>{codeError}</Text>
-            ) : null}
-            <Text style={styles.otpHint}>Para testar, use o código 123456</Text>
-            <TouchableOpacity style={styles.primaryButton} onPress={submitCode}>
-              <Text style={styles.primaryButtonText}>Verificar código</Text>
-            </TouchableOpacity>
-            {resendTimer > 0 ? (
-              <Text style={styles.resendText}>Reenviar em {resendTimer}s</Text>
-            ) : (
-              <TouchableOpacity
-                onPress={() => {
-                  setCode(["", "", "", "", "", ""]);
-                  setResendTimer(60);
-                }}
-              >
-                <Text style={styles.linkAction}>Reenviar código</Text>
-              </TouchableOpacity>
-            )}
-          </>
-        )}
-
-        {/* Stage: Reset */}
-        {stage === "reset" && (
-          <>
-            <View style={styles.iconBox}>
-              <Ionicons name="lock-closed" size={28} color="#2563eb" />
-            </View>
-            <View style={styles.field}>
-              <Text style={styles.label}>Nova senha</Text>
-              <View style={styles.inputRow}>
-                <Ionicons name="lock-closed-outline" size={18} color="#94a3b8" style={styles.inputIcon} />
-                <TextInput
-                  value={password}
-                  onChangeText={(value) => {
-                    setPassword(value);
-                    setPwError("");
-                  }}
-                  placeholder="Mínimo 8 caracteres"
-                  placeholderTextColor="#94a3b8"
-                  secureTextEntry={!showPw}
-                  style={styles.input}
-                />
-                <TouchableOpacity onPress={() => setShowPw((prev) => !prev)}>
-                  <Ionicons
-                    name={showPw ? "eye-off-outline" : "eye-outline"}
-                    size={20}
-                    color="#64748b"
-                  />
-                </TouchableOpacity>
-              </View>
-              {pwError ? <Text style={styles.errorText}>{pwError}</Text> : null}
-            </View>
-            <View style={styles.field}>
-              <Text style={styles.label}>Confirmar nova senha</Text>
-              <View style={styles.inputRow}>
-                <Ionicons name="lock-closed-outline" size={18} color="#94a3b8" style={styles.inputIcon} />
-                <TextInput
-                  value={confirm}
-                  onChangeText={(value) => {
-                    setConfirm(value);
-                    setCfError("");
-                  }}
-                  placeholder="Repita a senha"
-                  placeholderTextColor="#94a3b8"
-                  secureTextEntry={!showCf}
-                  style={styles.input}
-                />
-                <TouchableOpacity onPress={() => setShowCf((prev) => !prev)}>
-                  <Ionicons
-                    name={showCf ? "eye-off-outline" : "eye-outline"}
-                    size={20}
-                    color="#64748b"
-                  />
-                </TouchableOpacity>
-              </View>
-              {cfError ? <Text style={styles.errorText}>{cfError}</Text> : null}
-            </View>
-            <View style={styles.requirementsBox}>
-              {[
-                { label: "Mínimo 8 caracteres", ok: password.length >= 8 },
-                { label: "Uma letra maiúscula", ok: /[A-Z]/.test(password) },
-                { label: "Um número", ok: /[0-9]/.test(password) },
-                {
-                  label: "Senhas coincidem",
-                  ok: !!confirm && password === confirm,
-                },
-              ].map((item) => (
-                <View key={item.label} style={styles.requirementRow}>
-                  <Ionicons
-                    name={item.ok ? "checkmark-circle" : "ellipse-outline"}
-                    size={16}
-                    color={item.ok ? "#22c55e" : "#cbd5e1"}
-                    style={{ marginRight: 10 }}
-                  />
-                  <Text
-                    style={[
-                      styles.requirementText,
-                      item.ok
-                        ? styles.requirementTextActive
-                        : styles.requirementTextInactive,
-                    ]}
-                  >
-                    {item.label}
-                  </Text>
-                </View>
-              ))}
-            </View>
-            <TouchableOpacity style={styles.primaryButton} onPress={submitReset}>
-              <Text style={styles.primaryButtonText}>Redefinir senha</Text>
-            </TouchableOpacity>
-          </>
-        )}
-
-        {/* {stage === "reset" && (
+        {/* Card */}
+        <View style={styles.card}>
+          {/* Stage: Email */}
+          {stage === "email" && (
             <>
-              <View style={styles.iconBox}>
-                <Ionicons name="lock-closed" size={28} color="#2563eb" />
+              {/* Ícone + subtítulo na mesma linha */}
+              <View style={styles.subtitleRow}>
+                <Ionicons name="mail-outline" size={20} color="#2563eb" />
+                <Text style={styles.cardSubtitle}>{stageInfo.email.sub}</Text>
               </View>
 
+              <View style={styles.field}>
+                <Text style={styles.label}>E-mail</Text>
+                <View style={styles.inputRow}>
+                  <Ionicons name="mail-outline" size={18} color="#94a3b8" style={styles.inputIcon} />
+                  <TextInput
+                    value={email}
+                    onChangeText={(value) => {
+                      setEmail(value);
+                      setEmailError("");
+                    }}
+                    placeholder="seu@email.com"
+                    placeholderTextColor="#94a3b8"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    style={styles.input}
+                    editable={!sendingCode}
+                  />
+                </View>
+                {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
+              </View>
+
+              <TouchableOpacity
+                style={[styles.primaryButton, sendingCode && styles.primaryButtonDisabled]}
+                onPress={submitEmail}
+                disabled={sendingCode}
+                activeOpacity={0.8}
+              >
+                {sendingCode ? (
+                  <View style={styles.buttonContent}>
+                    <ActivityIndicator color="#ffffff" size="small" />
+                    <Text style={styles.primaryButtonText}>Enviando...</Text>
+                  </View>
+                ) : (
+                  <Text style={styles.primaryButtonText}>Enviar código de verificação</Text>
+                )}
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => router.replace("/")} style={styles.linkRow}>
+                <Text style={styles.linkText}>Lembrou a senha?</Text>
+                <Text style={styles.linkAction}> Voltar ao login</Text>
+              </TouchableOpacity>
+            </>
+          )}
+
+          {/* Stage: Reset (Código + Senha) */}
+          {stage === "reset" && (
+            <>
+              {/* Ícone + subtítulo na mesma linha */}
+              <View style={styles.subtitleRow}>
+                <Ionicons name="key-outline" size={20} color="#2563eb" />
+                <Text style={styles.cardSubtitle}>{stageInfo.reset.sub}</Text>
+              </View>
+
+              {/* Código OTP */}
+              <Text style={styles.label}>Código de verificação</Text>
+              <View style={styles.otpRow}>
+                {code.map((digit, idx) => (
+                  <TextInput
+                    key={idx}
+                    ref={(ref) => { otpRefs.current[idx] = ref; }}
+                    value={digit}
+                    onChangeText={(value) => handleCodeChange(idx, value)}
+                    keyboardType="number-pad"
+                    maxLength={1}
+                    returnKeyType={idx === 5 ? "done" : "next"}
+                    onSubmitEditing={() => {
+                      if (idx < 5) focusNextOtp(idx);
+                    }}
+                    onKeyPress={({ nativeEvent }) => {
+                      if (nativeEvent.key === "Backspace" && !digit && idx > 0) {
+                        focusPreviousOtp(idx);
+                      }
+                    }}
+                    style={[
+                      styles.otpInput,
+                      codeError ? styles.otpInputError : digit ? styles.otpInputFilled : null,
+                    ]}
+                  />
+                ))}
+              </View>
+              {codeError ? <Text style={styles.errorText}>{codeError}</Text> : null}
+
+              {/* Reenviar código centralizado */}
+              {resendTimer > 0 ? (
+                <Text style={styles.resendText}>Reenviar em {resendTimer}s</Text>
+              ) : (
+                <TouchableOpacity onPress={resendCode} style={styles.resendButton}>
+                  <Text style={styles.linkAction}>Reenviar código</Text>
+                </TouchableOpacity>
+              )}
+
+              {/* Campos de senha */}
               <View style={styles.field}>
                 <Text style={styles.label}>Nova senha</Text>
                 <View style={styles.inputRow}>
@@ -440,6 +335,7 @@ export default function ForgotPassword() {
                 {cfError ? <Text style={styles.errorText}>{cfError}</Text> : null}
               </View>
 
+              {/* Requisitos */}
               <View style={styles.requirementsBox}>
                 {[
                   { label: "Mínimo 8 caracteres", ok: password.length >= 8 },
@@ -448,7 +344,12 @@ export default function ForgotPassword() {
                   { label: "Senhas coincidem", ok: !!confirm && password === confirm },
                 ].map((item) => (
                   <View key={item.label} style={styles.requirementRow}>
-                    <Ionicons name={item.ok ? "checkmark-circle" : "ellipse-outline"} size={16} color={item.ok ? "#22c55e" : "#cbd5e1"} style={{ marginRight: 10 }} />
+                    <Ionicons
+                      name={item.ok ? "checkmark-circle" : "ellipse-outline"}
+                      size={16}
+                      color={item.ok ? "#22c55e" : "#cbd5e1"}
+                      style={{ marginRight: 10 }}
+                    />
                     <Text style={[styles.requirementText, item.ok ? styles.requirementTextActive : styles.requirementTextInactive]}>
                       {item.label}
                     </Text>
@@ -456,36 +357,43 @@ export default function ForgotPassword() {
                 ))}
               </View>
 
-              <View style={{ marginTop: 10, marginBottom: 40 }}>
-                <TouchableOpacity style={styles.primaryButton} onPress={submitReset}>
-                  <Text style={styles.primaryButtonText}>Redefinir senha</Text>
-                </TouchableOpacity>
-              </View>
-
-              <View style={{ height: 60 }} />
+              {/* Botão Salvar Senha */}
+              <TouchableOpacity
+                style={[styles.primaryButton, loading && styles.primaryButtonDisabled]}
+                onPress={submitReset}
+                disabled={loading}
+                activeOpacity={0.8}
+              >
+                {loading ? (
+                  <View style={styles.buttonContent}>
+                    <ActivityIndicator color="#ffffff" size="small" />
+                    <Text style={styles.primaryButtonText}>Salvando...</Text>
+                  </View>
+                ) : (
+                  <Text style={styles.primaryButtonText}>Salvar nova senha</Text>
+                )}
+              </TouchableOpacity>
             </>
-          )} */}
+          )}
 
-        {/* Stage: Done */}
-        {stage === "done" && (
-          <View style={styles.successBox}>
-            <View style={styles.successIconBox}>
-              <Ionicons name="checkmark-circle" size={40} color="#22c55e" />
+          {/* Stage: Done */}
+          {stage === "done" && (
+            <View style={styles.successBox}>
+              <View style={styles.successIconBox}>
+                <Ionicons name="checkmark-circle" size={40} color="#22c55e" />
+              </View>
+              <Text style={styles.successTitle}>Senha redefinida!</Text>
+              <Text style={styles.successSubtitle}>
+                Sua senha foi alterada com sucesso. Use-a no próximo acesso.
+              </Text>
+              <TouchableOpacity style={styles.primaryButton} onPress={() => router.replace("/")}>
+                <Text style={styles.primaryButtonText}>Ir para o login</Text>
+              </TouchableOpacity>
             </View>
-            <Text style={styles.successTitle}>Senha redefinida!</Text>
-            <Text style={styles.successSubtitle}>
-              Sua senha foi alterada com sucesso. Use-a no próximo acesso.
-            </Text>
-            <TouchableOpacity
-              style={styles.primaryButton}
-              onPress={() => router.push("/")}
-            >
-              <Text style={styles.primaryButtonText}>Ir para o login</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      </View>
-    </ScrollView>
+          )}
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -524,48 +432,26 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "700",
   },
-  stepRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 14,
-  },
-  stepDot: {
-    height: 8,
-    borderRadius: 4,
-    marginRight: 8,
-  },
-  stepDotActive: {
-    width: 32,
-    backgroundColor: "#ffffff",
-  },
-  stepDotInactive: {
-    width: 8,
-    backgroundColor: "rgba(255,255,255,0.45)",
-  },
   card: {
     backgroundColor: "#ffffff",
     borderRadius: 32,
     padding: 24,
-    paddingBottom: 1,
-    marginTop: 25,
     minHeight: 400,
+  },
+  // Ícone + subtítulo na mesma linha
+  subtitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 20,
   },
   cardSubtitle: {
     color: "#475569",
     fontSize: 14,
-    marginBottom: 10,
-  },
-  iconBox: {
-    width: 72,
-    height: 72,
-    borderRadius: 22,
-    backgroundColor: "#eff6ff",
-    alignItems: "center",
-    justifyContent: "center",
-    // marginBottom: 24,
+    flex: 1,
   },
   field: {
-    marginBottom: 10,
+    marginBottom: 16,
   },
   label: {
     fontSize: 13,
@@ -594,17 +480,25 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: "#ef4444",
-    // marginTop: 8,
     fontSize: 13,
+    marginTop: 4,
   },
   primaryButton: {
     backgroundColor: "#2563eb",
-    borderRadius: 20,
+    borderRadius: 16,
     paddingVertical: 16,
     alignItems: "center",
     justifyContent: "center",
-    // marginTop: 4,
-    marginBottom: 15
+    marginBottom: 16,
+    width: '80%'
+  },
+  primaryButtonDisabled: {
+    backgroundColor: "#94a3b8",
+  },
+  buttonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
   primaryButtonText: {
     color: "#ffffff",
@@ -614,7 +508,6 @@ const styles = StyleSheet.create({
   linkRow: {
     flexDirection: "row",
     justifyContent: "center",
-    // marginTop: 16,
   },
   linkText: {
     color: "#64748b",
@@ -625,20 +518,24 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "700",
   },
+  // OTP
   otpRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 14,
+    marginBottom: 8,
+    paddingHorizontal: 10,
+    marginLeft: -18
   },
   otpInput: {
-    width: 52,
-    height: 60,
+    width: 45,
+    height: 56,
     borderWidth: 1,
     borderColor: "#cbd5e1",
-    borderRadius: 18,
+    borderRadius: 16,
     textAlign: "center",
     fontSize: 20,
     color: "#0f172a",
+    backgroundColor: "#f8fafc",
   },
   otpInputError: {
     borderColor: "#f87171",
@@ -648,23 +545,23 @@ const styles = StyleSheet.create({
     borderColor: "#2563eb",
     backgroundColor: "#eff6ff",
   },
-  otpHint: {
+  // Reenviar centralizado
+  resendText: {
     color: "#64748b",
     fontSize: 13,
     textAlign: "center",
-    marginBottom: 18,
+    marginBottom: 16,
   },
-  resendText: {
-    color: "#475569",
-    fontSize: 14,
-    textAlign: "center",
-    // marginTop: 14,
+  resendButton: {
+    alignItems: "center",
+    marginBottom: 16,
   },
+  // Requisitos
   requirementsBox: {
     backgroundColor: "#f8fafc",
     borderRadius: 22,
     padding: 16,
-    marginBottom: 10,
+    marginBottom: 16,
   },
   requirementRow: {
     flexDirection: "row",
@@ -681,6 +578,7 @@ const styles = StyleSheet.create({
   requirementTextInactive: {
     color: "#94a3b8",
   },
+  // Sucesso
   successBox: {
     alignItems: "center",
     paddingVertical: 20,
