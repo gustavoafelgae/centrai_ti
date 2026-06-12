@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { listasService } from '../services/listasService';
-import { CargoResponse, ServicoResponse, ListaServicosFront } from '@/types/listasInsterfaces';
+import { CargoResponse, ServicoResponse, ListaServicosFront, StatusResponse } from '@/types/listasInsterfaces';
 import {
     servicosConfig,
     defaultIcon,
@@ -57,7 +57,7 @@ export const useServicos = () => {
             return {
                 id: config?.id || servicoBanco.id,
                 name: config?.name || servicoBanco.servico,
-                cargoId: servicoBanco.id || 0,
+                cargoId: servicoBanco.cargoId || 0,
                 icon: config?.icon || defaultIcon,
                 color: config?.color || defaultColor,
                 description: config?.description || defaultDescription,
@@ -95,4 +95,27 @@ export const useServicos = () => {
         error,
         recarregar: carregarServicos
     };
+};
+
+export const useStatus = () => {
+  const [statusList, setStatusList] = useState<StatusResponse[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const carregarStatus = async () => {
+    setLoading(true);
+    try {
+      const dados = await listasService.listarStatus();
+      setStatusList(dados);
+    } catch (err: any) {
+      console.error('Erro ao carregar status:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    carregarStatus();
+  }, []);
+
+  return { statusList, loadingStatus: loading };
 };

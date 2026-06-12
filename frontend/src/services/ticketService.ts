@@ -29,5 +29,24 @@ export const ticketService = {
     } catch (error: any) {
       throw error.response?.data || error.message;
     }
+  },
+
+  listarPorUsuarioCriador: async (usuarioId: number) => {
+    try {
+      const response = await api.get(`/tickets/usarioCriador/${usuarioId}`);
+      return response.data;
+    } catch (error: any) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  buscarPorSerial: async (serial: string) => {
+    try {
+      const response = await api.get(`/tickets/${serial}`);
+      return response.data;
+    } catch (error: any) {
+      throw error.response?.data || error.message;
+    }
   }
+
 };

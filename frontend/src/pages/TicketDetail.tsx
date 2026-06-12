@@ -1,6 +1,7 @@
 // app/tickets/[id].tsx
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useState, useEffect } from "react";
 import {
   Platform,
   ScrollView,
@@ -20,29 +21,151 @@ export default function TicketDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { ticket } = useCurrentTicket();
   const { user } = useUser();
-  const { loading, atualizarTicket } = useTicket();
+  const { loading, atualizarTicket, carregarTicket } = useTicket();
 
-  console.log("->"+id)
+  const [isLoadingTicket, setIsLoadingTicket] = useState(true); // Começa true
 
+  // Sempre carrega o ticket do backend ao entrar na tela
+  useEffect(() => {
+    if (id) {
+      loadTicket();
+    }
+  }, [id]);
+
+  const loadTicket = async () => {
+    setIsLoadingTicket(true);
+    await carregarTicket(id);  // Atualiza o contexto com dados frescos
+    setIsLoadingTicket(false);
+  };
+
+  // Loading enquanto busca
+  if (isLoadingTicket) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#2563eb" />
+        <Text style={{ marginTop: 12, color: '#64748b' }}>Carregando ticket...</Text>
+      </View>
+    );
+  }
+
+  // Não encontrado (após tentar carregar)
   if (!ticket) {
     return (
       <View style={styles.centered}>
         <Ionicons name="ticket-outline" size={48} color="#94a3b8" />
         <Text style={styles.emptyTitle}>Ticket não encontrado</Text>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-          <Text style={styles.backBtnText}>Voltar</Text>
+        <TouchableOpacity style={styles.backBtn} onPress={() => router.push("/tickets")}>
+          <Text style={styles.backBtnText}>Voltar para lista</Text>
         </TouchableOpacity>
       </View>
     );
   }
 
+  // ==================== REGRAS DE NEGÓCIO ====================
+
   const isCreator = user?.id === ticket.idUsuarioCreated;
   const isAssignedToMe = ticket.idUsuarioResolved === user?.id;
-  const isNotAssigned = ticket.idUsuarioResolved === 0;
+  const isNotAssigned = ticket.idUsuarioResolved === null;
+  const isFromMyService = user?.idCargo === ticket.cargoId;
 
-  const canAssign = isNotAssigned && !isCreator;
-  const canResolve = isAssignedToMe && ticket.statusId !== 3 && ticket.statusId !== 4;
-  const canCancel = isAssignedToMe && ticket.statusId !== 3 && ticket.statusId !== 4;
+  const isOpen = ticket.statusId === 1;
+  const isInProgress = ticket.statusId === 2;
+  const isFinished = ticket.statusId === 3;
+  const isCancelled = ticket.statusId === 4;
+  const isClosed = isFinished || isCancelled;
+
+  const canAssign = isNotAssigned && isFromMyService && !isClosed;
+  const canFinish = isAssignedToMe && isInProgress;
+  const canCancel = (isCreator || isAssignedToMe) && !isClosed;
+  const buttonsDisabled = isClosed;
+
+  // ==================== HANDLERS ====================
+
+  const handleAssign = async () => {
+    if (!canAssign || buttonsDisabled) return;
+
+    Alert.alert(
+      "Atribuir Ticket",
+      "Deseja atribuir este ticket para você?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Atribuir",
+          onPress: async () => {
+            setIsLoadingTicket(true);
+            await atualizarTicket(ticket.serial, {
+              titulo: ticket.titulo,
+              prioridade: ticket.prioridade,
+              descricao: ticket.descricao,
+              idServico: ticket.servicoId,
+              idStatus: 2,
+              idUsuarioResolved: user!.id,
+            });
+            setIsLoadingTicket(false);
+          }
+        }
+      ]
+    );
+  };
+
+  const handleFinish = async () => {
+    if (!canFinish || buttonsDisabled) return;
+
+    Alert.alert(
+      "Finalizar Ticket",
+      "Confirmar que este ticket foi resolvido?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Finalizar",
+          onPress: async () => {
+            setIsLoadingTicket(true);
+            await atualizarTicket(ticket.serial, {
+              titulo: ticket.titulo,
+              prioridade: ticket.prioridade,
+              descricao: ticket.descricao,
+              idServico: ticket.servicoId,
+              idStatus: 3,
+              idUsuarioResolved: user!.id,
+            });
+            setIsLoadingTicket(false);
+          }
+        }
+      ]
+    );
+  };
+
+  const handleCancel = async () => {
+    if (!canCancel || buttonsDisabled) return;
+
+    const quem = isCreator ? "Você criou este ticket." : "Você está responsável por este ticket.";
+
+    Alert.alert(
+      "Cancelar Ticket",
+      `Tem certeza que deseja cancelar este ticket?\n\n${quem}`,
+      [
+        { text: "Não", style: "cancel" },
+        {
+          text: "Sim, cancelar",
+          style: "destructive",
+          onPress: async () => {
+            setIsLoadingTicket(true);
+            await atualizarTicket(ticket.serial, {
+              titulo: ticket.titulo,
+              prioridade: ticket.prioridade,
+              descricao: ticket.descricao,
+              idServico: ticket.servicoId,
+              idStatus: 4,
+              idUsuarioResolved: user!.id,
+            });
+            setIsLoadingTicket(false);
+          }
+        }
+      ]
+    );
+  };
+
+  // ==================== ESTILOS ====================
 
   const getPriorityStyle = (priority: string) => {
     switch (priority) {
@@ -57,78 +180,10 @@ export default function TicketDetail() {
     switch (statusId) {
       case 1: return { text: "Aberto", color: "#3b82f6", bg: "#eff6ff" };
       case 2: return { text: "Em Andamento", color: "#eab308", bg: "#fef9c3" };
-      case 3: return { text: "Finalizado", color: "#22c55e", bg: "#dcfce7" };
+      case 3: return { text: "Finalizado", color: "#64748b", bg: "#f1f5f9" };
       case 4: return { text: "Cancelado", color: "#ef4444", bg: "#fee2e2" };
       default: return { text: "Desconhecido", color: "#64748b", bg: "#f1f5f9" };
     }
-  };
-
-  const handleAssign = async () => {
-    Alert.alert(
-      "Atribuir Ticket",
-      "Deseja atribuir este ticket para você?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Atribuir",
-          onPress: async () => {
-            const sucesso = await atualizarTicket(ticket.serial, {
-              idUsuarioResolved: user!.id,
-              idStatus: 2, // Em Andamento
-            });
-
-            if (sucesso) {
-              Alert.alert("Sucesso", "Ticket atribuído com sucesso!");
-            }
-          }
-        }
-      ]
-    );
-  };
-
-  const handleResolve = async () => {
-    Alert.alert(
-      "Resolver Ticket",
-      "Confirmar que este ticket foi resolvido?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Resolver",
-          onPress: async () => {
-            const sucesso = await atualizarTicket(ticket.serial, {
-              idStatus: 3, // Finalizado
-            });
-
-            if (sucesso) {
-              Alert.alert("Sucesso", "Ticket resolvido com sucesso!");
-            }
-          }
-        }
-      ]
-    );
-  };
-
-  const handleCancel = async () => {
-    Alert.alert(
-      "Cancelar Ticket",
-      "Tem certeza que deseja cancelar este ticket?",
-      [
-        { text: "Não", style: "cancel" },
-        {
-          text: "Sim, cancelar",
-          style: "destructive",
-          onPress: async () => {
-            const sucesso = await atualizarTicket(ticket.serial, {
-              idStatus: 4, // Cancelado
-            });
-
-            if (sucesso) {
-              Alert.alert("Sucesso", "Ticket cancelado com sucesso!");
-            }
-          }
-        }
-      ]
-    );
   };
 
   const priorityStyle = getPriorityStyle(ticket.prioridade);
@@ -139,7 +194,7 @@ export default function TicketDetail() {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerTop}>
-          <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+          <TouchableOpacity style={styles.backBtn} onPress={() => router.push("/tickets")}>
             <Ionicons name="arrow-back" size={24} color="#0f172a" />
           </TouchableOpacity>
           <View style={styles.headerTitleContainer}>
@@ -160,7 +215,7 @@ export default function TicketDetail() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Loading overlay */}
+        {/* Loading overlay durante ações */}
         {loading && (
           <View style={styles.loadingOverlay}>
             <ActivityIndicator size="large" color="#2563eb" />
@@ -192,7 +247,7 @@ export default function TicketDetail() {
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Serviço:</Text>
-              <Text style={styles.infoValue}>{ticket.servicoNome}</Text>
+              <Text style={styles.infoValue}>{ticket.servicoNome || `ID: ${ticket.servicoId}`}</Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Criado por:</Text>
@@ -218,53 +273,70 @@ export default function TicketDetail() {
 
       {/* Botões de Ação */}
       <View style={styles.actionsContainer}>
-        {canAssign && (
+        <View style={styles.actionsRow}>
+          {/* Botão Atribuir */}
           <TouchableOpacity
-            style={[styles.actionButton, styles.assignButton]}
+            style={[
+              styles.actionButton,
+              styles.assignButton,
+              (!canAssign || buttonsDisabled) && styles.buttonDisabled,
+            ]}
             onPress={handleAssign}
-            disabled={loading}
+            disabled={!canAssign || buttonsDisabled || loading}
             activeOpacity={0.8}
           >
-            <Ionicons name="person-add-outline" size={20} color="#ffffff" />
-            <Text style={styles.actionButtonText}>Atribuir para mim</Text>
+            <Ionicons name="person-add-outline" size={18} color="#ffffff" />
+            <Text style={styles.actionButtonText} numberOfLines={2}>
+              {buttonsDisabled ? "Atribuir" : !isFromMyService ? "Atribuir" : "Atribuir"}
+            </Text>
           </TouchableOpacity>
-        )}
 
-        {canResolve && (
+          {/* Botão Finalizar */}
           <TouchableOpacity
-            style={[styles.actionButton, styles.resolveButton]}
-            onPress={handleResolve}
-            disabled={loading}
+            style={[
+              styles.actionButton,
+              styles.finishButton,
+              (!canFinish || buttonsDisabled) && styles.buttonDisabled,
+            ]}
+            onPress={handleFinish}
+            disabled={!canFinish || buttonsDisabled || loading}
             activeOpacity={0.8}
           >
-            <Ionicons name="checkmark-circle-outline" size={20} color="#ffffff" />
-            <Text style={styles.actionButtonText}>Solucionar</Text>
+            <Ionicons name="checkmark-circle-outline" size={18} color="#ffffff" />
+            <Text style={styles.actionButtonText}>Finalizar</Text>
           </TouchableOpacity>
-        )}
 
-        {canCancel && (
+          {/* Botão Cancelar */}
           <TouchableOpacity
-            style={[styles.actionButton, styles.cancelButton]}
+            style={[
+              styles.actionButton,
+              styles.cancelButton,
+              (!canCancel || buttonsDisabled) && styles.buttonDisabled,
+            ]}
             onPress={handleCancel}
-            disabled={loading}
+            disabled={!canCancel || buttonsDisabled || loading}
             activeOpacity={0.8}
           >
-            <Ionicons name="close-circle-outline" size={20} color="#ffffff" />
+            <Ionicons name="close-circle-outline" size={18} color="#ffffff" />
             <Text style={styles.actionButtonText}>Cancelar</Text>
           </TouchableOpacity>
+        </View>
+
+        {/* Mensagens informativas */}
+        {isClosed && (
+          <View style={styles.noActionContainer}>
+            <Ionicons name="information-circle-outline" size={18} color="#64748b" />
+            <Text style={styles.noActionText}>
+              {isFinished ? "Este ticket foi finalizado." : "Este ticket foi cancelado."}
+            </Text>
+          </View>
         )}
 
-        {!canAssign && !canResolve && !canCancel && (
+        {!isClosed && isNotAssigned && !isFromMyService && (
           <View style={styles.noActionContainer}>
-            <Ionicons name="information-circle-outline" size={20} color="#64748b" />
+            <Ionicons name="information-circle-outline" size={18} color="#64748b" />
             <Text style={styles.noActionText}>
-              {ticket.statusId === 3
-                ? "Este ticket já foi finalizado."
-                : ticket.statusId === 4
-                  ? "Este ticket foi cancelado."
-                  : isCreator
-                    ? "Você criou este ticket. Aguarde um analista atribuí-lo."
-                    : "Nenhuma ação disponível no momento."}
+              Apenas usuários do mesmo setor podem atribuir este ticket.
             </Text>
           </View>
         )}
@@ -300,12 +372,16 @@ const styles = StyleSheet.create({
   descriptionCard: { backgroundColor: "#ffffff", borderRadius: 20, padding: 20, elevation: 2 },
   sectionTitle: { fontSize: 16, fontWeight: "700", color: "#0f172a", marginBottom: 12 },
   descriptionText: { fontSize: 15, color: "#374151", lineHeight: 24 },
-  actionsContainer: { backgroundColor: "#ffffff", borderTopWidth: 1, borderTopColor: "#e5e7eb", padding: 16, paddingBottom: Platform.OS === "ios" ? 30 : 16, gap: 10 },
-  actionButton: { flexDirection: "row", alignItems: "center", justifyContent: "center", paddingVertical: 14, borderRadius: 14, gap: 8 },
+
+  // Actions
+  actionsRow: { flexDirection: 'row', gap: 8 },
+  actionsContainer: { backgroundColor: "#ffffff", borderTopWidth: 1, borderTopColor: "#e5e7eb", padding: 16, paddingBottom: Platform.OS === "ios" ? 30 : 50, gap: 10 },
+  actionButton: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", paddingVertical: 14, borderRadius: 16, gap: 8 },
   assignButton: { backgroundColor: "#2563eb" },
-  resolveButton: { backgroundColor: "#22c55e" },
+  finishButton: { backgroundColor: "#22c55e" },
   cancelButton: { backgroundColor: "#ef4444" },
-  actionButtonText: { color: "#ffffff", fontSize: 16, fontWeight: "700" },
-  noActionContainer: { flexDirection: "row", alignItems: "center", justifyContent: "center", paddingVertical: 12, gap: 8, paddingBottom: 40 },
-  noActionText: { fontSize: 14, color: "#64748b", textAlign: "center" },
+  buttonDisabled: { backgroundColor: "#d1d5db", opacity: 0.7 },
+  actionButtonText: { color: "#ffffff", fontSize: 15, fontWeight: "700", marginLeft:-5 },
+  noActionContainer: { flexDirection: "row", alignItems: "center", justifyContent: "center", paddingVertical: 8, gap: 8, marginBottom: -10 },
+  noActionText: { fontSize: 13, color: "#64748b", textAlign: "center" },
 });

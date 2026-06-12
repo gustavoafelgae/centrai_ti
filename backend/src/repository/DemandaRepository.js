@@ -12,11 +12,22 @@ export class DemandaRepository {
 
   async findById(id) {
     const repository = getDb().getRepository('Demanda');
-    return repository.findOneOrFail({ 
+    return repository.findOneOrFail({
       where: { id },
-      relations: { ticket: true } 
+      relations: { ticket: true }
     });
   }
+
+  async findByidUsuarioCreated(idUsuarioCreater) {
+    const repository = getDb().getRepository('Demanda');
+    return repository.find({
+      where: { idUsuarioCreated: idUsuarioCreater }
+    });
+  }
+
+
+
+  
 
   async findAll() {
     const repository = getDb().getRepository('Demanda');
@@ -29,7 +40,7 @@ export class DemandaRepository {
     const repository = manager ? manager.getRepository('Demanda') : getDb().getRepository('Demanda');
     const novaDemanda = repository.create(demanda);
     console.log("Criando nova demanda:", novaDemanda);
-    return repository.save(novaDemanda); 
+    return repository.save(novaDemanda);
   }
 
   async update(id, demanda, manager = null) {

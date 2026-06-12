@@ -31,3 +31,12 @@ export interface ListaServicosFront {
   description: string;
   price: string;
 }
+
+export interface StatusResponse {
+  id: number;
+  nome: string;
+}
+
+export interface ListaStatusResponse {
+  status: Array<StatusResponse>;
+}

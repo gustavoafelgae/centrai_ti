@@ -83,7 +83,7 @@ export const sendEmailSenha = async (req, res) => {
     return res.status(200).json({ message: "Código enviado para seu e-mail." });
 
   } catch (error) {
-    return res.status(404).json({ message: "E-mail de usuário não encontrado." });
+    return res.status(404).json({ message: error?.message || "E-mail de usuário não encontrado." });
   }
 };
 

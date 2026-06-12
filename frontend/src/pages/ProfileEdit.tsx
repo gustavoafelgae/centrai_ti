@@ -127,8 +127,9 @@ export default function EditProfile() {
 
     return (
         <KeyboardAvoidingView
-            style={styles.container}
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.keyboardView}
+            behavior='padding'
+            keyboardVerticalOffset={20}
         >
             <View style={styles.header}>
                 <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
@@ -282,6 +283,10 @@ export default function EditProfile() {
 }
 
 const styles = StyleSheet.create({
+    keyboardView: {
+        flex: 1,
+        backgroundColor: '#ffffff',
+    },
     container: {
         flex: 1,
         backgroundColor: '#f8fafc',

@@ -26,7 +26,6 @@ export default function NewTicket() {
 
   const router = useRouter();
   const params = useLocalSearchParams();
-  const { ticket, setTicket } = useCurrentTicket();
   const { criarTicket } = useTicket();
   const { user } = useUser();
   const { servicos, loading: loadingServicos } = useServicos();
@@ -147,9 +146,9 @@ export default function NewTicket() {
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
+      style={styles.keyboardView}
+      behavior='padding'
+      keyboardVerticalOffset={20}
     >
       <View style={styles.container}>
         {/* Header */}
@@ -349,6 +348,10 @@ export default function NewTicket() {
 
 
 const styles = StyleSheet.create({
+  keyboardView: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+  },
   container: {
     flex: 1,
     backgroundColor: "#f8fafc",

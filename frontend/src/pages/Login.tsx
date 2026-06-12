@@ -73,7 +73,8 @@ export default function Login() {
   return (
     <KeyboardAvoidingView
       style={styles.keyboardView}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior='padding'
+      keyboardVerticalOffset={20}
     >
       <ScrollView
         bounces={false}

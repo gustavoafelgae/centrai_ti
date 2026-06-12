@@ -1,6 +1,9 @@
 import api from './api';
 import { AxiosResponse } from 'axios';
-import { CargoResponse, ListaCargosResponse, ListaServicosResponse, ServicoResponse } from '@/types/listasInsterfaces';
+import { CargoResponse, ListaCargosResponse, 
+    ServicoResponse, ListaServicosResponse, 
+    StatusResponse, ListaStatusResponse 
+} from '@/types/listasInsterfaces';
 
 
 export const listasService = {
@@ -10,6 +13,7 @@ export const listasService = {
             const response: AxiosResponse<ListaCargosResponse> = await api.get(
                 `/cargos/listarCargos`
             );
+            console.log(response.data)
             return response.data.cargos;
         } catch (error: any) {
             throw error.response?.data || error.message;
@@ -22,6 +26,15 @@ export const listasService = {
                 `/servicos/listarServicos`
             );
             return response.data.servicos;
+        } catch (error: any) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    listarStatus: async (): Promise<StatusResponse[]> => {
+        try {
+            const response: AxiosResponse<ListaStatusResponse> = await api.get(`/status/listarStatusNomes`);
+            return response.data.status;
         } catch (error: any) {
             throw error.response?.data || error.message;
         }

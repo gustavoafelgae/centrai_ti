@@ -69,3 +69,23 @@ export interface TicketResponse {
         };
     };
 }
+
+export interface TicketListResponse {
+  id: number;
+  serial: string;
+  titulo: string;
+  prioridade: 'Baixa' | 'Media' | 'Alta' | 'Critica';
+  descricao: string;
+  idServico: number;
+  demanda: {
+    id: number;
+    idUsuarioCreated: number;
+    idUsuarioResolved: number | null;
+    idTicket: number;
+  };
+  status: Array<{
+    ticketId: number;
+    statusNomeId: number;
+    data: string;
+  }>;
+}

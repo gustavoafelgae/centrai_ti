@@ -1,7 +1,7 @@
-// src/pages/Services.tsx
+// app/servicos/index.tsx
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { useServicos } from "@/hooks/useLists";
+import { useServicos, useCargos } from "@/hooks/useLists";
 import {
   Platform,
   ScrollView,
@@ -11,50 +11,7 @@ import {
   View,
   ActivityIndicator,
 } from "react-native";
-
-export default function Services() {
-  const router = useRouter();
-  const { servicos, loading, error, recarregar } = useServicos();
-
-  if (loading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#2563eb" />
-      </View>
-    );
-  }
-
-  return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color="#0f172a" />
-        </TouchableOpacity>
-        <Text style={styles.title}>Serviços</Text>
-        <View style={{ width: 24 }} />
-      </View>
-
-      <View style={styles.grid}>
-        {servicos.map((service) => (
-          <TouchableOpacity
-            key={service.id}
-            style={styles.card}
-            onPress={() => router.push(`/servicos/${service.id}` as any)}
-          >
-            <View style={[styles.iconContainer, { backgroundColor: getColorBg(service.color) }]}>
-              <Ionicons name={service.icon} size={24} color={getColorHex(service.color)} />
-            </View>
-            <Text style={styles.serviceName}>{service.name}</Text>
-            <Text style={styles.serviceDescription}>{service.description}</Text>
-            {service.price && (
-              <Text style={styles.price}>{service.price}</Text>
-            )}
-          </TouchableOpacity>
-        ))}
-      </View>
-    </ScrollView>
-  );
-}
+import { BottomNav } from "@/components/BottomNav";
 
 function getColorHex(colorClass: string): string {
   const colorMap: Record<string, string> = {
@@ -73,9 +30,117 @@ function getColorHex(colorClass: string): string {
   return colorMap[colorClass] || '#6b7280';
 }
 
-function getColorBg(colorClass: string): string {
-  const hex = getColorHex(colorClass);
-  return hex + '15';
+export default function Services() {
+  const router = useRouter();
+  const { servicos, loading, error, recarregar } = useServicos();
+  const { cargos } = useCargos();
+
+  const cargoMap = new Map(cargos.map(c => [c.id, c.nome]));
+
+  if (loading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#2563eb" />
+        <Text style={styles.loadingText}>Carregando serviços...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.centered}>
+        <Ionicons name="warning-outline" size={48} color="#ef4444" />
+        <Text style={styles.errorText}>{error}</Text>
+        <TouchableOpacity style={styles.retryButton} onPress={recarregar}>
+          <Text style={styles.retryButtonText}>Tentar novamente</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+          <Ionicons name="arrow-back" size={24} color="#0f172a" />
+        </TouchableOpacity>
+        <Text style={styles.title}>Serviços</Text>
+        <View style={{ width: 40 }} />
+      </View>
+
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        {servicos.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Ionicons name="apps-outline" size={48} color="#94a3b8" />
+            <Text style={styles.emptyText}>Nenhum serviço disponível</Text>
+          </View>
+        ) : (
+          <View style={styles.list}>
+            {servicos.map((service) => {
+              const cargoNome = cargoMap.get(service.cargoId) || 'Não definido';
+
+              return (
+                <TouchableOpacity
+                  key={service.id}
+                  style={styles.card}
+                  activeOpacity={0.7}
+                  onPress={() => router.push({
+                    pathname: '/tickets/new',
+                    params: { servicoId: service.id }
+                  } as any)}
+                >
+                  {/* Linha principal: Ícone + Info */}
+                  <View style={styles.cardRow}>
+                    {/* Ícone */}
+                    <View style={[styles.iconContainer, { backgroundColor: getColorHex(service.color) + '18' }]}>
+                      <Ionicons
+                        name={service.icon as any}
+                        size={28}
+                        color={getColorHex(service.color)}
+                      />
+                    </View>
+
+                    {/* Informações */}
+                    <View style={styles.cardInfo}>
+                      <Text style={styles.serviceName} numberOfLines={1}>
+                        {service.name}
+                      </Text>
+                      <Text style={styles.serviceDescription} numberOfLines={2}>
+                        {service.description}
+                      </Text>
+
+                      {/* Cargo + Preço na mesma linha */}
+                      <View style={styles.cardFooter}>
+                        <View style={styles.cargoBadge}>
+                          <Ionicons name="person-outline" size={12} color="#64748b" />
+                          <Text style={styles.cargoText} numberOfLines={1}>
+                            {cargoNome}
+                          </Text>
+                        </View>
+                      </View>
+                      <View style={styles.cardFooter}>
+                        {service.price && (
+                          <Text style={styles.priceText}>{service.price}</Text>
+                        )}
+                      </View>
+                    </View>
+
+                    {/* Seta */}
+                    <Ionicons name="chevron-forward" size={20} color="#94a3b8" />
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        )}
+      </ScrollView>
+      <BottomNav />
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -87,50 +152,103 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 20,
+    gap: 12,
   },
-  content: {
-    paddingBottom: 40,
+  loadingText: {
+    fontSize: 16,
+    color: '#64748b',
   },
+  errorText: {
+    fontSize: 14,
+    color: '#64748b',
+    textAlign: 'center',
+  },
+  retryButton: {
+    backgroundColor: '#2563eb',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 12,
+    marginTop: 8,
+  },
+  retryButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  // Header
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    backgroundColor: '#ffffff',
     paddingHorizontal: 16,
     paddingTop: Platform.OS === 'ios' ? 50 : 20,
     paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e7eb',
+  },
+  backBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   title: {
     fontSize: 20,
     fontWeight: '700',
+    marginTop: 20,
     color: '#0f172a',
   },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+  // Conteúdo
+  content: {
     padding: 16,
+    paddingBottom: 150
+  },
+  emptyState: {
+    alignItems: 'center',
+    padding: 40,
     gap: 12,
   },
+  emptyText: {
+    fontSize: 16,
+    color: '#94a3b8',
+  },
+  // Lista (1 por linha)
+  list: {
+    gap: 12,
+  },
+  // Card horizontal
   card: {
-    width: '47%',
     backgroundColor: '#ffffff',
     borderRadius: 20,
     padding: 16,
     shadowColor: '#000',
     shadowOpacity: 0.05,
-    shadowRadius: 6,
+    shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 },
     elevation: 2,
   },
+  cardRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+  },
+  // Ícone
   iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
+    width: 56,
+    height: 56,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 12,
+  },
+  // Informações
+  cardInfo: {
+    flex: 1,
   },
   serviceName: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '700',
     color: '#0f172a',
     marginBottom: 4,
@@ -139,11 +257,31 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#64748b',
     lineHeight: 18,
-    marginBottom: 8,
+    marginBottom: 10,
   },
-  price: {
+  cardFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  cargoBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#f1f5f9',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  cargoText: {
+    fontSize: 11,
+    color: '#64748b',
+    fontWeight: '500',
+  },
+  priceText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#2563eb',
+    paddingVertical: 7,
   },
 });

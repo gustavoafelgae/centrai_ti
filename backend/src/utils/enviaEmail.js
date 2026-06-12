@@ -18,7 +18,7 @@ export async function enviarCodigoVerificacao(destinatarioEmail, codigo) {
                 <span style="font-size: 24px; font-weight: bold; color: #333; letter-spacing: 5px;">${codigo}</span>
             </div>
             <p>Este código é válido por 15 minutos. Não o compartilhe com ninguém.</p>
-            <p>Atenciosamente,<br>Equipe Central ti</p>
+            <p>Atenciosamente,<br>Equipe Central TI</p>
             <hr style="border: 0; border-top: 1px solid #eee; margin-top: 20px;">
         </div>
     `;
@@ -36,7 +36,7 @@ export async function enviarCodigoVerificacao(destinatarioEmail, codigo) {
         return true;
     } catch (error) {
         console.error(`❌ Erro ao enviar o e-mail: ${error.message}`);
-        return false;
+        throw error;
     };
 
 }

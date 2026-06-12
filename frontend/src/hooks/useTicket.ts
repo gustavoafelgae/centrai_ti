@@ -9,6 +9,37 @@ export const useTicket = () => {
   const [loading, setLoading] = useState(false);
   const { setTicket } = useCurrentTicket();
 
+    const carregarTicket = async (serial: string) => {
+    setLoading(true);
+    try {
+      const response = await ticketService.buscarPorSerial(serial);
+
+      setTicket({
+        id: response.id,
+        serial: response.serial,
+        titulo: response.titulo,
+        prioridade: response.prioridade as 'Baixa' | 'Media' | 'Alta' | 'Critica',
+        descricao: response.descricao,
+        servicoId: response.servico.id,
+        servicoNome: response.servico.servico,
+        statusId: response.status.id,
+        cargoId: response.servico.cargoId,
+        idUsuarioCreated: response.demanda.idUsuarioCreated,
+        idUsuarioResolved: response.demanda.idUsuarioResolved,
+      });
+
+      return true;
+    } catch (error: any) {
+      console.log(error);
+      const mensagem = error?.mensagem || error?.message || 'Erro ao carregar ticket';
+      Alert.alert('Erro', mensagem);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
   const criarTicket = async (dados: CriarTicketData) => {
     setLoading(true);
     try {
@@ -41,6 +72,7 @@ export const useTicket = () => {
       setLoading(false);
     }
   };
+
 
   const atualizarTicket = async (serial: string, dados: AtualizarTicketData) => {
     setLoading(true);
@@ -78,6 +110,7 @@ export const useTicket = () => {
   return {
     loading,
     criarTicket,
-    atualizarTicket
+    atualizarTicket,
+    carregarTicket
   };
 };

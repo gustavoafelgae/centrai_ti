@@ -5,6 +5,7 @@ import { statusRepository } from '../repository/StatusRepository.js';
 import { statusNomeRepository } from '../repository/StatusNomeRepository.js';
 import { usuarioRepository } from '../repository/UsuarioRepository.js';
 import { getDb } from '../config/database.js';
+import { de } from 'zod/locales';
 
 
 // CRIAR NOVO TICKET
@@ -82,6 +83,23 @@ export const consultarTicketByServico = async (req, res) => {
 }
 
 
+// CONSULTAR TICKET POR USUARIO CRIADOR
+export const consultarTicketsByUsuarioCriador = async (req, res) => {
+
+    const { idUsuarioCreated } = req.params;
+    const demandas = await demandaRepository.findByidUsuarioCreated(idUsuarioCreated);
+    const idsTickets = demandas.map(d => d.idTicket);
+    const tickets = await ticketRepository.findByIds(idsTickets);
+
+    const ticketsLimpos = tickets.map(ticket => {
+        const { servico, ...ticketLimpo } = ticket;
+        return ticketLimpo;
+    });
+
+    return res.status(200).json(ticketsLimpos);
+}
+
+
 // ATUALIZAR TICKET
 export const atualizarTicket = async (req, res) => {
     
@@ -148,35 +166,3 @@ export const atualizarTicket = async (req, res) => {
         }   
     });
 }
-
-// export const criarV2 = async (req, res) => {
-
-//     const dadosDeEntrada = req.body;
-
-//     if(!dadosDeEntrada)
-//         return res.status(402).json({ mensagem: "Dados de entrada invalido." });
-    
-//     const resposta = await ticketRepository.create(dadosDeEntrada);
-
-//     const novaDemanda = await demandaRepository.create({
-//         idUsuarioCreated: dadosDeEntrada.idUsuario,
-//         idTicket: resposta.id  
-//     })
-
-//     console.log
-
-//     const status = await statusRepository.create({
-//         ticketId: resposta.id
-//         statusNomeId: 1
-//     });
-
-//     if (!resposta || !novaDemanda || !status) {
-//         return res.status(500).json({ mensagem: "Erro ao criar o ticket." });
-//     }
-
-//     return res.status(201).json({
-//         mensagem: "Ticket aberto com sucesso.",
-//         ticket: resposta
-//     });
-
-// }

@@ -34,13 +34,6 @@ function getColorHex(colorClass: string): string {
   return colorMap[colorClass] || '#6b7280';
 }
 
-const navItems = [
-  { label: "Início", path: "/home", icon: "home" as keyof typeof Ionicons.glyphMap },
-  { label: "Serviços", path: "/servicos", icon: "briefcase" as keyof typeof Ionicons.glyphMap },
-  { label: "Tickets", path: "/tickets", icon: "ticket" as keyof typeof Ionicons.glyphMap },
-  { label: "Perfil", path: "/profile", icon: "person" as keyof typeof Ionicons.glyphMap },
-];
-
 export default function Home() {
   const router = useRouter();
   const { user, logout } = useUser();
@@ -203,32 +196,7 @@ export default function Home() {
           )}
         </View>
       </ScrollView>
-
-      {/* Bottom Nav */}
-      <View style={styles.bottomNav}>
-        {navItems.map((item) => {
-          const isActive = pathname === item.path ||
-            (item.path === '/home' && pathname === '/home') ||
-            pathname.startsWith(item.path + '/');
-          return (
-            <TouchableOpacity
-              key={item.path}
-              style={styles.navButton}
-              onPress={() => router.push(item.path as any)}
-              activeOpacity={0.7}
-            >
-              <Ionicons
-                name={item.icon}
-                size={24}
-                color={isActive ? "#2563eb" : "#64748b"}
-              />
-              <Text style={[styles.navText, isActive && styles.navTextActive]}>
-                {item.label}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
+      <BottomNav />
     </View>
   );
 }

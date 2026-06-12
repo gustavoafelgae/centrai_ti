@@ -172,9 +172,9 @@ export default function ForgotPassword() {
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
+      style={styles.keyboardView}
+      behavior='padding'
+      keyboardVerticalOffset={20}
     >
       <ScrollView contentContainerStyle={styles.container}>
         {/* Header */}
@@ -398,6 +398,10 @@ export default function ForgotPassword() {
 }
 
 const styles = StyleSheet.create({
+    keyboardView: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+  },
   container: {
     flexGrow: 1,
     backgroundColor: "#1d4ed8",

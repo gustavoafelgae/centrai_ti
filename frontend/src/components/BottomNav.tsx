@@ -1,4 +1,4 @@
-// src/components/BottomNav.tsx (com badge)
+// src/components/BottomNav.tsx
 import { usePathname, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import {
@@ -14,34 +14,10 @@ export function BottomNav() {
   const pathname = usePathname();
 
   const navItems = [
-    {
-      name: "Início",
-      path: "/home",
-      icon: "home" as const,
-      iconActive: "home" as const,
-      badge: 0,
-    },
-    {
-      name: "Serviços",
-      path: "/services",
-      icon: "briefcase-outline" as const,
-      iconActive: "briefcase" as const,
-      badge: 0,
-    },
-    {
-      name: "Tickets",
-      path: "/tickets",
-      icon: "ticket-outline" as const,
-      iconActive: "ticket" as const,
-      badge: 3, // Exemplo de badge
-    },
-    {
-      name: "Perfil",
-      path: "/profile",
-      icon: "person-outline" as const,
-      iconActive: "person" as const,
-      badge: 0,
-    },
+    { name: "Início", path: "/home", icon: "home" as keyof typeof Ionicons.glyphMap },
+    { name: "Serviços", path: "/servicos", icon: "briefcase" as keyof typeof Ionicons.glyphMap },
+    { name: "Tickets", path: "/tickets", icon: "ticket" as keyof typeof Ionicons.glyphMap },
+    { name: "Perfil", path: "/profile", icon: "person" as keyof typeof Ionicons.glyphMap },
   ];
 
   const isActive = (path: string) => {
@@ -54,7 +30,6 @@ export function BottomNav() {
     <View style={styles.container}>
       {navItems.map((item) => {
         const active = isActive(item.path);
-        const iconName = active ? item.iconActive : item.icon;
 
         return (
           <TouchableOpacity
@@ -63,26 +38,12 @@ export function BottomNav() {
             onPress={() => router.push(item.path as any)}
             activeOpacity={0.7}
           >
-            <View style={styles.iconContainer}>
-              <Ionicons
-                name={iconName}
-                size={24}
-                color={active ? "#2563eb" : "#94a3b8"}
-              />
-              {item.badge > 0 && (
-                <View style={styles.badge}>
-                  <Text style={styles.badgeText}>
-                    {item.badge > 99 ? "99+" : item.badge}
-                  </Text>
-                </View>
-              )}
-            </View>
-            <Text
-              style={[
-                styles.navText,
-                active && styles.navTextActive,
-              ]}
-            >
+            <Ionicons
+              name={item.icon}
+              size={24}
+              color={active ? "#2563eb" : "#94a3b8"}
+            />
+            <Text style={[styles.navText, active && styles.navTextActive]}>
               {item.name}
             </Text>
           </TouchableOpacity>
@@ -100,9 +61,9 @@ const styles = StyleSheet.create({
     borderTopColor: "#f1f5f9",
     paddingVertical: Platform.OS === "ios" ? 20 : 10,
     paddingHorizontal: 10,
-    paddingBottom: 50,
+    paddingBottom: Platform.OS === "ios" ? 30 : 50,
     justifyContent: "space-around",
-    elevation: 50,
+    elevation: 10,
     shadowColor: "#000",
     shadowOpacity: 0.05,
     shadowRadius: 10,
@@ -118,33 +79,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingVertical: 4,
   },
-  iconContainer: {
-    position: "relative",
-    marginBottom: 4,
-  },
-  badge: {
-    position: "absolute",
-    top: -4,
-    right: -8,
-    backgroundColor: "#ef4444",
-    borderRadius: 10,
-    minWidth: 18,
-    height: 18,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 4,
-    borderWidth: 1.5,
-    borderColor: "#ffffff",
-  },
-  badgeText: {
-    color: "#ffffff",
-    fontSize: 10,
-    fontWeight: "700",
-  },
   navText: {
     fontSize: 11,
     fontWeight: "600",
     color: "#94a3b8",
+    marginTop: 4,
   },
   navTextActive: {
     color: "#2563eb",

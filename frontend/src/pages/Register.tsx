@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   View,
   Alert,
+  KeyboardAvoidingView
 } from "react-native";
 import { useCargos } from "@/hooks/useLists";
 import SHA256 from "crypto-js/sha256";
@@ -168,10 +169,7 @@ export default function Register() {
             Seu cadastro foi realizado com sucesso. Um e-mail de confirmação foi enviado para
           </Text>
           <Text style={styles.successEmail}>{form.email}</Text>
-          <TouchableOpacity
-            style={styles.primaryButton}
-            onPress={() => router.push("/")}
-          >
+          <TouchableOpacity style={styles.primaryButton} onPress={() => router.replace("/")}>
             <Text style={styles.primaryButtonText}>Ir para o login</Text>
           </TouchableOpacity>
         </View>
@@ -180,225 +178,236 @@ export default function Register() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={back}>
-          <Ionicons name="arrow-back" size={20} color="#ffffff" />
-        </TouchableOpacity>
-        <View style={styles.headerText}>
-          <Text style={styles.smallLabel}>Cadastro</Text>
-          <Text style={styles.pageTitle}>
-            {step === 1 ? "Dados pessoais" : "Acesso"}
-          </Text>
-        </View>
-      </View>
 
-      {/* Card */}
-      <View style={styles.card}>
-        {/* Progresso */}
-        <View style={styles.progressRow}>
-          {[1, 2].map((s) => (
-            <View key={s} style={styles.progressStep}>
-              <View style={[styles.progressCircle, step >= s && styles.progressCircleActive]}>
-                {step > s ? (
-                  <Ionicons name="checkmark" size={14} color="#ffffff" />
-                ) : (
-                  <Text style={[styles.progressCircleText, step >= s && styles.progressCircleTextActive]}>
-                    {s}
-                  </Text>
+    <KeyboardAvoidingView
+      style={styles.keyboardView}
+      behavior='padding'
+      keyboardVerticalOffset={20}
+    >
+      <ScrollView contentContainerStyle={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.backButton} onPress={back}>
+            <Ionicons name="arrow-back" size={20} color="#ffffff" />
+          </TouchableOpacity>
+          <View style={styles.headerText}>
+            <Text style={styles.smallLabel}>Cadastro</Text>
+            <Text style={styles.pageTitle}>
+              {step === 1 ? "Dados pessoais" : "Acesso"}
+            </Text>
+          </View>
+        </View>
+
+        {/* Card */}
+        <View style={styles.card}>
+          {/* Progresso */}
+          <View style={styles.progressRow}>
+            {[1, 2].map((s) => (
+              <View key={s} style={styles.progressStep}>
+                <View style={[styles.progressCircle, step >= s && styles.progressCircleActive]}>
+                  {step > s ? (
+                    <Ionicons name="checkmark" size={14} color="#ffffff" />
+                  ) : (
+                    <Text style={[styles.progressCircleText, step >= s && styles.progressCircleTextActive]}>
+                      {s}
+                    </Text>
+                  )}
+                </View>
+                {s < 2 && (
+                  <View style={[styles.progressLine, step > s && styles.progressLineActive]} />
                 )}
               </View>
-              {s < 2 && (
-                <View style={[styles.progressLine, step > s && styles.progressLineActive]} />
-              )}
-            </View>
-          ))}
-        </View>
-
-        <Text style={styles.sectionSubtitle}>
-          {step === 1 ? "Preencha suas informações básicas" : "Defina sua senha de acesso"}
-        </Text>
-
-        {/* Step 1 */}
-        {step === 1 && (
-          <View style={styles.fieldsContainer}>
-            {/* Nome */}
-            <View style={styles.field}>
-              <Text style={styles.label}>Nome completo</Text>
-              <View style={[styles.inputRow, errors.name && styles.inputError]}>
-                <Ionicons name="person-outline" size={18} color="#94a3b8" style={styles.inputIcon} />
-                <TextInput
-                  value={form.name}
-                  onChangeText={(v) => { set("name")(v); setErrors(p => ({ ...p, name: undefined })); }}
-                  placeholder="Seu nome completo"
-                  placeholderTextColor="#94a3b8"
-                  style={styles.input}
-                  autoCapitalize="words"
-                />
-              </View>
-              {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
-            </View>
-
-            {/* Email */}
-            <View style={styles.field}>
-              <Text style={styles.label}>E-mail corporativo</Text>
-              <View style={[styles.inputRow, errors.email && styles.inputError]}>
-                <Ionicons name="mail-outline" size={18} color="#94a3b8" style={styles.inputIcon} />
-                <TextInput
-                  value={form.email}
-                  onChangeText={(v) => { set("email")(v); setErrors(p => ({ ...p, email: undefined })); }}
-                  placeholder="seu@email.com"
-                  placeholderTextColor="#94a3b8"
-                  style={styles.input}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                />
-              </View>
-              {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
-            </View>
-
-            {/* Telefone */}
-            <View style={styles.field}>
-              <Text style={styles.label}>Telefone</Text>
-              <View style={[styles.inputRow, errors.phone && styles.inputError]}>
-                <Ionicons name="call-outline" size={18} color="#94a3b8" style={styles.inputIcon} />
-                <TextInput
-                  value={form.phone}
-                  onChangeText={(v) => set("phone")(phoneFormat(v))}
-                  placeholder="(00) 00000-0000"
-                  placeholderTextColor="#94a3b8"
-                  style={styles.input}
-                  keyboardType="phone-pad"
-                />
-              </View>
-              {errors.phone && <Text style={styles.errorText}>{errors.phone}</Text>}
-            </View>
-
-            {/* Cargo */}
-            <View style={styles.field}>
-              <Text style={styles.label}>Cargo / Função</Text>
-              <TouchableOpacity
-                style={[styles.inputRow, errors.role && styles.inputError]}
-                onPress={() => setRoleOpen(!roleOpen)}
-              >
-                <Ionicons name="briefcase-outline" size={18} color="#94a3b8" style={styles.inputIcon} />
-                <Text style={[styles.input, !form.role && styles.placeholderText]}>
-                  {form.role || (loadingCargos ? "Carregando..." : "Selecione o cargo")}
-                </Text>
-                <Ionicons name={roleOpen ? "chevron-up" : "chevron-down"} size={16} color="#94a3b8" />
-              </TouchableOpacity>
-              {errors.role && <Text style={styles.errorText}>{errors.role}</Text>}
-              {roleOpen && (
-                <View style={styles.dropdown}>
-                  {cargosNomes.map((option) => (
-                    <TouchableOpacity
-                      key={option}
-                      style={styles.dropdownOption}
-                      onPress={() => {
-                        handleCargoSelect(option);
-                        setRoleOpen(false);
-                      }}
-                    >
-                      <Text style={styles.dropdownOptionText}>{option}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              )}
-            </View>
+            ))}
           </View>
-        )}
 
-        {/* Step 2 */}
-        {step === 2 && (
-          <View style={styles.fieldsContainer}>
-            {/* Senha */}
-            <View style={styles.field}>
-              <Text style={styles.label}>Senha</Text>
-              <View style={[styles.inputRow, errors.password && styles.inputError]}>
-                <Ionicons name="lock-closed-outline" size={18} color="#94a3b8" style={styles.inputIcon} />
-                <TextInput
-                  value={form.password}
-                  onChangeText={(v) => { set("password")(v); setErrors(p => ({ ...p, password: undefined })); }}
-                  placeholder="Mínimo 8 caracteres"
-                  placeholderTextColor="#94a3b8"
-                  style={styles.input}
-                  secureTextEntry={!showPassword}
-                />
-                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                  <Ionicons name={showPassword ? "eye-off-outline" : "eye-outline"} size={20} color="#64748b" />
-                </TouchableOpacity>
-              </View>
-              {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
-              {strength && (
-                <View style={styles.strengthContainer}>
-                  <View style={styles.strengthBar}>
-                    <View style={[styles.strengthFill, { width: strength.width as any, backgroundColor: strength.color }]} />
-                  </View>
-                  <Text style={styles.strengthLabel}>Senha {strength.label}</Text>
+          <Text style={styles.sectionSubtitle}>
+            {step === 1 ? "Preencha suas informações básicas" : "Defina sua senha de acesso"}
+          </Text>
+
+          {/* Step 1 */}
+          {step === 1 && (
+            <View style={styles.fieldsContainer}>
+              {/* Nome */}
+              <View style={styles.field}>
+                <Text style={styles.label}>Nome completo</Text>
+                <View style={[styles.inputRow, errors.name && styles.inputError]}>
+                  <Ionicons name="person-outline" size={18} color="#94a3b8" style={styles.inputIcon} />
+                  <TextInput
+                    value={form.name}
+                    onChangeText={(v) => { set("name")(v); setErrors(p => ({ ...p, name: undefined })); }}
+                    placeholder="Seu nome completo"
+                    placeholderTextColor="#94a3b8"
+                    style={styles.input}
+                    autoCapitalize="words"
+                  />
                 </View>
-              )}
-            </View>
+                {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
+              </View>
 
-            {/* Confirmar Senha */}
-            <View style={styles.field}>
-              <Text style={styles.label}>Confirmar senha</Text>
-              <View style={[styles.inputRow, errors.confirmPassword && styles.inputError]}>
-                <Ionicons name="lock-closed-outline" size={18} color="#94a3b8" style={styles.inputIcon} />
-                <TextInput
-                  value={form.confirmPassword}
-                  onChangeText={(v) => { set("confirmPassword")(v); setErrors(p => ({ ...p, confirmPassword: undefined })); }}
-                  placeholder="Repita a senha"
-                  placeholderTextColor="#94a3b8"
-                  style={styles.input}
-                  secureTextEntry={!showConfirm}
-                />
-                <TouchableOpacity onPress={() => setShowConfirm(!showConfirm)}>
-                  <Ionicons name={showConfirm ? "eye-off-outline" : "eye-outline"} size={20} color="#64748b" />
+              {/* Email */}
+              <View style={styles.field}>
+                <Text style={styles.label}>E-mail corporativo</Text>
+                <View style={[styles.inputRow, errors.email && styles.inputError]}>
+                  <Ionicons name="mail-outline" size={18} color="#94a3b8" style={styles.inputIcon} />
+                  <TextInput
+                    value={form.email}
+                    onChangeText={(v) => { set("email")(v); setErrors(p => ({ ...p, email: undefined })); }}
+                    placeholder="seu@email.com"
+                    placeholderTextColor="#94a3b8"
+                    style={styles.input}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                  />
+                </View>
+                {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
+              </View>
+
+              {/* Telefone */}
+              <View style={styles.field}>
+                <Text style={styles.label}>Telefone</Text>
+                <View style={[styles.inputRow, errors.phone && styles.inputError]}>
+                  <Ionicons name="call-outline" size={18} color="#94a3b8" style={styles.inputIcon} />
+                  <TextInput
+                    value={form.phone}
+                    onChangeText={(v) => set("phone")(phoneFormat(v))}
+                    placeholder="(00) 00000-0000"
+                    placeholderTextColor="#94a3b8"
+                    style={styles.input}
+                    keyboardType="phone-pad"
+                  />
+                </View>
+                {errors.phone && <Text style={styles.errorText}>{errors.phone}</Text>}
+              </View>
+
+              {/* Cargo */}
+              <View style={styles.field}>
+                <Text style={styles.label}>Cargo / Função</Text>
+                <TouchableOpacity
+                  style={[styles.inputRow, errors.role && styles.inputError]}
+                  onPress={() => setRoleOpen(!roleOpen)}
+                >
+                  <Ionicons name="briefcase-outline" size={18} color="#94a3b8" style={styles.inputIcon} />
+                  <Text style={[styles.input, !form.role && styles.placeholderText]}>
+                    {form.role || (loadingCargos ? "Carregando..." : "Selecione o cargo")}
+                  </Text>
+                  <Ionicons name={roleOpen ? "chevron-up" : "chevron-down"} size={16} color="#94a3b8" />
                 </TouchableOpacity>
+                {errors.role && <Text style={styles.errorText}>{errors.role}</Text>}
+                {roleOpen && (
+                  <View style={styles.dropdown}>
+                    {cargosNomes.map((option) => (
+                      <TouchableOpacity
+                        key={option}
+                        style={styles.dropdownOption}
+                        onPress={() => {
+                          handleCargoSelect(option);
+                          setRoleOpen(false);
+                        }}
+                      >
+                        <Text style={styles.dropdownOptionText}>{option}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
               </View>
-              {errors.confirmPassword && <Text style={styles.errorText}>{errors.confirmPassword}</Text>}
             </View>
+          )}
 
-            {/* Termos */}
-            <TouchableOpacity style={styles.termsRow} onPress={() => set("terms")(!form.terms)}>
-              <View style={[styles.checkbox, form.terms && styles.checkboxChecked]}>
-                {form.terms && <Ionicons name="checkmark" size={12} color="#ffffff" />}
+          {/* Step 2 */}
+          {step === 2 && (
+            <View style={styles.fieldsContainer}>
+              {/* Senha */}
+              <View style={styles.field}>
+                <Text style={styles.label}>Senha</Text>
+                <View style={[styles.inputRow, errors.password && styles.inputError]}>
+                  <Ionicons name="lock-closed-outline" size={18} color="#94a3b8" style={styles.inputIcon} />
+                  <TextInput
+                    value={form.password}
+                    onChangeText={(v) => { set("password")(v); setErrors(p => ({ ...p, password: undefined })); }}
+                    placeholder="Mínimo 8 caracteres"
+                    placeholderTextColor="#94a3b8"
+                    style={styles.input}
+                    secureTextEntry={!showPassword}
+                  />
+                  <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                    <Ionicons name={showPassword ? "eye-off-outline" : "eye-outline"} size={20} color="#64748b" />
+                  </TouchableOpacity>
+                </View>
+                {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
+                {strength && (
+                  <View style={styles.strengthContainer}>
+                    <View style={styles.strengthBar}>
+                      <View style={[styles.strengthFill, { width: strength.width as any, backgroundColor: strength.color }]} />
+                    </View>
+                    <Text style={styles.strengthLabel}>Senha {strength.label}</Text>
+                  </View>
+                )}
               </View>
-              <Text style={styles.termsText}>
-                Li e aceito os <Text style={styles.termsLink}>Termos de Uso</Text> e a{" "}
-                <Text style={styles.termsLink}>Política de Privacidade</Text>
+
+              {/* Confirmar Senha */}
+              <View style={styles.field}>
+                <Text style={styles.label}>Confirmar senha</Text>
+                <View style={[styles.inputRow, errors.confirmPassword && styles.inputError]}>
+                  <Ionicons name="lock-closed-outline" size={18} color="#94a3b8" style={styles.inputIcon} />
+                  <TextInput
+                    value={form.confirmPassword}
+                    onChangeText={(v) => { set("confirmPassword")(v); setErrors(p => ({ ...p, confirmPassword: undefined })); }}
+                    placeholder="Repita a senha"
+                    placeholderTextColor="#94a3b8"
+                    style={styles.input}
+                    secureTextEntry={!showConfirm}
+                  />
+                  <TouchableOpacity onPress={() => setShowConfirm(!showConfirm)}>
+                    <Ionicons name={showConfirm ? "eye-off-outline" : "eye-outline"} size={20} color="#64748b" />
+                  </TouchableOpacity>
+                </View>
+                {errors.confirmPassword && <Text style={styles.errorText}>{errors.confirmPassword}</Text>}
+              </View>
+
+              {/* Termos */}
+              <TouchableOpacity style={styles.termsRow} onPress={() => set("terms")(!form.terms)}>
+                <View style={[styles.checkbox, form.terms && styles.checkboxChecked]}>
+                  {form.terms && <Ionicons name="checkmark" size={12} color="#ffffff" />}
+                </View>
+                <Text style={styles.termsText}>
+                  Li e aceito os <Text style={styles.termsLink}>Termos de Uso</Text> e a{" "}
+                  <Text style={styles.termsLink}>Política de Privacidade</Text>
+                </Text>
+              </TouchableOpacity>
+              {errors.terms && <Text style={styles.errorText}>{errors.terms}</Text>}
+            </View>
+          )}
+
+          {/* Botão */}
+          <TouchableOpacity
+            style={[styles.primaryButton, loadingSubmit && styles.primaryButtonDisabled]}
+            onPress={next}
+            disabled={loadingSubmit}
+          >
+            <Text style={styles.primaryButtonText}>
+              {loadingSubmit ? "Processando..." : step === 2 ? "Criar conta" : "Continuar"}
+            </Text>
+            {!loadingSubmit && <Ionicons name="arrow-forward" size={20} color="#ffffff" />}
+          </TouchableOpacity>
+
+          {step === 1 && (
+            <TouchableOpacity onPress={() => router.push("/")} style={styles.loginLink}>
+              <Text style={styles.loginLinkText}>
+                Já tem uma conta? <Text style={styles.loginLinkAction}>Entrar</Text>
               </Text>
             </TouchableOpacity>
-            {errors.terms && <Text style={styles.errorText}>{errors.terms}</Text>}
-          </View>
-        )}
-
-        {/* Botão */}
-        <TouchableOpacity
-          style={[styles.primaryButton, loadingSubmit && styles.primaryButtonDisabled]}
-          onPress={next}
-          disabled={loadingSubmit}
-        >
-          <Text style={styles.primaryButtonText}>
-            {loadingSubmit ? "Processando..." : step === 2 ? "Criar conta" : "Continuar"}
-          </Text>
-          {!loadingSubmit && <Ionicons name="arrow-forward" size={20} color="#ffffff" />}
-        </TouchableOpacity>
-
-        {step === 1 && (
-          <TouchableOpacity onPress={() => router.push("/")} style={styles.loginLink}>
-            <Text style={styles.loginLinkText}>
-              Já tem uma conta? <Text style={styles.loginLinkAction}>Entrar</Text>
-            </Text>
-          </TouchableOpacity>
-        )}
-      </View>
-    </ScrollView>
+          )}
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
+  keyboardView: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+  },
   container: {
     flexGrow: 1,
     padding: 24,
@@ -611,6 +620,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginTop: 24,
     gap: 8,
+    width: "80%"
   },
   primaryButtonDisabled: {
     backgroundColor: "#94a3b8",
@@ -618,7 +628,7 @@ const styles = StyleSheet.create({
   primaryButtonText: {
     color: "#fff",
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: "700"
   },
   // Link login
   loginLink: {

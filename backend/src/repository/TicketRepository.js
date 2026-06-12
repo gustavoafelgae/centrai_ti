@@ -9,6 +9,21 @@ export class TicketRepository {
     });
   }
 
+  async findByIds(ids) {
+    const repository = getDb().getRepository('Ticket');
+
+    return repository
+      .createQueryBuilder('ticket')
+      .leftJoinAndSelect('ticket.servico', 'servico')
+      .leftJoinAndSelect('ticket.demanda', 'demanda')
+      .leftJoinAndSelect('ticket.status', 'status',
+        'status.data = (SELECT MAX(s.data) FROM status s WHERE s.ticket_id = ticket.id)'
+      )
+      .where('ticket.id IN (:...ids)', { ids })
+      .orderBy('ticket.id', 'DESC')
+      .getMany();
+  }
+
   async findAll() {
     const repository = getDb().getRepository('Ticket');
     return repository.find({
@@ -44,7 +59,7 @@ export class TicketRepository {
     const repository = manager ? manager.getRepository('Ticket') : getDb().getRepository('Ticket');
     console.log("Atualizando ticket:", ticket);
     await repository.update(id, ticket);
-    return this.findById(id); 
+    return this.findById(id);
   }
 
   async delete(id) {
