@@ -47,6 +47,15 @@ export const ticketService = {
     } catch (error: any) {
       throw error.response?.data || error.message;
     }
+  },
+
+  listarPorCargo: async (cargoId: number) => {
+    try {
+      const response = await api.get(`/tickets/cargo/${cargoId}`);
+      return response.data;
+    } catch (error: any) {
+      throw error.response?.data || error.message;
+    }
   }
 
 };

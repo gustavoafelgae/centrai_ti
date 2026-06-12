@@ -1,6 +1,6 @@
 import express from 'express';
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { criarTicket,consultarTicket,atualizarTicket,consultarTicketByServico, consultarTicketsByUsuarioCriador } from '../controllers/ticketController.js';
+import { criarTicket,consultarTicket,atualizarTicket,consultarTicketByServico, consultarTicketsByUsuarioCriador, consultarTicketByCargo } from '../controllers/ticketController.js';
 import { validateData } from '../middlewares/validateData.js';
 import { criarTicketDTO,atualizarTicketDTO } from '../validations/ticketSchema.js';
 
@@ -17,6 +17,10 @@ router.get('/:serial',
 
 router.get('/servico/:idServico', 
     asyncHandler(consultarTicketByServico)
+);
+
+router.get('/cargo/:idCargo', 
+    asyncHandler(consultarTicketByCargo)
 );
 
 router.get('/usarioCriador/:idUsuarioCreated', 

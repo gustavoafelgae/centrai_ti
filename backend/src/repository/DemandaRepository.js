@@ -25,10 +25,6 @@ export class DemandaRepository {
     });
   }
 
-
-
-  
-
   async findAll() {
     const repository = getDb().getRepository('Demanda');
     return repository.find({

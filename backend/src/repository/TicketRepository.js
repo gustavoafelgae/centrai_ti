@@ -24,6 +24,25 @@ export class TicketRepository {
       .getMany();
   }
 
+  async findByCargo(cargoId) {
+    const repository = getDb().getRepository('Ticket');
+
+    return repository
+      .createQueryBuilder('ticket')
+      .innerJoin('ticket.servico', 'servico')
+      .innerJoin('servico.cargo', 'cargo')
+      .leftJoinAndSelect('ticket.demanda', 'demanda')
+      .leftJoinAndSelect('ticket.servico', 'servicoSelect')
+      .leftJoinAndSelect(
+        'ticket.status',
+        'status',
+        'status.data = (SELECT MAX(s.data) FROM status s WHERE s.ticket_id = ticket.id)'
+      )
+      .where('cargo.id = :cargoId', { cargoId })
+      .orderBy('ticket.id', 'DESC')
+      .getMany();
+  }
+
   async findAll() {
     const repository = getDb().getRepository('Ticket');
     return repository.find({

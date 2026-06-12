@@ -135,7 +135,11 @@ export default function Home() {
 
         {/* Banner */}
         {user?.idCargo !== 5 && (
-          <TouchableOpacity style={styles.analystBanner}>
+          <TouchableOpacity
+            style={styles.analystBanner}
+            onPress={() => router.push("/analyst" as any)}  // ← ADICIONE ESTA LINHA
+            activeOpacity={0.7}
+          >
             <View style={styles.analystBannerLeft}>
               <View style={styles.analystIcon}>
                 <MaterialCommunityIcons name="view-dashboard" size={20} color="#ffffff" />
@@ -146,7 +150,8 @@ export default function Home() {
               </View>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#94a3b8" />
-          </TouchableOpacity>)}
+          </TouchableOpacity>
+        )}
 
         {/* Serviços */}
         <View style={styles.section}>

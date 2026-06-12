@@ -83,6 +83,21 @@ export const consultarTicketByServico = async (req, res) => {
 }
 
 
+// CONSULTAR TICKET POR CARGO
+export const consultarTicketByCargo = async (req, res) => {
+
+    const { idCargo } = req.params;
+    const tickets = await ticketRepository.findByCargo(idCargo);
+
+    const ticketsLimpos = tickets.map(ticket => {
+        const { servico, ...ticketLimpo } = ticket;
+        return ticketLimpo;
+    });
+
+    return res.status(200).json(tickets);
+}
+
+
 // CONSULTAR TICKET POR USUARIO CRIADOR
 export const consultarTicketsByUsuarioCriador = async (req, res) => {
 
