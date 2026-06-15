@@ -1,4 +1,3 @@
-// app/home.tsx
 import { useRouter, usePathname } from "expo-router";
 import {
   ActivityIndicator,
@@ -102,13 +101,9 @@ export default function Home() {
           </View>
 
           <View style={styles.headerRight}>
-            <TouchableOpacity style={styles.iconButton}>
-              <Ionicons name="notifications" size={20} color="#ffffff" />
-              <View style={styles.notificationDot} />
-            </TouchableOpacity>
 
             <TouchableOpacity style={styles.iconButton}
-              onPress={() => setShowProfileMenu(!showProfileMenu)}
+              onPress={() => router.push("/profile")}
             >
               <View style={styles.avatar}>
                 <Text style={styles.avatarText}>
@@ -119,16 +114,6 @@ export default function Home() {
           </View>
         </View>
 
-        {/* ... dropdown com ícones corrigidos ... */}
-        <View style={styles.dropdownActions}>
-          <TouchableOpacity
-            style={[styles.dropdownAction, styles.logoutAction]}
-            onPress={handleLogout}
-          >
-            <Ionicons name="log-out-outline" size={20} color="#f81414d5" />
-            <Text style={styles.logoutText}>Sair</Text>
-          </TouchableOpacity>
-        </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
@@ -137,7 +122,7 @@ export default function Home() {
         {user?.idCargo !== 5 && (
           <TouchableOpacity
             style={styles.analystBanner}
-            onPress={() => router.push("/analyst" as any)}  // ← ADICIONE ESTA LINHA
+            onPress={() => router.push("/analyst" as any)}
             activeOpacity={0.7}
           >
             <View style={styles.analystBannerLeft}>
@@ -257,6 +242,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#2563eb",
     paddingTop: Platform.OS === "ios" ? 60 : 60,
     paddingHorizontal: 20,
+    padding: 8,
   },
   headerTop: {
     flexDirection: "row",
@@ -408,29 +394,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     color: '#2563eb',
-  },
-  dropdownActions: {
-    padding: 8,
-  },
-  dropdownAction: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 12,
-    borderRadius: 12,
-    gap: 12,
-  },
-  dropdownActionText: {
-    fontSize: 15,
-    color: '#c6c4c4',
-    fontWeight: '500',
-  },
-  logoutAction: {
-    marginTop: 4,
-  },
-  logoutText: {
-    fontSize: 15,
-    color: '#ef4444',
-    fontWeight: '500',
   },
 
   // Conteúdo

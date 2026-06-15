@@ -1,4 +1,3 @@
-// app/servicos/index.tsx
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useServicos, useCargos } from "@/hooks/useLists";
@@ -113,7 +112,7 @@ export default function Services() {
                         {service.description}
                       </Text>
 
-                      {/* Cargo + Preço na mesma linha */}
+                      {/* Cargo */}
                       <View style={styles.cardFooter}>
                         <View style={styles.cargoBadge}>
                           <Ionicons name="person-outline" size={12} color="#64748b" />
@@ -121,11 +120,6 @@ export default function Services() {
                             {cargoNome}
                           </Text>
                         </View>
-                      </View>
-                      <View style={styles.cardFooter}>
-                        {service.price && (
-                          <Text style={styles.priceText}>{service.price}</Text>
-                        )}
                       </View>
                     </View>
 
@@ -277,11 +271,5 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: '#64748b',
     fontWeight: '500',
-  },
-  priceText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#2563eb',
-    paddingVertical: 7,
   },
 });

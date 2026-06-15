@@ -1,4 +1,3 @@
-// app/tickets/[id].tsx
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useState, useEffect } from "react";

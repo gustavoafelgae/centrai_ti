@@ -1,4 +1,3 @@
-// src/config/servicosConfig.ts
 import { Ionicons } from "@expo/vector-icons";
 import { ComponentProps } from "react";
 

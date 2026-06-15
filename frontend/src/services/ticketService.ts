@@ -1,4 +1,3 @@
-// src/services/ticketService.ts
 import api from './api';
 import { AxiosResponse } from 'axios';
 import { CriarTicketData, NovoTicketResponse, AtualizarTicketData, TicketResponse } from '@/types/ticketInterface';

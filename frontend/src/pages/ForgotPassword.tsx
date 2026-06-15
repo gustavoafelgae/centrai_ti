@@ -1,4 +1,3 @@
-// app/forgot-password.tsx
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useRef, useState } from "react";
@@ -440,7 +439,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
     borderRadius: 32,
     padding: 24,
-    minHeight: 400,
+    minHeight: 200,
   },
   // Ícone + subtítulo na mesma linha
   subtitleRow: {

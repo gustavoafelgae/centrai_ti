@@ -8,7 +8,7 @@ import { servicoRepository } from './src/repository/ServicoRepository.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const IP_LINK = process.env.IP_LINK || '192.168.1.247'
+const IP_LINK = process.env.IP_LINK || '192.168.0.19' // Substitua pelo seu IPv4
 
 app.use(express.json());
 

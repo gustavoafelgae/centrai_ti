@@ -1,4 +1,3 @@
-// app/tickets/index.tsx
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useState, useEffect } from "react";

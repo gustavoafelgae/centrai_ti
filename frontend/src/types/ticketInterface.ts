@@ -1,5 +1,3 @@
-// src/types/ticketInterface.ts
-
 export interface CriarTicketData {
     idUsuario: number;
     titulo: string;
