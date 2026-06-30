@@ -4,8 +4,8 @@ export async function enviarCodigoVerificacao(destinatarioEmail, codigo) {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-            user: process.env.EMAIL_USER || 'heitorpinto.oficial@gmail.com',
-            pass: process.env.EMAIL_PASS || 'bnlvruvxhserutrt'
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS 
         },
     });
 
